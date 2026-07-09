@@ -1,0 +1,16 @@
+/vendor
+/node_modules
+.env
+.env.*
+!.env.example
+/storage/*.key
+/bootstrap/cache/*
+.git
+.gitignore
+.idea
+.vscode
+*.md
+docker-compose.yml
+Dockerfile
+.phpunit.result.cache
+tests

@@ -1,0 +1,39 @@
+# Sistema
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Dependências
+**/node_modules/
+**/vendor/
+
+# Ambiente
+**/.env
+**/.env.*
+!**/.env.example
+
+# Laravel
+backend/storage/
+!backend/storage/.gitkeep
+backend/bootstrap/cache/
+!backend/bootstrap/cache/.gitkeep
+backend/public/hot
+backend/public/storage
+backend/.phpunit.result.cache
+
+# React Native / Android
+mobile-android/android/app/build/
+mobile-android/android/build/
+mobile-android/android/.gradle/
+mobile-android/android/local.properties
+
+# iOS
+ios/**/xcuserdata/
+ios/**/DerivedData/
+*.xip
+
+# Docker
+backend/database/database.sqlite

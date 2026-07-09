@@ -1,0 +1,9 @@
+/* Login */
+"login.title" = "Entrar";
+"login.email" = "E-mail";
+"login.password" = "Senha";
+"login.button" = "Entrar";
+"login.error.empty" = "Preencha e-mail e senha.";
+
+/* General */
+"app.name" = "RotinaPlus";

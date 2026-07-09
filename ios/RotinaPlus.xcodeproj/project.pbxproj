@@ -1,0 +1,435 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		14087EF27A99C5D6F7E1DA69 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 304E05A076A85F6859B184EF /* AuthManager.swift */; };
+		1C379C0B1D009404FD32089F /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BDECFF96D9D7EA16D00DA42 /* User.swift */; };
+		6C0313376F77DD04246DA5A5 /* Endpoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EC6EA046F94F6FA0EC3D5AE /* Endpoints.swift */; };
+		81033F456D18267F1CECE0AE /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C9C8017C0591D903A264A02 /* LoginViewModel.swift */; };
+		89D0441C35B855202146CD91 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D7E49E387608C929069271 /* LoginView.swift */; };
+		9C98FAB24945704D61551CDA /* Rotina.swift in Sources */ = {isa = PBXBuildFile; fileRef = 125980BFC9B0A546484E270F /* Rotina.swift */; };
+		A42611753EC809A312832560 /* PrimaryButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F0D1AD50E31A43D568FBB1 /* PrimaryButton.swift */; };
+		B6109AFEAB275E9435624775 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D374E0472A5A0D36930F02C /* AppDelegate.swift */; };
+		B9C9A473C461A22DC4DCE84D /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B31E3FE121617ABF759DC2 /* APIClient.swift */; };
+		CD2977F3B619690833850BC0 /* RotinaPlusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85161E62B62BE74F95E1AFFC /* RotinaPlusApp.swift */; };
+		EBB6BE2DEF5081E4667171DD /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = AFB03256A6FF8F73D5B75DF5 /* Localizable.strings */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		125980BFC9B0A546484E270F /* Rotina.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rotina.swift; sourceTree = "<group>"; };
+		1D3736D6B9B9DBCD4BD6E017 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		2C9C8017C0591D903A264A02 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
+		304E05A076A85F6859B184EF /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
+		3EC6EA046F94F6FA0EC3D5AE /* Endpoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Endpoints.swift; sourceTree = "<group>"; };
+		40D7E49E387608C929069271 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		54F0D1AD50E31A43D568FBB1 /* PrimaryButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimaryButton.swift; sourceTree = "<group>"; };
+		5D374E0472A5A0D36930F02C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		7BDECFF96D9D7EA16D00DA42 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		85161E62B62BE74F95E1AFFC /* RotinaPlusApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotinaPlusApp.swift; sourceTree = "<group>"; };
+		AFB03256A6FF8F73D5B75DF5 /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = Localizable.strings; sourceTree = "<group>"; };
+		C7B31E3FE121617ABF759DC2 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		F6660249C15BA031E5D46016 /* RotinaPlus.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = RotinaPlus.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		1CC98E5E331EF94978338A00 /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				C7B31E3FE121617ABF759DC2 /* APIClient.swift */,
+				3EC6EA046F94F6FA0EC3D5AE /* Endpoints.swift */,
+			);
+			path = Networking;
+			sourceTree = "<group>";
+		};
+		2341D48E1715C375D60A5DEA /* RotinaPlus */ = {
+			isa = PBXGroup;
+			children = (
+				965165B369D7F8A56112045F /* App */,
+				B2337484F4500EFF28B6A63A /* Models */,
+				90F715CA16683E0B09B38BE3 /* Resources */,
+				E367A0B1708D6233C0E839C9 /* Services */,
+				3EDED179B99A9051672B4FF9 /* Utils */,
+				F496B7B980222B5C29E0E47B /* ViewModels */,
+				474D91216FD99B95F7E635C4 /* Views */,
+			);
+			path = RotinaPlus;
+			sourceTree = "<group>";
+		};
+		3EDED179B99A9051672B4FF9 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				1D3736D6B9B9DBCD4BD6E017 /* .gitkeep */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		474D91216FD99B95F7E635C4 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				9479963F96E04D8856EEC07B /* Components */,
+				65699CB8E70234A0A686E9EB /* Screens */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		4BF18295BBFF55CD82DF0C1C = {
+			isa = PBXGroup;
+			children = (
+				2341D48E1715C375D60A5DEA /* RotinaPlus */,
+				802DAFD8E559AFFB64FC4ED4 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		65699CB8E70234A0A686E9EB /* Screens */ = {
+			isa = PBXGroup;
+			children = (
+				40D7E49E387608C929069271 /* LoginView.swift */,
+			);
+			path = Screens;
+			sourceTree = "<group>";
+		};
+		802DAFD8E559AFFB64FC4ED4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F6660249C15BA031E5D46016 /* RotinaPlus.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		90F715CA16683E0B09B38BE3 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				AFB03256A6FF8F73D5B75DF5 /* Localizable.strings */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		9479963F96E04D8856EEC07B /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				54F0D1AD50E31A43D568FBB1 /* PrimaryButton.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		965165B369D7F8A56112045F /* App */ = {
+			isa = PBXGroup;
+			children = (
+				5D374E0472A5A0D36930F02C /* AppDelegate.swift */,
+				85161E62B62BE74F95E1AFFC /* RotinaPlusApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		B2337484F4500EFF28B6A63A /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				125980BFC9B0A546484E270F /* Rotina.swift */,
+				7BDECFF96D9D7EA16D00DA42 /* User.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		E367A0B1708D6233C0E839C9 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				F95FE33776B8425D262DA6BD /* Auth */,
+				1CC98E5E331EF94978338A00 /* Networking */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		F496B7B980222B5C29E0E47B /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				2C9C8017C0591D903A264A02 /* LoginViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		F95FE33776B8425D262DA6BD /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				304E05A076A85F6859B184EF /* AuthManager.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E5642FAA216218003BAA5B4E /* RotinaPlus */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ACA7BA227E3BDEAE26230D8F /* Build configuration list for PBXNativeTarget "RotinaPlus" */;
+			buildPhases = (
+				9713139A7559309BCCEEEF28 /* Sources */,
+				AC23AA197EB807C6FECD43C4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RotinaPlus;
+			packageProductDependencies = (
+			);
+			productName = RotinaPlus;
+			productReference = F6660249C15BA031E5D46016 /* RotinaPlus.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3F2B77A8EB15DF53800460E1 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = C3A03CE4DB018E0C9EC6B89F /* Build configuration list for PBXProject "RotinaPlus" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 4BF18295BBFF55CD82DF0C1C;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 802DAFD8E559AFFB64FC4ED4 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E5642FAA216218003BAA5B4E /* RotinaPlus */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AC23AA197EB807C6FECD43C4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EBB6BE2DEF5081E4667171DD /* Localizable.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		9713139A7559309BCCEEEF28 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B9C9A473C461A22DC4DCE84D /* APIClient.swift in Sources */,
+				B6109AFEAB275E9435624775 /* AppDelegate.swift in Sources */,
+				14087EF27A99C5D6F7E1DA69 /* AuthManager.swift in Sources */,
+				6C0313376F77DD04246DA5A5 /* Endpoints.swift in Sources */,
+				89D0441C35B855202146CD91 /* LoginView.swift in Sources */,
+				81033F456D18267F1CECE0AE /* LoginViewModel.swift in Sources */,
+				A42611753EC809A312832560 /* PrimaryButton.swift in Sources */,
+				9C98FAB24945704D61551CDA /* Rotina.swift in Sources */,
+				CD2977F3B619690833850BC0 /* RotinaPlusApp.swift in Sources */,
+				1C379C0B1D009404FD32089F /* User.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		318FC3D4AB137EC8DC8BC0AD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = RotinaPlus;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rotinaplus.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		47D388FF0644BBDB919FD2CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		4D2CC97B89B24A2025EA76DA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = RotinaPlus;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rotinaplus.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F72D0803C1340C29938FDE18 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		ACA7BA227E3BDEAE26230D8F /* Build configuration list for PBXNativeTarget "RotinaPlus" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4D2CC97B89B24A2025EA76DA /* Debug */,
+				318FC3D4AB137EC8DC8BC0AD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C3A03CE4DB018E0C9EC6B89F /* Build configuration list for PBXProject "RotinaPlus" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F72D0803C1340C29938FDE18 /* Debug */,
+				47D388FF0644BBDB919FD2CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 3F2B77A8EB15DF53800460E1 /* Project object */;
+}
