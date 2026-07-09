@@ -3,6 +3,8 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
+"$(dirname "$0")/../scripts/guara-logo.sh" 2>/dev/null || true
+
 if ! command -v docker >/dev/null 2>&1; then
   echo "Erro: Docker não encontrado. Instale o Docker Desktop: https://www.docker.com/products/docker-desktop/"
   exit 1
