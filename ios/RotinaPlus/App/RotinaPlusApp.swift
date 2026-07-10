@@ -6,7 +6,7 @@ struct RotinaPlusApp: App {
 
     var body: some Scene {
         WindowGroup {
-            LoginView()
+            TelaBemVindo()
         }
     }
 }

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		14087EF27A99C5D6F7E1DA69 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 304E05A076A85F6859B184EF /* AuthManager.swift */; };
 		1C379C0B1D009404FD32089F /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BDECFF96D9D7EA16D00DA42 /* User.swift */; };
+		60F4C3C02A003BE2A4D377F1 /* TelaBemVindo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ECAD16E703F8F6FA38184E7 /* TelaBemVindo.swift */; };
 		6C0313376F77DD04246DA5A5 /* Endpoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EC6EA046F94F6FA0EC3D5AE /* Endpoints.swift */; };
 		81033F456D18267F1CECE0AE /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C9C8017C0591D903A264A02 /* LoginViewModel.swift */; };
 		89D0441C35B855202146CD91 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D7E49E387608C929069271 /* LoginView.swift */; };
@@ -17,16 +18,19 @@
 		B6109AFEAB275E9435624775 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D374E0472A5A0D36930F02C /* AppDelegate.swift */; };
 		B9C9A473C461A22DC4DCE84D /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B31E3FE121617ABF759DC2 /* APIClient.swift */; };
 		CD2977F3B619690833850BC0 /* RotinaPlusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85161E62B62BE74F95E1AFFC /* RotinaPlusApp.swift */; };
+		DC4F1B60F09D717CE237B54E /* BotaoPular.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44488404F9129F900C378B01 /* BotaoPular.swift */; };
 		EBB6BE2DEF5081E4667171DD /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = AFB03256A6FF8F73D5B75DF5 /* Localizable.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0ECAD16E703F8F6FA38184E7 /* TelaBemVindo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaBemVindo.swift; sourceTree = "<group>"; };
 		125980BFC9B0A546484E270F /* Rotina.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rotina.swift; sourceTree = "<group>"; };
 		1D3736D6B9B9DBCD4BD6E017 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		2C9C8017C0591D903A264A02 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		304E05A076A85F6859B184EF /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
 		3EC6EA046F94F6FA0EC3D5AE /* Endpoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Endpoints.swift; sourceTree = "<group>"; };
 		40D7E49E387608C929069271 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		44488404F9129F900C378B01 /* BotaoPular.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BotaoPular.swift; sourceTree = "<group>"; };
 		54F0D1AD50E31A43D568FBB1 /* PrimaryButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimaryButton.swift; sourceTree = "<group>"; };
 		5D374E0472A5A0D36930F02C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7BDECFF96D9D7EA16D00DA42 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
@@ -89,6 +93,7 @@
 			isa = PBXGroup;
 			children = (
 				40D7E49E387608C929069271 /* LoginView.swift */,
+				0ECAD16E703F8F6FA38184E7 /* TelaBemVindo.swift */,
 			);
 			path = Screens;
 			sourceTree = "<group>";
@@ -112,6 +117,7 @@
 		9479963F96E04D8856EEC07B /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				44488404F9129F900C378B01 /* BotaoPular.swift */,
 				54F0D1AD50E31A43D568FBB1 /* PrimaryButton.swift */,
 			);
 			path = Components;
@@ -230,12 +236,14 @@
 				B9C9A473C461A22DC4DCE84D /* APIClient.swift in Sources */,
 				B6109AFEAB275E9435624775 /* AppDelegate.swift in Sources */,
 				14087EF27A99C5D6F7E1DA69 /* AuthManager.swift in Sources */,
+				DC4F1B60F09D717CE237B54E /* BotaoPular.swift in Sources */,
 				6C0313376F77DD04246DA5A5 /* Endpoints.swift in Sources */,
 				89D0441C35B855202146CD91 /* LoginView.swift in Sources */,
 				81033F456D18267F1CECE0AE /* LoginViewModel.swift in Sources */,
 				A42611753EC809A312832560 /* PrimaryButton.swift in Sources */,
 				9C98FAB24945704D61551CDA /* Rotina.swift in Sources */,
 				CD2977F3B619690833850BC0 /* RotinaPlusApp.swift in Sources */,
+				60F4C3C02A003BE2A4D377F1 /* TelaBemVindo.swift in Sources */,
 				1C379C0B1D009404FD32089F /* User.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
