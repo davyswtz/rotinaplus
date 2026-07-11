@@ -23,3 +23,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
         ApiExceptionHandler::register($exceptions);
     })->create();
+
+    Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+
+    });
