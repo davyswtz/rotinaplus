@@ -22,6 +22,7 @@
 		CD2977F3B619690833850BC0 /* RotinaPlusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85161E62B62BE74F95E1AFFC /* RotinaPlusApp.swift */; };
 		DC4F1B60F09D717CE237B54E /* BotaoPular.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44488404F9129F900C378B01 /* BotaoPular.swift */; };
 		EBB6BE2DEF5081E4667171DD /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = AFB03256A6FF8F73D5B75DF5 /* Localizable.strings */; };
+		F1E2D3C4B5A6978800112233 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2F3A4B5C6D7989000112233 /* HomeView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +43,7 @@
 		AFB03256A6FF8F73D5B75DF5 /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = Localizable.strings; sourceTree = "<group>"; };
 		C7B31E3FE121617ABF759DC2 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		F6660249C15BA031E5D46016 /* RotinaPlus.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = RotinaPlus.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E2F3A4B5C6D7989000112233 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -98,6 +100,7 @@
 			isa = PBXGroup;
 			children = (
 				40D7E49E387608C929069271 /* LoginView.swift */,
+				E2F3A4B5C6D7989000112233 /* HomeView.swift */,
 				0ECAD16E703F8F6FA38184E7 /* TelaBemVindo.swift */,
 			);
 			path = Screens;
@@ -249,6 +252,7 @@
 				A42611753EC809A312832560 /* PrimaryButton.swift in Sources */,
 				9A1B2C3D4E5F60718293A4B5 /* AppConfig.swift in Sources */,
 				860B9B7B46EA639C98099023 /* RootView.swift in Sources */,
+				F1E2D3C4B5A6978800112233 /* HomeView.swift in Sources */,
 				9C98FAB24945704D61551CDA /* Rotina.swift in Sources */,
 				CD2977F3B619690833850BC0 /* RotinaPlusApp.swift in Sources */,
 				60F4C3C02A003BE2A4D377F1 /* TelaBemVindo.swift in Sources */,

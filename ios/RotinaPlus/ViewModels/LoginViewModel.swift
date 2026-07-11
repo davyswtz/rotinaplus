@@ -2,8 +2,13 @@ import Foundation
 
 @MainActor
 class LoginViewModel: ObservableObject {
+    #if DEBUG
+    @Published var email: String = "davy@teste.com"
+    @Published var password: String = "senha123"
+    #else
     @Published var email: String = ""
     @Published var password: String = ""
+    #endif
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
 
