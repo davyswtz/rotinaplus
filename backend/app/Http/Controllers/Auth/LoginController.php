@@ -16,7 +16,11 @@ class LoginController extends Controller
 
         $user = User::where('email', $validated['email'])->first();
 
-        if (!$user || !Hash::check($validated['password'], $user->password)) {
+        if (
+            ! $user
+            || empty($user->password)
+            || ! Hash::check($validated['password'], $user->password)
+        ) {
             throw ValidationException::withMessages([
                 'email' => ['As credenciais fornecidas são inválidas.'],
             ]);

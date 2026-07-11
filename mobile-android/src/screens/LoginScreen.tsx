@@ -16,14 +16,17 @@ import { SocialLoginButton } from '../components/SocialLoginButton';
 import { useAuth } from '../hooks/useAuth';
 import { cores } from '../theme/colors';
 
+const TEST_EMAIL = __DEV__ ? 'davy@teste.com' : '';
+const TEST_PASSWORD = __DEV__ ? 'senha123' : '';
+
 // MARK: - Tela de Login (Android / React Native)
 // Layout espelhado do LoginView.swift no iOS.
 // Apenas UI + hook useAuth; botões sociais são placeholders até integrar SDKs.
 
 export function LoginScreen() {
   // MARK: - Estado local dos campos
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState(TEST_EMAIL);
+  const [password, setPassword] = useState(TEST_PASSWORD);
 
   // MARK: - Autenticação (e-mail/senha via API)
   const { login, isLoading, error } = useAuth();
