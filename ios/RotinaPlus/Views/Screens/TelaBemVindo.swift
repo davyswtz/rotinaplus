@@ -13,14 +13,12 @@ private enum CoresBoasVindas {
 struct TelaBemVindo: View {
 
     // MARK: - Estado da tela
-    @State private var mostrarLogin = false   // controla navegação para LoginView
     @State private var paginaAtual = 0      // página ativa no onboarding (0, 1 ou 2)
 
     private let totalPaginas = 3
 
     var body: some View {
-        NavigationStack {
-            ZStack {
+        ZStack {
 
                 // MARK: Fundo
                 // Gradiente roxo escuro que cobre a tela inteira.
@@ -70,7 +68,7 @@ struct TelaBemVindo: View {
                         .padding(.bottom, 28)
 
                     // MARK: Botão "Próximo"
-                    // Botão roxo grande que avança o onboarding ou vai para o login.
+                    // Botão roxo grande que avança o onboarding.
                     Button {
                         avancar()
                     } label: {
@@ -87,18 +85,11 @@ struct TelaBemVindo: View {
                     // MARK: Botão "Pular"
                     // Componente reutilizável (BotaoPular.swift) — texto discreto no rodapé.
                     BotaoPular {
-                        mostrarLogin = true
+                        avancar()
                     }
                     .padding(.bottom, 16)
                 }
             }
-
-            // MARK: Navegação
-            // Quando mostrarLogin = true, abre a tela de login.
-            .navigationDestination(isPresented: $mostrarLogin) {
-                LoginView()
-            }
-        }
         .preferredColorScheme(.dark)
     }
 
@@ -121,12 +112,10 @@ struct TelaBemVindo: View {
     }
 
     // MARK: Ação do botão "Próximo"
-    // Avança para a próxima página ou abre o login na última página.
+    // Avança para a próxima página do onboarding.
     private func avancar() {
         if paginaAtual < totalPaginas - 1 {
             paginaAtual += 1
-        } else {
-            mostrarLogin = true
         }
     }
 }
