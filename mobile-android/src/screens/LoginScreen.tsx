@@ -30,6 +30,9 @@ export function LoginScreen() {
 
   // MARK: - Ação do botão "Entrar"
   const handleLogin = () => {
+    if (!email.trim() || !password.trim()) {
+      return;
+    }
     void login(email, password);
   };
 

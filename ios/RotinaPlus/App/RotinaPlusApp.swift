@@ -6,8 +6,7 @@ struct RotinaPlusApp: App {
 
     var body: some Scene {
         WindowGroup {
-            // MARK: Tela inicial do app — login antes de qualquer outra tela
-            LoginView()
+            RootView()
         }
     }
 }

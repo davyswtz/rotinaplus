@@ -1,20 +1,20 @@
 import Foundation
 
-class AuthManager {
+@MainActor
+final class AuthManager: ObservableObject {
     static let shared = AuthManager()
 
-    private let tokenKey = "auth_token"
+    private static let tokenKey = "auth_token"
 
-    var token: String? {
-        get { UserDefaults.standard.string(forKey: tokenKey) }
-        set { UserDefaults.standard.set(newValue, forKey: tokenKey) }
+    @Published private(set) var isAuthenticated: Bool
+
+    nonisolated var token: String? {
+        UserDefaults.standard.string(forKey: Self.tokenKey)
     }
 
-    var isAuthenticated: Bool {
-        token != nil
+    private init() {
+        isAuthenticated = UserDefaults.standard.string(forKey: Self.tokenKey) != nil
     }
-
-    private init() {}
 
     func login(email: String, password: String) async throws {
         struct LoginRequest: Encodable {
@@ -23,11 +23,7 @@ class AuthManager {
         }
 
         struct LoginResponse: Decodable {
-            let success: Bool
-            let data: LoginData?
-        }
-
-        struct LoginData: Decodable {
+            let user: AuthUser
             let token: String
         }
 
@@ -37,14 +33,18 @@ class AuthManager {
             body: LoginRequest(email: email, password: password)
         )
 
-        guard let token = response.data?.token else {
-            throw APIError.invalidResponse
-        }
-
-        self.token = token
+        UserDefaults.standard.set(response.token, forKey: Self.tokenKey)
+        isAuthenticated = true
     }
 
     func logout() {
-        token = nil
+        UserDefaults.standard.removeObject(forKey: Self.tokenKey)
+        isAuthenticated = false
     }
+}
+
+struct AuthUser: Decodable {
+    let id: Int
+    let name: String
+    let email: String
 }
