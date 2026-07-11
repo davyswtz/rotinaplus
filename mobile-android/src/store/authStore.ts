@@ -3,16 +3,27 @@ import * as authService from '../services/auth';
 
 interface AuthState {
   isAuthenticated: boolean;
+  isHydrated: boolean;
   isLoading: boolean;
   error: string | null;
+  hydrate: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  isAuthenticated: authService.isAuthenticated(),
+  isAuthenticated: false,
+  isHydrated: false,
   isLoading: false,
   error: null,
+
+  hydrate: async () => {
+    await authService.hydrate();
+    set({
+      isAuthenticated: authService.isAuthenticated(),
+      isHydrated: true,
+    });
+  },
 
   login: async (email, password) => {
     set({ isLoading: true, error: null });
@@ -28,8 +39,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
-  logout: () => {
-    authService.logout();
+  logout: async () => {
+    await authService.logout();
     set({ isAuthenticated: false, error: null });
   },
 }));

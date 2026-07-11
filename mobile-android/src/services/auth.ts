@@ -1,40 +1,45 @@
 import { api, setAuthToken } from './api';
-import type { ApiResponse } from '../types';
+import type { User } from '../types';
+import * as tokenStorage from './tokenStorage';
 
 interface LoginPayload {
   email: string;
   password: string;
 }
 
-interface LoginData {
+interface LoginResponse {
+  user: User;
   token: string;
 }
 
-let currentToken: string | null = null;
+export async function hydrate(): Promise<void> {
+  const token = await tokenStorage.hydrateToken();
+  setAuthToken(token);
+}
 
 export async function login(email: string, password: string): Promise<void> {
-  const { data } = await api.post<ApiResponse<LoginData>>(
+  const { data } = await api.post<LoginResponse>(
     '/api/v1/auth/login',
     { email, password } satisfies LoginPayload,
   );
 
-  if (!data.success || !data.data?.token) {
-    throw new Error(data.message ?? 'Falha no login.');
+  if (!data.token) {
+    throw new Error('Falha no login.');
   }
 
-  currentToken = data.data.token;
-  setAuthToken(currentToken);
+  await tokenStorage.saveToken(data.token);
+  setAuthToken(data.token);
 }
 
-export function logout(): void {
-  currentToken = null;
+export async function logout(): Promise<void> {
+  await tokenStorage.clearToken();
   setAuthToken(null);
 }
 
 export function getToken(): string | null {
-  return currentToken;
+  return tokenStorage.getToken();
 }
 
 export function isAuthenticated(): boolean {
-  return currentToken !== null;
+  return tokenStorage.getToken() !== null;
 }

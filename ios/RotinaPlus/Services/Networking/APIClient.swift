@@ -38,7 +38,7 @@ struct APIResponse<T: Decodable>: Decodable {
 class APIClient {
     static let shared = APIClient()
 
-    private let baseURL = "http://181.215.135.114"
+    private let baseURL = AppConfig.apiBaseURL
     private let session: URLSession
 
     private init(session: URLSession = .shared) {
@@ -75,10 +75,10 @@ class APIClient {
         }
 
         guard (200...299).contains(httpResponse.statusCode) else {
-            let apiResponse = try? JSONDecoder().decode(APIResponse<EmptyData>.self, from: data)
+            let message = Self.parseErrorMessage(from: data)
             throw APIError.httpError(
                 statusCode: httpResponse.statusCode,
-                message: apiResponse?.message ?? "Erro na requisição."
+                message: message
             )
         }
 
@@ -87,6 +87,37 @@ class APIClient {
         } catch {
             throw APIError.decodingError
         }
+    }
+}
+
+private struct LaravelErrorResponse: Decodable {
+    let message: String?
+    let errors: [String: [String]]?
+}
+
+private extension APIClient {
+    static func parseErrorMessage(from data: Data) -> String {
+        let decoder = JSONDecoder()
+
+        if let laravelError = try? decoder.decode(LaravelErrorResponse.self, from: data) {
+            if let fieldErrors = laravelError.errors?.values.compactMap(\.first).first {
+                return fieldErrors
+            }
+            if let message = laravelError.message {
+                return message
+            }
+        }
+
+        if let apiResponse = try? decoder.decode(APIResponse<EmptyData>.self, from: data) {
+            if let fieldErrors = apiResponse.errors?.values.compactMap(\.first).first {
+                return fieldErrors
+            }
+            if let message = apiResponse.message {
+                return message
+            }
+        }
+
+        return "Erro na requisição."
     }
 }
 
