@@ -1,0 +1,19 @@
+# Override para produção no servidor.
+# Uso: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# - Nginx na porta 80 (API pública)
+# - MySQL e Redis só na rede interna do Docker (evita conflito com serviços do host)
+
+services:
+  nginx:
+    ports:
+      - "80:80"
+
+  mysql:
+    ports: !reset []
+
+  redis:
+    ports: !reset []
+
+  adminer:
+    ports: !reset []
