@@ -14,6 +14,7 @@ struct TelaBemVindo: View {
 
     // MARK: - Estado da tela
     @State private var paginaAtual = 0      // página ativa no onboarding (0, 1 ou 2)
+    var onConcluir: (() -> Void)?
 
     private let totalPaginas = 3
 
@@ -112,10 +113,12 @@ struct TelaBemVindo: View {
     }
 
     // MARK: Ação do botão "Próximo"
-    // Avança para a próxima página do onboarding.
+    // Avança para a próxima página do onboarding; na última, conclui.
     private func avancar() {
         if paginaAtual < totalPaginas - 1 {
             paginaAtual += 1
+        } else {
+            onConcluir?()
         }
     }
 }

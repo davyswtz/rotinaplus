@@ -40,3 +40,8 @@ fastlane/test_output
 
 # macOS
 .DS_Store
+
+# Sprite tooling (local)
+RotinaPlus/Resources/_sprites_tmp/
+scripts/_preview_guara.png
+../.venv-sprites/
