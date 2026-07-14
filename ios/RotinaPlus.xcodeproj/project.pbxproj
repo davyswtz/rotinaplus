@@ -7,9 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		00A59C7ED74CD2CAD4468186 /* TelaLoading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DC5E216D08AE7B9B009E435 /* TelaLoading.swift */; };
 		14087EF27A99C5D6F7E1DA69 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 304E05A076A85F6859B184EF /* AuthManager.swift */; };
 		145A93EA80CDA7F458E56F80 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9368C816DE1CA6CD890F75B0 /* HomeView.swift */; };
+		19D4E10FC6E93C1CF3047D7D /* _icon0_check.png in Resources */ = {isa = PBXBuildFile; fileRef = F2865C182562E82CFAD74364 /* _icon0_check.png */; };
 		1C379C0B1D009404FD32089F /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BDECFF96D9D7EA16D00DA42 /* User.swift */; };
+		209F2BDFFA6B1099BA65F5F0 /* _content_mask.png in Resources */ = {isa = PBXBuildFile; fileRef = 7FF3BF138F2FE9DEAC6CD397 /* _content_mask.png */; };
+		342BC1D32179266057A975EB /* _icons_preview_v2.png in Resources */ = {isa = PBXBuildFile; fileRef = 4EF73EB04FFB908E0E3199B6 /* _icons_preview_v2.png */; };
+		3BF5AABB0C6A5E9B5783434E /* colecao_icones_v2.png in Resources */ = {isa = PBXBuildFile; fileRef = B15562B40A03D72FD695C928 /* colecao_icones_v2.png */; };
 		3DFAB8176247446CF49ADC6E /* TelaCriePersonagem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80BBB4E7A5C758E62CE4DC19 /* TelaCriePersonagem.swift */; };
 		50DA3B1128CBC53ACFC9294E /* TelaEscolhaAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDB438512CABDF75AA754A5D /* TelaEscolhaAvatar.swift */; };
 		60F4C3C02A003BE2A4D377F1 /* TelaBemVindo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ECAD16E703F8F6FA38184E7 /* TelaBemVindo.swift */; };
@@ -23,22 +28,27 @@
 		B6109AFEAB275E9435624775 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D374E0472A5A0D36930F02C /* AppDelegate.swift */; };
 		B72DF0C613B5928F2388A7D9 /* colecao_icones_explorador.png in Resources */ = {isa = PBXBuildFile; fileRef = 7195527E68F0E912AE8FE4BD /* colecao_icones_explorador.png */; };
 		B9C9A473C461A22DC4DCE84D /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B31E3FE121617ABF759DC2 /* APIClient.swift */; };
+		BC56F3198E042E2DC7E38DC8 /* _splash_guara.png in Resources */ = {isa = PBXBuildFile; fileRef = DF227AC1062610AB4BAB7B80 /* _splash_guara.png */; };
 		CD2977F3B619690833850BC0 /* RotinaPlusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85161E62B62BE74F95E1AFFC /* RotinaPlusApp.swift */; };
 		D3263123CFFFF320F5CAC98F /* _icons_preview.png in Resources */ = {isa = PBXBuildFile; fileRef = F8EF2ED900DB4DC58EEDC56B /* _icons_preview.png */; };
 		DC4F1B60F09D717CE237B54E /* BotaoPular.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44488404F9129F900C378B01 /* BotaoPular.swift */; };
 		E6DCAA9C40DD92DF543A680A /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D94C60C5E896AED65A2FDCA /* AppConfig.swift */; };
 		EBB6BE2DEF5081E4667171DD /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = AFB03256A6FF8F73D5B75DF5 /* Localizable.strings */; };
+		EBB998C9D191356BC7E64787 /* _cell0.png in Resources */ = {isa = PBXBuildFile; fileRef = 08632F606ABDBCAA510C10C7 /* _cell0.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		08632F606ABDBCAA510C10C7 /* _cell0.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = _cell0.png; sourceTree = "<group>"; };
 		0ECAD16E703F8F6FA38184E7 /* TelaBemVindo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaBemVindo.swift; sourceTree = "<group>"; };
 		125980BFC9B0A546484E270F /* Rotina.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rotina.swift; sourceTree = "<group>"; };
 		1D3736D6B9B9DBCD4BD6E017 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		2C9C8017C0591D903A264A02 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		304E05A076A85F6859B184EF /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
+		3DC5E216D08AE7B9B009E435 /* TelaLoading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaLoading.swift; sourceTree = "<group>"; };
 		3EC6EA046F94F6FA0EC3D5AE /* Endpoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Endpoints.swift; sourceTree = "<group>"; };
 		40D7E49E387608C929069271 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		44488404F9129F900C378B01 /* BotaoPular.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BotaoPular.swift; sourceTree = "<group>"; };
+		4EF73EB04FFB908E0E3199B6 /* _icons_preview_v2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = _icons_preview_v2.png; sourceTree = "<group>"; };
 		54F0D1AD50E31A43D568FBB1 /* PrimaryButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimaryButton.swift; sourceTree = "<group>"; };
 		5D374E0472A5A0D36930F02C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		5D94C60C5E896AED65A2FDCA /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
@@ -46,13 +56,17 @@
 		7195527E68F0E912AE8FE4BD /* colecao_icones_explorador.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = colecao_icones_explorador.png; sourceTree = "<group>"; };
 		7600D5F8FA76B8FFB364AB04 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		7BDECFF96D9D7EA16D00DA42 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		7FF3BF138F2FE9DEAC6CD397 /* _content_mask.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = _content_mask.png; sourceTree = "<group>"; };
 		80BBB4E7A5C758E62CE4DC19 /* TelaCriePersonagem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaCriePersonagem.swift; sourceTree = "<group>"; };
 		85161E62B62BE74F95E1AFFC /* RotinaPlusApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotinaPlusApp.swift; sourceTree = "<group>"; };
 		9368C816DE1CA6CD890F75B0 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		AFB03256A6FF8F73D5B75DF5 /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = Localizable.strings; sourceTree = "<group>"; };
+		B15562B40A03D72FD695C928 /* colecao_icones_v2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = colecao_icones_v2.png; sourceTree = "<group>"; };
 		B9FA862C1973F25C6CF5552C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BDB438512CABDF75AA754A5D /* TelaEscolhaAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaEscolhaAvatar.swift; sourceTree = "<group>"; };
 		C7B31E3FE121617ABF759DC2 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		DF227AC1062610AB4BAB7B80 /* _splash_guara.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = _splash_guara.png; sourceTree = "<group>"; };
+		F2865C182562E82CFAD74364 /* _icon0_check.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = _icon0_check.png; sourceTree = "<group>"; };
 		F6660249C15BA031E5D46016 /* RotinaPlus.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = RotinaPlus.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F8EF2ED900DB4DC58EEDC56B /* _icons_preview.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = _icons_preview.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -85,8 +99,14 @@
 		376C56D9FB349BB5B0FABE11 /* ArtSource */ = {
 			isa = PBXGroup;
 			children = (
+				08632F606ABDBCAA510C10C7 /* _cell0.png */,
+				7FF3BF138F2FE9DEAC6CD397 /* _content_mask.png */,
+				F2865C182562E82CFAD74364 /* _icon0_check.png */,
+				4EF73EB04FFB908E0E3199B6 /* _icons_preview_v2.png */,
 				F8EF2ED900DB4DC58EEDC56B /* _icons_preview.png */,
+				DF227AC1062610AB4BAB7B80 /* _splash_guara.png */,
 				7195527E68F0E912AE8FE4BD /* colecao_icones_explorador.png */,
+				B15562B40A03D72FD695C928 /* colecao_icones_v2.png */,
 			);
 			path = ArtSource;
 			sourceTree = "<group>";
@@ -125,6 +145,7 @@
 				0ECAD16E703F8F6FA38184E7 /* TelaBemVindo.swift */,
 				80BBB4E7A5C758E62CE4DC19 /* TelaCriePersonagem.swift */,
 				BDB438512CABDF75AA754A5D /* TelaEscolhaAvatar.swift */,
+				3DC5E216D08AE7B9B009E435 /* TelaLoading.swift */,
 			);
 			path = Screens;
 			sourceTree = "<group>";
@@ -258,8 +279,14 @@
 			files = (
 				A0AC2C0FE66397C9280BE9A9 /* Assets.xcassets in Resources */,
 				EBB6BE2DEF5081E4667171DD /* Localizable.strings in Resources */,
+				EBB998C9D191356BC7E64787 /* _cell0.png in Resources */,
+				209F2BDFFA6B1099BA65F5F0 /* _content_mask.png in Resources */,
+				19D4E10FC6E93C1CF3047D7D /* _icon0_check.png in Resources */,
 				D3263123CFFFF320F5CAC98F /* _icons_preview.png in Resources */,
+				342BC1D32179266057A975EB /* _icons_preview_v2.png in Resources */,
+				BC56F3198E042E2DC7E38DC8 /* _splash_guara.png in Resources */,
 				B72DF0C613B5928F2388A7D9 /* colecao_icones_explorador.png in Resources */,
+				3BF5AABB0C6A5E9B5783434E /* colecao_icones_v2.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -286,6 +313,7 @@
 				60F4C3C02A003BE2A4D377F1 /* TelaBemVindo.swift in Sources */,
 				3DFAB8176247446CF49ADC6E /* TelaCriePersonagem.swift in Sources */,
 				50DA3B1128CBC53ACFC9294E /* TelaEscolhaAvatar.swift in Sources */,
+				00A59C7ED74CD2CAD4468186 /* TelaLoading.swift in Sources */,
 				1C379C0B1D009404FD32089F /* User.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

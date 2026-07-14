@@ -10,10 +10,13 @@ struct RootView: View {
     @ObservedObject private var authManager = AuthManager.shared
     @State private var onboarding: OnboardingFase = .bemVindo
     @State private var avatarSelecionado: AvatarExplorador?
+    @State private var mostrandoLoading = true
 
     var body: some View {
         Group {
-            if authManager.isAuthenticated {
+            if mostrandoLoading {
+                TelaLoading()
+            } else if authManager.isAuthenticated {
                 switch onboarding {
                 case .bemVindo:
                     TelaBemVindo {
@@ -41,6 +44,14 @@ struct RootView: View {
                 }
             } else {
                 LoginView()
+            }
+        }
+        .onAppear {
+            guard mostrandoLoading else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
+                withAnimation(.easeInOut(duration: 0.35)) {
+                    mostrandoLoading = false
+                }
             }
         }
         .onChange(of: authManager.isAuthenticated) { autenticado in
