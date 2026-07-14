@@ -12,20 +12,19 @@ import { cores } from '../theme/colors';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
 const TOTAL_PAGINAS = 3;
-/** Página 1 de 3 no onboarding (índice 0). */
-const PAGINA_ATUAL = 0;
+/** Página 2 de 3 no onboarding (índice 1). */
+const PAGINA_ATUAL = 1;
 
-type Nav = NativeStackNavigationProp<RootStackParamList, 'Welcome'>;
+type Nav = NativeStackNavigationProp<RootStackParamList, 'CriePersonagem'>;
 
-// MARK: - Tela de Boas-vindas (Android / React Native)
-// Layout espelhado de TelaBemVindo.swift no iOS.
-// "Próximo" / "Pular" seguem para a intro de personagem.
+// MARK: - Intro "Crie seu personagem" (após Welcome)
+// Espelha TelaCriePersonagem.swift no iOS. Usa a pata, sem a raposa do mock.
 
-export function WelcomeScreen() {
+export function CriePersonagemScreen() {
   const navigation = useNavigation<Nav>();
 
   const concluir = () => {
-    navigation.replace('CriePersonagem');
+    navigation.replace('Home');
   };
 
   return (
@@ -37,11 +36,11 @@ export function WelcomeScreen() {
 
         <Text style={styles.mascote}>🐾</Text>
 
-        <Text style={styles.titulo}>Bem-vindo ao Rotina Plus!</Text>
+        <Text style={styles.titulo}>Crie seu personagem único</Text>
 
         <Text style={styles.descricao}>
-          Transforme sua vida numa aventura RPG. Cada hábito completado te deixa
-          mais forte, rico e sábio.
+          Escolha sua classe, avatar e nome. Seu herói evolui conforme você
+          avança na vida real.
         </Text>
 
         <View style={styles.espacador} />
