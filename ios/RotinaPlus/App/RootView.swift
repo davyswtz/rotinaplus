@@ -3,13 +3,14 @@ import SwiftUI
 private enum OnboardingFase {
     case bemVindo
     case escolhaAvatar
+    case nomeHeroi
     case home
 }
 
 struct RootView: View {
     @ObservedObject private var authManager = AuthManager.shared
     @State private var onboarding: OnboardingFase = .bemVindo
-    @State private var avatarSelecionado: AvatarExplorador?
+    @State private var avatarSelecionado: AvatarExplorador = .guaraSerio
     @State private var mostrandoLoading = true
 
     var body: some View {
@@ -30,12 +31,27 @@ struct RootView: View {
                             avatarSelecionado = avatar
                             UserDefaults.standard.set(avatar.rawValue, forKey: "avatar_selecionado")
                             withAnimation(.easeInOut(duration: 0.25)) {
-                                onboarding = .home
+                                onboarding = .nomeHeroi
                             }
                         },
                         onVoltar: {
                             withAnimation(.easeInOut(duration: 0.25)) {
                                 onboarding = .bemVindo
+                            }
+                        }
+                    )
+                case .nomeHeroi:
+                    TelaNomeHeroi(
+                        avatar: avatarSelecionado,
+                        onComecar: { nome in
+                            UserDefaults.standard.set(nome, forKey: "nome_heroi")
+                            withAnimation(.easeInOut(duration: 0.25)) {
+                                onboarding = .home
+                            }
+                        },
+                        onVoltar: {
+                            withAnimation(.easeInOut(duration: 0.25)) {
+                                onboarding = .escolhaAvatar
                             }
                         }
                     )
@@ -57,7 +73,7 @@ struct RootView: View {
         .onChange(of: authManager.isAuthenticated) { autenticado in
             if autenticado {
                 onboarding = .bemVindo
-                avatarSelecionado = nil
+                avatarSelecionado = .guaraSerio
             }
         }
     }

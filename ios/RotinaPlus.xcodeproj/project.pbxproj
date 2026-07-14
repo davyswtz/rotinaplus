@@ -22,6 +22,7 @@
 		81033F456D18267F1CECE0AE /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C9C8017C0591D903A264A02 /* LoginViewModel.swift */; };
 		860B9B7B46EA639C98099023 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7600D5F8FA76B8FFB364AB04 /* RootView.swift */; };
 		89D0441C35B855202146CD91 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D7E49E387608C929069271 /* LoginView.swift */; };
+		8EEDE49A57999BCBAE0EC531 /* TelaNomeHeroi.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEB298F80086AB3BA2B83FFB /* TelaNomeHeroi.swift */; };
 		9C98FAB24945704D61551CDA /* Rotina.swift in Sources */ = {isa = PBXBuildFile; fileRef = 125980BFC9B0A546484E270F /* Rotina.swift */; };
 		A0AC2C0FE66397C9280BE9A9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9FA862C1973F25C6CF5552C /* Assets.xcassets */; };
 		A42611753EC809A312832560 /* PrimaryButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F0D1AD50E31A43D568FBB1 /* PrimaryButton.swift */; };
@@ -60,6 +61,7 @@
 		80BBB4E7A5C758E62CE4DC19 /* TelaCriePersonagem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaCriePersonagem.swift; sourceTree = "<group>"; };
 		85161E62B62BE74F95E1AFFC /* RotinaPlusApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotinaPlusApp.swift; sourceTree = "<group>"; };
 		9368C816DE1CA6CD890F75B0 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		AEB298F80086AB3BA2B83FFB /* TelaNomeHeroi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaNomeHeroi.swift; sourceTree = "<group>"; };
 		AFB03256A6FF8F73D5B75DF5 /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = Localizable.strings; sourceTree = "<group>"; };
 		B15562B40A03D72FD695C928 /* colecao_icones_v2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = colecao_icones_v2.png; sourceTree = "<group>"; };
 		B9FA862C1973F25C6CF5552C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -146,6 +148,7 @@
 				80BBB4E7A5C758E62CE4DC19 /* TelaCriePersonagem.swift */,
 				BDB438512CABDF75AA754A5D /* TelaEscolhaAvatar.swift */,
 				3DC5E216D08AE7B9B009E435 /* TelaLoading.swift */,
+				AEB298F80086AB3BA2B83FFB /* TelaNomeHeroi.swift */,
 			);
 			path = Screens;
 			sourceTree = "<group>";
@@ -314,6 +317,7 @@
 				3DFAB8176247446CF49ADC6E /* TelaCriePersonagem.swift in Sources */,
 				50DA3B1128CBC53ACFC9294E /* TelaEscolhaAvatar.swift in Sources */,
 				00A59C7ED74CD2CAD4468186 /* TelaLoading.swift in Sources */,
+				8EEDE49A57999BCBAE0EC531 /* TelaNomeHeroi.swift in Sources */,
 				1C379C0B1D009404FD32089F /* User.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
