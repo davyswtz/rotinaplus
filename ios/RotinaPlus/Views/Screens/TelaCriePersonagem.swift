@@ -1,27 +1,27 @@
 import SwiftUI
 
-// MARK: - Cores da tela
-// Paleta usada no fundo, textos, botões e indicador de páginas.
-private enum CoresBoasVindas {
+// MARK: - Cores (mesma paleta do welcome / login)
+private enum CoresCriePersonagem {
     static let fundoSuperior = Color(red: 0.10, green: 0.06, blue: 0.18)
     static let fundoInferior = Color(red: 0.05, green: 0.03, blue: 0.10)
     static let roxoPrimario = Color(red: 0.48, green: 0.26, blue: 0.96)
     static let textoSecundario = Color.white.opacity(0.65)
     static let indicadorInativo = Color.white.opacity(0.25)
+    static let laranjaMascote = Color(red: 1.0, green: 0.55, blue: 0.20)
 }
 
-struct TelaBemVindo: View {
-    /// Chamado ao concluir ou pular o welcome (vai para a próxima tela do onboarding).
+/// Segunda etapa do onboarding — aparece depois de `TelaBemVindo`.
+struct TelaCriePersonagem: View {
     var onConcluido: () -> Void = {}
 
-    /// Página 1 de 3 no fluxo de onboarding (índice 0).
-    private let paginaAtual = 0
+    /// Página 2 de 3 no fluxo de onboarding (índice 1).
+    private let paginaAtual = 1
     private let totalPaginas = 3
 
     var body: some View {
         ZStack {
             LinearGradient(
-                colors: [CoresBoasVindas.fundoSuperior, CoresBoasVindas.fundoInferior],
+                colors: [CoresCriePersonagem.fundoSuperior, CoresCriePersonagem.fundoInferior],
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -32,19 +32,19 @@ struct TelaBemVindo: View {
 
                 Image(systemName: "pawprint.fill")
                     .font(.system(size: 88))
-                    .foregroundStyle(Color(red: 1.0, green: 0.55, blue: 0.20))
+                    .foregroundStyle(CoresCriePersonagem.laranjaMascote)
                     .padding(.bottom, 40)
 
-                Text("Bem-vindo ao Rotina Plus!")
+                Text("Crie seu personagem único")
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
 
-                Text("Transforme sua vida numa aventura RPG. Cada hábito completado te deixa mais forte, rico e sábio.")
+                Text("Escolha sua classe, avatar e nome. Seu herói evolui conforme você avança na vida real.")
                     .font(.body)
-                    .foregroundStyle(CoresBoasVindas.textoSecundario)
+                    .foregroundStyle(CoresCriePersonagem.textoSecundario)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
                     .padding(.top, 16)
@@ -61,7 +61,7 @@ struct TelaBemVindo: View {
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 18)
-                        .background(CoresBoasVindas.roxoPrimario)
+                        .background(CoresCriePersonagem.roxoPrimario)
                         .foregroundStyle(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                 }
@@ -81,11 +81,11 @@ struct TelaBemVindo: View {
             ForEach(0..<totalPaginas, id: \.self) { indice in
                 if indice == paginaAtual {
                     Capsule()
-                        .fill(CoresBoasVindas.roxoPrimario)
+                        .fill(CoresCriePersonagem.roxoPrimario)
                         .frame(width: 24, height: 8)
                 } else {
                     Circle()
-                        .fill(CoresBoasVindas.indicadorInativo)
+                        .fill(CoresCriePersonagem.indicadorInativo)
                         .frame(width: 8, height: 8)
                 }
             }
@@ -94,5 +94,5 @@ struct TelaBemVindo: View {
 }
 
 #Preview {
-    TelaBemVindo()
+    TelaCriePersonagem()
 }
