@@ -1,35 +1,29 @@
-import React, { useEffect } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import { AppNavigator } from './src/navigation/AppNavigator';
+import { LoadingScreen } from './src/screens/LoadingScreen';
 import { useAuthStore } from './src/store/authStore';
-import { cores } from './src/theme/colors';
+
+const SPLASH_MS = 2200;
 
 function App(): React.JSX.Element {
   const hydrate = useAuthStore((state) => state.hydrate);
   const isHydrated = useAuthStore((state) => state.isHydrated);
+  const [mostrarSplash, setMostrarSplash] = useState(true);
 
   useEffect(() => {
     void hydrate();
   }, [hydrate]);
 
-  if (!isHydrated) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" color={cores.roxoPrimario} />
-      </View>
-    );
+  useEffect(() => {
+    const timer = setTimeout(() => setMostrarSplash(false), SPLASH_MS);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (mostrarSplash || !isHydrated) {
+    return <LoadingScreen />;
   }
 
   return <AppNavigator />;
 }
-
-const styles = StyleSheet.create({
-  loading: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: cores.fundoTela,
-  },
-});
 
 export default App;
