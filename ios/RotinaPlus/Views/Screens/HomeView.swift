@@ -59,6 +59,8 @@ struct HomeView: View {
                         switch abaSelecionada {
                         case .inicio:
                             conteudoInicio(pad: pad, gap: gap)
+                        case .academia:
+                            TelaAcademia()
                         case .perfil:
                             conteudoPlaceholder(
                                 titulo: "Perfil",
