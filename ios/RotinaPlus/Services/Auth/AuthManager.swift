@@ -41,12 +41,6 @@ final class AuthManager: ObservableObject {
         UserDefaults.standard.removeObject(forKey: Self.tokenKey)
         isAuthenticated = false
     }
-
-    /// Só para preview/teste local sem API.
-    func entrarComoConvidado() {
-        UserDefaults.standard.set("debug_preview_token", forKey: Self.tokenKey)
-        isAuthenticated = true
-    }
 }
 
 struct AuthUser: Decodable {

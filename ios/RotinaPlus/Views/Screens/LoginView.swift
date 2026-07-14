@@ -64,21 +64,6 @@ struct LoginView: View {
                             .padding(.bottom, 8)
                     }
 
-                    #if DEBUG
-                    // Atalho local para testar onboarding sem API.
-                    Button {
-                        AuthManager.shared.entrarComoConvidado()
-                    } label: {
-                        Text("Continuar sem login (teste)")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .foregroundStyle(CoresLogin.textoSecundario)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                    }
-                    .padding(.top, 4)
-                    #endif
-
                     // MARK: Divisor "ou continue com"
                     divisorSocial
                         .padding(.vertical, 24)
