@@ -6,6 +6,7 @@ import { WelcomeScreen } from '../screens/WelcomeScreen';
 import { EscolhaAvatarScreen } from '../screens/EscolhaAvatarScreen';
 import { NomeHeroiScreen } from '../screens/NomeHeroiScreen';
 import { HomeScreen } from '../screens/HomeScreen';
+import { NotificacoesScreen } from '../screens/NotificacoesScreen';
 import { useAuthStore } from '../store/authStore';
 
 export type RootStackParamList = {
@@ -14,6 +15,7 @@ export type RootStackParamList = {
   EscolhaAvatar: undefined;
   NomeHeroi: { avatarId: string };
   Home: undefined;
+  Notificacoes: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -39,6 +41,7 @@ export function AppNavigator() {
             <Stack.Screen name="EscolhaAvatar" component={EscolhaAvatarScreen} />
             <Stack.Screen name="NomeHeroi" component={NomeHeroiScreen} />
             <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Notificacoes" component={NotificacoesScreen} />
           </>
         ) : (
           <Stack.Screen name="Login" component={LoginScreen} />

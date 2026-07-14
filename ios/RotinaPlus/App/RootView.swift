@@ -9,9 +9,15 @@ private enum OnboardingFase {
 
 struct RootView: View {
     @ObservedObject private var authManager = AuthManager.shared
-    @State private var onboarding: OnboardingFase = .bemVindo
+    @State private var onboarding: OnboardingFase = Self.faseInicial
     @State private var avatarSelecionado: AvatarExplorador = .guaraSerio
     @State private var mostrandoLoading = true
+
+    private static var faseInicial: OnboardingFase {
+        let nome = UserDefaults.standard.string(forKey: "nome_heroi")?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return (nome?.isEmpty == false) ? .home : .bemVindo
+    }
 
     var body: some View {
         Group {
@@ -72,7 +78,7 @@ struct RootView: View {
         }
         .onChange(of: authManager.isAuthenticated) { autenticado in
             if autenticado {
-                onboarding = .bemVindo
+                onboarding = Self.faseInicial
                 avatarSelecionado = .guaraSerio
             }
         }
