@@ -23,6 +23,7 @@ import {
 } from '../components/MissoesDoDiaView';
 import { AtalhosRapidosView } from '../components/AtalhosRapidosView';
 import { AbaFooter, FooterNavegacao } from '../components/FooterNavegacao';
+import { AcademiaScreen } from './AcademiaScreen';
 import { cores } from '../theme/colors';
 import { getLayoutDashboard } from '../theme/layout';
 import { useAuthStore } from '../store/authStore';
@@ -178,16 +179,16 @@ export function HomeScreen() {
             />
           </View>
         </ScrollView>
+      ) : aba === 'academia' ? (
+        <AcademiaScreen />
       ) : (
         <View style={styles.placeholder}>
           <Text style={styles.placeholderTitulo}>
             {aba === 'perfil'
               ? 'Perfil'
-              : aba === 'academia'
-                ? 'Academia'
-                : aba === 'financas'
-                  ? 'Finanças'
-                  : 'Estudos'}
+              : aba === 'financas'
+                ? 'Finanças'
+                : 'Estudos'}
           </Text>
           <Text style={styles.placeholderTexto}>
             {aba === 'perfil'

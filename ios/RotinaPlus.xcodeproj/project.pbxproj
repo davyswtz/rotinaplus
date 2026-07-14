@@ -38,6 +38,7 @@
 		BC56F3198E042E2DC7E38DC8 /* _splash_guara.png in Resources */ = {isa = PBXBuildFile; fileRef = DF227AC1062610AB4BAB7B80 /* _splash_guara.png */; };
 		CD2977F3B619690833850BC0 /* RotinaPlusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85161E62B62BE74F95E1AFFC /* RotinaPlusApp.swift */; };
 		CDC583457884B50EC4F9D614 /* TelaNotificacoes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 713AFC38548F20CEB7E8C927 /* TelaNotificacoes.swift */; };
+		F4A8B1C2D3E4F5061728394A /* TelaAcademia.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A8B1C2D3E4F5061728394B /* TelaAcademia.swift */; };
 		D3263123CFFFF320F5CAC98F /* _icons_preview.png in Resources */ = {isa = PBXBuildFile; fileRef = F8EF2ED900DB4DC58EEDC56B /* _icons_preview.png */; };
 		D9566768B2D91F4119C24E8B /* LayoutDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6078EF931F7249D1FABF5EF /* LayoutDashboard.swift */; };
 		DAF7C790B5C355351888769A /* CardPerfilHeroi.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6B0E4D73CA7586D49CB7205 /* CardPerfilHeroi.swift */; };
@@ -66,6 +67,7 @@
 		5D94C60C5E896AED65A2FDCA /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
 		63DBAF71F7F90F2E93387559 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		713AFC38548F20CEB7E8C927 /* TelaNotificacoes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaNotificacoes.swift; sourceTree = "<group>"; };
+		E4A8B1C2D3E4F5061728394B /* TelaAcademia.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaAcademia.swift; sourceTree = "<group>"; };
 		7195527E68F0E912AE8FE4BD /* colecao_icones_explorador.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = colecao_icones_explorador.png; sourceTree = "<group>"; };
 		7600D5F8FA76B8FFB364AB04 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		7BDECFF96D9D7EA16D00DA42 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
@@ -168,6 +170,7 @@
 				BDB438512CABDF75AA754A5D /* TelaEscolhaAvatar.swift */,
 				3DC5E216D08AE7B9B009E435 /* TelaLoading.swift */,
 				AEB298F80086AB3BA2B83FFB /* TelaNomeHeroi.swift */,
+				E4A8B1C2D3E4F5061728394B /* TelaAcademia.swift */,
 				713AFC38548F20CEB7E8C927 /* TelaNotificacoes.swift */,
 			);
 			path = Screens;
@@ -353,6 +356,7 @@
 				50DA3B1128CBC53ACFC9294E /* TelaEscolhaAvatar.swift in Sources */,
 				00A59C7ED74CD2CAD4468186 /* TelaLoading.swift in Sources */,
 				8EEDE49A57999BCBAE0EC531 /* TelaNomeHeroi.swift in Sources */,
+				F4A8B1C2D3E4F5061728394A /* TelaAcademia.swift in Sources */,
 				CDC583457884B50EC4F9D614 /* TelaNotificacoes.swift in Sources */,
 				1C379C0B1D009404FD32089F /* User.swift in Sources */,
 			);
