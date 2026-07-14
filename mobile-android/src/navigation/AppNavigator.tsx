@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { LoginScreen } from '../screens/LoginScreen';
 import { WelcomeScreen } from '../screens/WelcomeScreen';
 import { EscolhaAvatarScreen } from '../screens/EscolhaAvatarScreen';
+import { NomeHeroiScreen } from '../screens/NomeHeroiScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { useAuthStore } from '../store/authStore';
 
@@ -11,6 +12,7 @@ export type RootStackParamList = {
   Login: undefined;
   Welcome: undefined;
   EscolhaAvatar: undefined;
+  NomeHeroi: { avatarId: string };
   Home: undefined;
 };
 
@@ -35,6 +37,7 @@ export function AppNavigator() {
           <>
             <Stack.Screen name="Welcome" component={WelcomeScreen} />
             <Stack.Screen name="EscolhaAvatar" component={EscolhaAvatarScreen} />
+            <Stack.Screen name="NomeHeroi" component={NomeHeroiScreen} />
             <Stack.Screen name="Home" component={HomeScreen} />
           </>
         ) : (

@@ -84,7 +84,10 @@ struct TelaEscolhaAvatar: View {
                 .padding(.horizontal, 24)
                 .padding(.top, 28)
 
-                Spacer(minLength: 16)
+                previewHeroi
+                    .padding(.top, 24)
+
+                Spacer(minLength: 12)
 
                 Button {
                     onContinuar(selecionado)
@@ -122,6 +125,32 @@ struct TelaEscolhaAvatar: View {
                     .frame(height: 4)
             }
         }
+    }
+
+    private var previewHeroi: some View {
+        VStack(spacing: 10) {
+            Image(selecionado.rawValue)
+                .resizable()
+                .interpolation(.none)
+                .scaledToFit()
+                .padding(18)
+                .frame(width: 120, height: 120)
+                .background(
+                    RoundedRectangle(cornerRadius: 18)
+                        .fill(CoresEscolhaAvatar.tile)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18)
+                        .stroke(CoresEscolhaAvatar.roxoPrimario.opacity(0.55), lineWidth: 2)
+                )
+                .id(selecionado.id)
+                .transition(.scale.combined(with: .opacity))
+
+            Text("Preview do seu herói")
+                .font(.system(size: 13, weight: .medium, design: .monospaced))
+                .foregroundStyle(CoresEscolhaAvatar.textoSecundario)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     private func botaoAvatar(_ avatar: AvatarExplorador) -> some View {

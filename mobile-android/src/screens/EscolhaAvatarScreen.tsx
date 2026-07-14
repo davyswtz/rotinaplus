@@ -38,6 +38,8 @@ const AVATARES: { id: string; source: ImageSourcePropType }[] = [
 export function EscolhaAvatarScreen() {
   const navigation = useNavigation<Nav>();
   const [selecionado, setSelecionado] = useState(AVATARES[0].id);
+  const avatarSelecionado =
+    AVATARES.find((avatar) => avatar.id === selecionado) ?? AVATARES[0];
 
   return (
     <SafeAreaView style={styles.areaSegura}>
@@ -70,11 +72,20 @@ export function EscolhaAvatarScreen() {
           })}
         </View>
 
+        <View style={styles.previewArea}>
+          <View style={styles.previewTile}>
+            <Image source={avatarSelecionado.source} style={styles.previewIcone} resizeMode="contain" />
+          </View>
+          <Text style={styles.previewLabel}>Preview do seu herói</Text>
+        </View>
+
         <View style={styles.espacador} />
 
         <TouchableOpacity
           style={styles.botaoContinuar}
-          onPress={() => navigation.replace('Home')}
+          onPress={() =>
+            navigation.navigate('NomeHeroi', { avatarId: selecionado })
+          }
           activeOpacity={0.85}
         >
           <Text style={styles.textoContinuar}>Continuar →</Text>
@@ -162,6 +173,32 @@ const styles = StyleSheet.create({
   icone: {
     width: '100%',
     height: '100%',
+  },
+  previewArea: {
+    marginTop: 24,
+    alignItems: 'center',
+  },
+  previewTile: {
+    width: 120,
+    height: 120,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderWidth: 2,
+    borderColor: 'rgba(122, 66, 245, 0.55)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+  },
+  previewIcone: {
+    width: '100%',
+    height: '100%',
+  },
+  previewLabel: {
+    marginTop: 10,
+    fontSize: 13,
+    fontWeight: '500',
+    color: 'rgba(255,255,255,0.55)',
+    fontVariant: ['tabular-nums'],
   },
   espacador: {
     flex: 1,
