@@ -2,13 +2,14 @@ import SwiftUI
 
 private enum OnboardingFase {
     case bemVindo
-    case criePersonagem
+    case escolhaAvatar
     case home
 }
 
 struct RootView: View {
     @ObservedObject private var authManager = AuthManager.shared
     @State private var onboarding: OnboardingFase = .bemVindo
+    @State private var avatarSelecionado: AvatarExplorador?
 
     var body: some View {
         Group {
@@ -17,15 +18,24 @@ struct RootView: View {
                 case .bemVindo:
                     TelaBemVindo {
                         withAnimation(.easeInOut(duration: 0.25)) {
-                            onboarding = .criePersonagem
+                            onboarding = .escolhaAvatar
                         }
                     }
-                case .criePersonagem:
-                    TelaCriePersonagem {
-                        withAnimation(.easeInOut(duration: 0.25)) {
-                            onboarding = .home
+                case .escolhaAvatar:
+                    TelaEscolhaAvatar(
+                        onContinuar: { avatar in
+                            avatarSelecionado = avatar
+                            UserDefaults.standard.set(avatar.rawValue, forKey: "avatar_selecionado")
+                            withAnimation(.easeInOut(duration: 0.25)) {
+                                onboarding = .home
+                            }
+                        },
+                        onVoltar: {
+                            withAnimation(.easeInOut(duration: 0.25)) {
+                                onboarding = .bemVindo
+                            }
                         }
-                    }
+                    )
                 case .home:
                     HomeView()
                 }
@@ -36,6 +46,7 @@ struct RootView: View {
         .onChange(of: authManager.isAuthenticated) { autenticado in
             if autenticado {
                 onboarding = .bemVindo
+                avatarSelecionado = nil
             }
         }
     }
