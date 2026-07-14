@@ -10,6 +10,7 @@ import {
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { cores } from '../theme/colors';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
@@ -83,9 +84,10 @@ export function EscolhaAvatarScreen() {
 
         <TouchableOpacity
           style={styles.botaoContinuar}
-          onPress={() =>
-            navigation.navigate('NomeHeroi', { avatarId: selecionado })
-          }
+          onPress={() => {
+            void AsyncStorage.setItem('avatar_selecionado', selecionado);
+            navigation.navigate('NomeHeroi', { avatarId: selecionado });
+          }}
           activeOpacity={0.85}
         >
           <Text style={styles.textoContinuar}>Continuar →</Text>

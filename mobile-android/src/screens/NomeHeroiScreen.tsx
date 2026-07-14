@@ -11,6 +11,7 @@ import {
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { cores } from '../theme/colors';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
@@ -110,6 +111,7 @@ export function NomeHeroiScreen() {
           style={[styles.botaoComecar, !nomeValido && styles.botaoDesabilitado]}
           onPress={() => {
             if (!nomeValido) return;
+            void AsyncStorage.setItem('nome_heroi', nome.trim());
             navigation.replace('Home');
           }}
           activeOpacity={0.85}
