@@ -2,6 +2,7 @@ import SwiftUI
 
 private enum OnboardingFase {
     case bemVindo
+    case escolhaClasse
     case escolhaAvatar
     case nomeHeroi
     case home
@@ -15,6 +16,7 @@ struct RootView: View {
     @ObservedObject private var authManager = AuthManager.shared
     @State private var onboarding: OnboardingFase = Self.faseInicial
     @State private var guestPath = NavigationPath()
+    @State private var classeSelecionada: ClasseHeroi = .guerreiro
     @State private var avatarSelecionado: AvatarExplorador = .guaraSerio
     @State private var mostrandoLoading = true
 
@@ -33,9 +35,26 @@ struct RootView: View {
                 case .bemVindo:
                     TelaBemVindo {
                         withAnimation(.easeInOut(duration: 0.25)) {
-                            onboarding = .escolhaAvatar
+                            onboarding = .escolhaClasse
                         }
                     }
+                case .escolhaClasse:
+                    TelaEscolhaClasse(
+                        onContinuar: { classe in
+                            classeSelecionada = classe
+                            UserDefaults.standard.set(classe.rawValue, forKey: "classe_selecionada")
+                            UserDefaults.standard.set(classe.nome, forKey: "classe_nome")
+                            UserDefaults.standard.set(classe.emoji, forKey: "emoji_classe")
+                            withAnimation(.easeInOut(duration: 0.25)) {
+                                onboarding = .escolhaAvatar
+                            }
+                        },
+                        onVoltar: {
+                            withAnimation(.easeInOut(duration: 0.25)) {
+                                onboarding = .bemVindo
+                            }
+                        }
+                    )
                 case .escolhaAvatar:
                     TelaEscolhaAvatar(
                         onContinuar: { avatar in
@@ -47,15 +66,15 @@ struct RootView: View {
                         },
                         onVoltar: {
                             withAnimation(.easeInOut(duration: 0.25)) {
-                                onboarding = .bemVindo
+                                onboarding = .escolhaClasse
                             }
                         }
                     )
                 case .nomeHeroi:
                     TelaNomeHeroi(
                         avatar: avatarSelecionado,
+                        classe: classeSelecionada,
                         onComecar: { nome in
-                            let traco = avatarSelecionado.traco
                             let avatarKey = AvatarHelper.apiKey(from: avatarSelecionado.rawValue)
 
                             UserDefaults.standard.set(nome, forKey: "nome_heroi")
@@ -64,12 +83,11 @@ struct RootView: View {
                                 forKey: "avatar_selecionado"
                             )
 
-                            // Persiste no backend para a Home (dashboard) exibir o herói certo.
                             _ = try await RotinaPlusAPI.updatePerfil(
                                 nomeHeroi: nome,
                                 avatarKey: avatarKey,
-                                classe: traco.nome,
-                                emojiClasse: traco.emoji
+                                classe: classeSelecionada.nome,
+                                emojiClasse: classeSelecionada.emoji
                             )
 
                             await MainActor.run {
@@ -89,7 +107,6 @@ struct RootView: View {
                     HomeView()
                 }
             } else {
-                // MARK: Fluxo guest — Login → Criar conta
                 NavigationStack(path: $guestPath) {
                     LoginView(
                         onCriarConta: {
@@ -119,9 +136,8 @@ struct RootView: View {
         }
         .onChange(of: authManager.isAuthenticated) { autenticado in
             if autenticado {
-                // Conta nova: sempre Bem-vindo → avatar → nome → Home.
-                // Login: retoma Home se o onboarding local já foi concluído.
                 onboarding = authManager.forceOnboarding ? .bemVindo : Self.faseInicial
+                classeSelecionada = .guerreiro
                 avatarSelecionado = .guaraSerio
                 guestPath = NavigationPath()
             }

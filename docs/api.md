@@ -93,14 +93,19 @@ Todas as respostas de erro da API seguem este formato:
 |--------|----------|-----------|
 | GET | `/me` | Usuário + perfil do herói |
 | PUT | `/perfil` | Atualiza nome_heroi, avatar_key, classe |
+| GET | `/classes` | Catálogo de classes do onboarding |
 | GET | `/dashboard` | Home: perfil, missões do dia, XP, badge notificações, resumo academia |
 
 ### Missões
 
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
-| GET | `/missoes` | Missões do dia (hoje) |
+| GET | `/missoes` | Missões do dia (hoje; gera 5 padrão aleatórias se vazio) |
+| POST | `/missoes` | Cria missão extra `{ titulo, detalhe?, icone? }` — XP calculado no servidor |
 | PATCH | `/missoes/{id}/toggle` | Conclui / reabre missão (+/- XP no perfil) |
+
+XP das missões: ≈ 35% do `xp_proximo_nivel` distribuído nas 5 padrão (peso 1–3). Missões extras usam o mesmo cálculo (teto de missão média).
+
 
 ### Notificações
 
@@ -116,6 +121,31 @@ Todas as respostas de erro da API seguem este formato:
 |--------|----------|-----------|
 | GET | `/academia` | Stats, dias da semana, volumes, treino de hoje |
 | PATCH | `/academia/dias/{id}/toggle` | Marca/desmarca dia como feito |
+
+### Finanças
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| GET | `/financas?mes=YYYY-MM` | Resumo do mês, gráficos, recentes e metas |
+| POST | `/financas/transacoes` | Cria receita ou despesa |
+| DELETE | `/financas/transacoes/{id}` | Remove transação |
+| POST | `/financas/metas` | Cria meta financeira |
+| PATCH | `/financas/metas/{id}` | Atualiza meta (título / valor atual) |
+
+Valores monetários em **centavos** (`valor_centavos`). Categorias de despesa: `moradia`, `alimentacao`, `transporte`, `lazer`, `saude`, `educacao`, `outros`.
+
+#### POST /financas/transacoes — Body
+
+```json
+{
+  "tipo": "despesa",
+  "categoria": "alimentacao",
+  "titulo": "Mercado",
+  "icone": "🛒",
+  "valor_centavos": 47500,
+  "data": "2026-07-10"
+}
+```
 
 ### Rotinas
 
@@ -166,7 +196,7 @@ Todas as respostas de erro da API seguem este formato:
 | `academia_volumes` | Volume semanal (kg) |
 | `academia_treinos` | Treino de hoje / biblioteca |
 
-Seed demo: `php artisan db:seed` (usuário `davy@teste.com` / `senha123`).
+Seed local: `php artisan migrate:fresh --seed` cria o usuário `davy@teste.com` / `senha123` com perfil e config de academia vazios. Missões do dia, semana de academia e finanças vêm do uso real da API (sem dados fictícios).
 
 ## Implementação
 

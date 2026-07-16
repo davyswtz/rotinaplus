@@ -34,6 +34,7 @@ extension AvatarExplorador {
 /// Passo 3 de 3 — nome do herói + preview do avatar escolhido.
 struct TelaNomeHeroi: View {
     let avatar: AvatarExplorador
+    var classe: ClasseHeroi = .sabio
     var onComecar: (String) async throws -> Void = { _ in }
     var onVoltar: () -> Void = {}
 
@@ -179,8 +180,8 @@ struct TelaNomeHeroi: View {
                 )
 
             HStack(spacing: 6) {
-                Text(avatar.traco.emoji)
-                Text(avatar.traco.nome)
+                Text(classe.emoji)
+                Text(classe.nome)
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(CoresNomeHeroi.acentoTeal)
             }
@@ -231,5 +232,5 @@ struct TelaNomeHeroi: View {
 }
 
 #Preview {
-    TelaNomeHeroi(avatar: .guaraSorriso)
+    TelaNomeHeroi(avatar: .guaraSorriso, classe: .guerreiro)
 }

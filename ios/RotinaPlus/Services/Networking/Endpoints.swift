@@ -13,6 +13,11 @@ enum Endpoints {
     case lerTodasNotificacoes
     case academia
     case toggleAcademiaDia(id: Int)
+    case financas(mes: String?)
+    case financasTransacoes
+    case financasTransacao(id: Int)
+    case financasMetas
+    case financasMeta(id: Int)
     case rotinas
     case rotina(id: Int)
 
@@ -42,6 +47,19 @@ enum Endpoints {
             return "/api/v1/academia"
         case .toggleAcademiaDia(let id):
             return "/api/v1/academia/dias/\(id)/toggle"
+        case .financas(let mes):
+            if let mes, !mes.isEmpty {
+                return "/api/v1/financas?mes=\(mes)"
+            }
+            return "/api/v1/financas"
+        case .financasTransacoes:
+            return "/api/v1/financas/transacoes"
+        case .financasTransacao(let id):
+            return "/api/v1/financas/transacoes/\(id)"
+        case .financasMetas:
+            return "/api/v1/financas/metas"
+        case .financasMeta(let id):
+            return "/api/v1/financas/metas/\(id)"
         case .rotinas:
             return "/api/v1/rotinas"
         case .rotina(let id):

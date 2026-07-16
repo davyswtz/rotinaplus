@@ -11,6 +11,7 @@ struct HomeView: View {
     @State private var abaSelecionada: AbaFooter = .inicio
     @State private var carregando = true
     @State private var erro: String?
+    @State private var mostrarAdicionarMissao = false
 
     private var dadosHeader: DadosHeaderApp {
         let p = perfil
@@ -69,6 +70,8 @@ struct HomeView: View {
                             conteudoInicio(pad: pad, gap: gap)
                         case .academia:
                             TelaAcademia()
+                        case .financas:
+                            TelaFinancas()
                         case .perfil:
                             conteudoPlaceholder(
                                 titulo: "Perfil",
@@ -102,6 +105,24 @@ struct HomeView: View {
                 mostrarNotificacoes = false
                 Task { await carregarDashboard() }
             }
+        }
+        .sheet(isPresented: $mostrarAdicionarMissao) {
+            AdicionarMissaoSheet(
+                onSalvar: { titulo, detalhe, icone in
+                    let criada = try await RotinaPlusAPI.criarMissao(
+                        titulo: titulo,
+                        detalhe: detalhe.isEmpty ? nil : detalhe,
+                        icone: icone
+                    )
+                    await MainActor.run {
+                        missoes.append(criada.asMissaoDoDia())
+                        mostrarAdicionarMissao = false
+                    }
+                    await carregarDashboard()
+                },
+                onCancelar: { mostrarAdicionarMissao = false }
+            )
+            .presentationDetents([.medium, .large])
         }
     }
 
@@ -158,9 +179,13 @@ struct HomeView: View {
                     .padding(.horizontal, pad)
                     .padding(.top, gap)
 
-                    MissoesDoDiaView(missoes: $missoes) { missao in
-                        Task { await toggleMissao(missao) }
-                    }
+                    MissoesDoDiaView(
+                        missoes: $missoes,
+                        onToggle: { missao in
+                            Task { await toggleMissao(missao) }
+                        },
+                        onAdicionar: { mostrarAdicionarMissao = true }
+                    )
                     .padding(.horizontal, pad)
                     .padding(.top, gap + 4)
 

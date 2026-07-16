@@ -7,6 +7,9 @@ final class AuthManager: ObservableObject {
     private static let tokenKey = "auth_token"
     private static let nomeHeroiKey = "nome_heroi"
     private static let avatarKey = "avatar_selecionado"
+    private static let classeKey = "classe_selecionada"
+    private static let classeNomeKey = "classe_nome"
+    private static let emojiClasseKey = "emoji_classe"
 
     @Published private(set) var isAuthenticated: Bool
     /// Conta nova: força Bem-vindo → avatar → nome → Home.
@@ -93,6 +96,9 @@ final class AuthManager: ObservableObject {
     private func clearOnboardingLocalState() {
         UserDefaults.standard.removeObject(forKey: Self.nomeHeroiKey)
         UserDefaults.standard.removeObject(forKey: Self.avatarKey)
+        UserDefaults.standard.removeObject(forKey: Self.classeKey)
+        UserDefaults.standard.removeObject(forKey: Self.classeNomeKey)
+        UserDefaults.standard.removeObject(forKey: Self.emojiClasseKey)
     }
 
     private func persistSession(token: String) {

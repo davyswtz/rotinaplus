@@ -2,22 +2,22 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
+/**
+ * Prepara o banco local/dev com usuário de teste e defaults estruturais.
+ * Não insere dados financeiros, notificações ou progresso fictícios —
+ * missões do dia e semana de academia são criados sob demanda pelos services.
+ */
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
         $this->call([
             TestUserSeeder::class,
-            DemoDataSeeder::class,
         ]);
     }
 }

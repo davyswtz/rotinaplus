@@ -194,6 +194,131 @@ struct AcademiaAPI: Codable, Equatable {
     }
 }
 
+// MARK: - Finanças
+
+struct FinancasMesAPI: Codable, Equatable, Identifiable {
+    var anoMes: String
+    var label: String
+    var curto: String
+
+    var id: String { anoMes }
+
+    enum CodingKeys: String, CodingKey {
+        case anoMes = "ano_mes"
+        case label, curto
+    }
+}
+
+struct FinancasSerieAPI: Codable, Equatable, Identifiable {
+    var anoMes: String
+    var curto: String
+    var receitaCentavos: Int
+    var gastosCentavos: Int
+    var saldoCentavos: Int
+
+    var id: String { anoMes }
+
+    enum CodingKeys: String, CodingKey {
+        case anoMes = "ano_mes"
+        case curto
+        case receitaCentavos = "receita_centavos"
+        case gastosCentavos = "gastos_centavos"
+        case saldoCentavos = "saldo_centavos"
+    }
+}
+
+struct FinancasDistribuicaoAPI: Codable, Equatable, Identifiable {
+    var categoria: String
+    var nome: String
+    var cor: String
+    var valorCentavos: Int
+    var percentual: Double
+
+    var id: String { categoria }
+
+    enum CodingKeys: String, CodingKey {
+        case categoria, nome, cor
+        case valorCentavos = "valor_centavos"
+        case percentual
+    }
+}
+
+struct FinancasTransacaoAPI: Codable, Equatable, Identifiable {
+    let id: Int
+    var tipo: String
+    var categoria: String
+    var categoriaNome: String
+    var categoriaCor: String
+    var titulo: String
+    var icone: String
+    var valorCentavos: Int
+    var data: String
+
+    enum CodingKeys: String, CodingKey {
+        case id, tipo, categoria, titulo, icone, data
+        case categoriaNome = "categoria_nome"
+        case categoriaCor = "categoria_cor"
+        case valorCentavos = "valor_centavos"
+    }
+
+    var isReceita: Bool { tipo == "receita" }
+}
+
+struct FinancasMetaAPI: Codable, Equatable, Identifiable {
+    let id: Int
+    var titulo: String
+    var icone: String
+    var categoria: String?
+    var valorAlvoCentavos: Int
+    var valorAtualCentavos: Int
+    var percentual: Double
+
+    enum CodingKeys: String, CodingKey {
+        case id, titulo, icone, categoria, percentual
+        case valorAlvoCentavos = "valor_alvo_centavos"
+        case valorAtualCentavos = "valor_atual_centavos"
+    }
+}
+
+struct FinancasCategoriaAPI: Codable, Equatable, Identifiable {
+    var chave: String
+    var nome: String
+    var cor: String
+    var icone: String
+
+    var id: String { chave }
+}
+
+struct FinancasCategoriasAPI: Codable, Equatable {
+    var despesas: [FinancasCategoriaAPI]
+    var receita: FinancasCategoriaAPI
+}
+
+struct FinancasAPI: Codable, Equatable {
+    var anoMes: String
+    var mesLabel: String
+    var meses: [FinancasMesAPI]
+    var saldoCentavos: Int
+    var receitaCentavos: Int
+    var gastosCentavos: Int
+    var serieMensal: [FinancasSerieAPI]
+    var distribuicao: [FinancasDistribuicaoAPI]
+    var recentes: [FinancasTransacaoAPI]
+    var transacoes: [FinancasTransacaoAPI]
+    var metas: [FinancasMetaAPI]
+    var categorias: FinancasCategoriasAPI
+
+    enum CodingKeys: String, CodingKey {
+        case meses, distribuicao, recentes, transacoes, metas, categorias
+        case anoMes = "ano_mes"
+        case mesLabel = "mes_label"
+        case saldoCentavos = "saldo_centavos"
+        case receitaCentavos = "receita_centavos"
+        case gastosCentavos = "gastos_centavos"
+        case serieMensal = "serie_mensal"
+    }
+}
+
 enum AvatarHelper {
     static func assetName(from key: String) -> String {
         let trimmed = key.trimmingCharacters(in: .whitespacesAndNewlines)

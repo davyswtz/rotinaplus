@@ -16,6 +16,7 @@
 		A011A7115A910000000002 /* RotinaPlusAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A011A7115A910000000001 /* RotinaPlusAPI.swift */; };
 		B0CADA50A8D00000000002 /* CadastroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0CADA50A8D00000000001 /* CadastroView.swift */; };
 		B0CADA50A8D00000000004 /* CadastroViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0CADA50A8D00000000003 /* CadastroViewModel.swift */; };
+		C1A55E50A8D00000000002 /* TelaEscolhaClasse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A55E50A8D00000000001 /* TelaEscolhaClasse.swift */; };
 		1D11F24CE886B10D693156D7 /* ProgressoDiarioCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7A494F59A17ADF97C21BFC9 /* ProgressoDiarioCard.swift */; };
 		209F2BDFFA6B1099BA65F5F0 /* _content_mask.png in Resources */ = {isa = PBXBuildFile; fileRef = 7FF3BF138F2FE9DEAC6CD397 /* _content_mask.png */; };
 		28F2ED12AC657D19EB2001A1 /* FooterNavegacao.swift in Sources */ = {isa = PBXBuildFile; fileRef = 597840AEC84B2E30C6C8DAC6 /* FooterNavegacao.swift */; };
@@ -26,6 +27,7 @@
 		52F6D680775D749F4171E234 /* GradeStatsDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9091AC1C4D89EE26EF9DC07 /* GradeStatsDashboard.swift */; };
 		60F4C3C02A003BE2A4D377F1 /* TelaBemVindo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ECAD16E703F8F6FA38184E7 /* TelaBemVindo.swift */; };
 		68F93255BFE614C7C573955C /* MissoesDoDiaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0C4B9BC4F827F0F0C2D2CE1 /* MissoesDoDiaView.swift */; };
+		D2ADDM155A8D0000000002 /* AdicionarMissaoSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2ADDM155A8D0000000001 /* AdicionarMissaoSheet.swift */; };
 		6C0313376F77DD04246DA5A5 /* Endpoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EC6EA046F94F6FA0EC3D5AE /* Endpoints.swift */; };
 		763A0CCD63079CC6DB99EBDF /* HeaderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36EE44E27F40448EF4F06915 /* HeaderApp.swift */; };
 		7DD29AD40F98CD54E548A2B4 /* AtalhosRapidosView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B89168E1C29CEE057213B52F /* AtalhosRapidosView.swift */; };
@@ -50,6 +52,7 @@
 		EBB6BE2DEF5081E4667171DD /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = AFB03256A6FF8F73D5B75DF5 /* Localizable.strings */; };
 		EBB998C9D191356BC7E64787 /* _cell0.png in Resources */ = {isa = PBXBuildFile; fileRef = 08632F606ABDBCAA510C10C7 /* _cell0.png */; };
 		F4A8B1C2D3E4F5061728394A /* TelaAcademia.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A8B1C2D3E4F5061728394B /* TelaAcademia.swift */; };
+		F1N4NC45A8D00000000002 /* TelaFinancas.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1N4NC45A8D00000000001 /* TelaFinancas.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -61,6 +64,7 @@
 		304E05A076A85F6859B184EF /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
 		B0CADA50A8D00000000001 /* CadastroView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CadastroView.swift; sourceTree = "<group>"; };
 		B0CADA50A8D00000000003 /* CadastroViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CadastroViewModel.swift; sourceTree = "<group>"; };
+		C1A55E50A8D00000000001 /* TelaEscolhaClasse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaEscolhaClasse.swift; sourceTree = "<group>"; };
 		36EE44E27F40448EF4F06915 /* HeaderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderApp.swift; sourceTree = "<group>"; };
 		3DC5E216D08AE7B9B009E435 /* TelaLoading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaLoading.swift; sourceTree = "<group>"; };
 		3EC6EA046F94F6FA0EC3D5AE /* Endpoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Endpoints.swift; sourceTree = "<group>"; };
@@ -94,7 +98,9 @@
 		C7B31E3FE121617ABF759DC2 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		DF227AC1062610AB4BAB7B80 /* _splash_guara.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = _splash_guara.png; sourceTree = "<group>"; };
 		E0C4B9BC4F827F0F0C2D2CE1 /* MissoesDoDiaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissoesDoDiaView.swift; sourceTree = "<group>"; };
+		D2ADDM155A8D0000000001 /* AdicionarMissaoSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdicionarMissaoSheet.swift; sourceTree = "<group>"; };
 		E4A8B1C2D3E4F5061728394B /* TelaAcademia.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaAcademia.swift; sourceTree = "<group>"; };
+		F1N4NC45A8D00000000001 /* TelaFinancas.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaFinancas.swift; sourceTree = "<group>"; };
 		E6078EF931F7249D1FABF5EF /* LayoutDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutDashboard.swift; sourceTree = "<group>"; };
 		F2865C182562E82CFAD74364 /* _icon0_check.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = _icon0_check.png; sourceTree = "<group>"; };
 		F6660249C15BA031E5D46016 /* RotinaPlus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RotinaPlus.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -174,12 +180,14 @@
 				9368C816DE1CA6CD890F75B0 /* HomeView.swift */,
 				40D7E49E387608C929069271 /* LoginView.swift */,
 				B0CADA50A8D00000000001 /* CadastroView.swift */,
+				C1A55E50A8D00000000001 /* TelaEscolhaClasse.swift */,
 				0ECAD16E703F8F6FA38184E7 /* TelaBemVindo.swift */,
 				80BBB4E7A5C758E62CE4DC19 /* TelaCriePersonagem.swift */,
 				BDB438512CABDF75AA754A5D /* TelaEscolhaAvatar.swift */,
 				3DC5E216D08AE7B9B009E435 /* TelaLoading.swift */,
 				AEB298F80086AB3BA2B83FFB /* TelaNomeHeroi.swift */,
 				E4A8B1C2D3E4F5061728394B /* TelaAcademia.swift */,
+				F1N4NC45A8D00000000001 /* TelaFinancas.swift */,
 				713AFC38548F20CEB7E8C927 /* TelaNotificacoes.swift */,
 			);
 			path = Screens;
@@ -213,6 +221,7 @@
 				A9091AC1C4D89EE26EF9DC07 /* GradeStatsDashboard.swift */,
 				36EE44E27F40448EF4F06915 /* HeaderApp.swift */,
 				E0C4B9BC4F827F0F0C2D2CE1 /* MissoesDoDiaView.swift */,
+				D2ADDM155A8D0000000001 /* AdicionarMissaoSheet.swift */,
 				54F0D1AD50E31A43D568FBB1 /* PrimaryButton.swift */,
 				C7A494F59A17ADF97C21BFC9 /* ProgressoDiarioCard.swift */,
 			);
@@ -357,7 +366,9 @@
 				81033F456D18267F1CECE0AE /* LoginViewModel.swift in Sources */,
 				B0CADA50A8D00000000002 /* CadastroView.swift in Sources */,
 				B0CADA50A8D00000000004 /* CadastroViewModel.swift in Sources */,
+				C1A55E50A8D00000000002 /* TelaEscolhaClasse.swift in Sources */,
 				68F93255BFE614C7C573955C /* MissoesDoDiaView.swift in Sources */,
+				D2ADDM155A8D0000000002 /* AdicionarMissaoSheet.swift in Sources */,
 				A42611753EC809A312832560 /* PrimaryButton.swift in Sources */,
 				1D11F24CE886B10D693156D7 /* ProgressoDiarioCard.swift in Sources */,
 				860B9B7B46EA639C98099023 /* RootView.swift in Sources */,
@@ -369,6 +380,7 @@
 				00A59C7ED74CD2CAD4468186 /* TelaLoading.swift in Sources */,
 				8EEDE49A57999BCBAE0EC531 /* TelaNomeHeroi.swift in Sources */,
 				F4A8B1C2D3E4F5061728394A /* TelaAcademia.swift in Sources */,
+				F1N4NC45A8D00000000002 /* TelaFinancas.swift in Sources */,
 				CDC583457884B50EC4F9D614 /* TelaNotificacoes.swift in Sources */,
 				1C379C0B1D009404FD32089F /* User.swift in Sources */,
 				A11D45B0A8D00000000002 /* DashboardModels.swift in Sources */,

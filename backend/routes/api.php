@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\Api\AcademiaController;
+use App\Http\Controllers\Api\ClasseController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\FinancasController;
 use App\Http\Controllers\Api\MissaoController;
 use App\Http\Controllers\Api\NotificacaoController;
 use App\Http\Controllers\Api\PerfilController;
@@ -15,6 +17,7 @@ Route::prefix('v1')->group(function () {
     Route::post('/auth/social', [SocialAuthController::class, 'login']);
     Route::post('/auth/login', [LoginController::class, 'login']);
     Route::post('/auth/register', [RegisterController::class, 'register']);
+    Route::get('/classes', [ClasseController::class, 'index']);
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', [PerfilController::class, 'show']);
@@ -22,6 +25,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'show']);
 
         Route::get('/missoes', [MissaoController::class, 'index']);
+        Route::post('/missoes', [MissaoController::class, 'store']);
         Route::patch('/missoes/{id}/toggle', [MissaoController::class, 'toggle']);
 
         Route::get('/notificacoes', [NotificacaoController::class, 'index']);
@@ -30,6 +34,12 @@ Route::prefix('v1')->group(function () {
 
         Route::get('/academia', [AcademiaController::class, 'show']);
         Route::patch('/academia/dias/{id}/toggle', [AcademiaController::class, 'toggleDia']);
+
+        Route::get('/financas', [FinancasController::class, 'show']);
+        Route::post('/financas/transacoes', [FinancasController::class, 'storeTransacao']);
+        Route::delete('/financas/transacoes/{id}', [FinancasController::class, 'destroyTransacao']);
+        Route::post('/financas/metas', [FinancasController::class, 'storeMeta']);
+        Route::patch('/financas/metas/{id}', [FinancasController::class, 'updateMeta']);
 
         Route::apiResource('rotinas', RotinaController::class);
     });

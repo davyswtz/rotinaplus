@@ -57,10 +57,11 @@ export const MISSOES_EXEMPLO: MissaoDoDia[] = [
 type Props = {
   missoes: MissaoDoDia[];
   onToggle: (id: number) => void;
+  onAdicionar?: () => void;
 };
 
 /** Lista de missões do dia — espelha MissoesDoDiaView.swift. */
-export function MissoesDoDiaView({ missoes, onToggle }: Props) {
+export function MissoesDoDiaView({ missoes, onToggle, onAdicionar }: Props) {
   const concluidas = useMemo(
     () => missoes.filter((m) => m.concluida).length,
     [missoes],
@@ -118,6 +119,16 @@ export function MissoesDoDiaView({ missoes, onToggle }: Props) {
           </TouchableOpacity>
         ))}
       </View>
+
+      {onAdicionar ? (
+        <TouchableOpacity
+          style={styles.botaoAdicionar}
+          onPress={onAdicionar}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.textoAdicionar}>＋  Adicionar missão do dia</Text>
+        </TouchableOpacity>
+      ) : null}
     </View>
   );
 }
@@ -211,5 +222,17 @@ const styles = StyleSheet.create({
   checkConcluida: {
     color: '#4ADE80',
     fontWeight: '700',
+  },
+  botaoAdicionar: {
+    marginTop: 4,
+    backgroundColor: cores.roxoPrimario,
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  textoAdicionar: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '600',
   },
 });

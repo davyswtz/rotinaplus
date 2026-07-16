@@ -5,13 +5,15 @@ namespace App\Services;
 use App\Models\Missao;
 use App\Models\Perfil;
 use App\Models\User;
-use Carbon\Carbon;
+use App\Support\MissaoXpCalculator;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class MissaoService
 {
     public function listHoje(User $user): \Illuminate\Database\Eloquent\Collection
     {
+        $this->ensureMissoesPadraoHoje($user);
+
         $hoje = now('America/Sao_Paulo')->toDateString();
 
         return Missao::query()
@@ -19,6 +21,46 @@ class MissaoService
             ->whereDate('data', $hoje)
             ->orderBy('ordem')
             ->get();
+    }
+
+    /**
+     * Garante 5 missões padrão aleatórias no dia (se ainda não houver nenhuma).
+     */
+    public function ensureMissoesPadraoHoje(User $user): void
+    {
+        $user->ensureDefaults();
+        $hoje = now('America/Sao_Paulo')->toDateString();
+
+        $existem = Missao::query()
+            ->where('user_id', $user->id)
+            ->whereDate('data', $hoje)
+            ->exists();
+
+        if ($existem) {
+            return;
+        }
+
+        /** @var Perfil $perfil */
+        $perfil = $user->perfil()->firstOrFail();
+        $sorteadas = MissaoXpCalculator::sortearPadrao();
+
+        foreach ($sorteadas as $indice => $item) {
+            Missao::query()->create([
+                'user_id' => $user->id,
+                'data' => $hoje,
+                'icone' => $item['icone'],
+                'titulo' => $item['titulo'],
+                'detalhe' => $item['detalhe'],
+                'xp' => MissaoXpCalculator::calcularXp(
+                    (int) $perfil->xp_proximo_nivel,
+                    $item['peso'],
+                    true,
+                ),
+                'concluida' => false,
+                'concluida_em' => null,
+                'ordem' => $indice + 1,
+            ]);
+        }
     }
 
     public function toggle(User $user, int $id): Missao
@@ -41,6 +83,47 @@ class MissaoService
         $this->ajustarXpPerfil($user, $missao, $nova);
 
         return $missao->fresh();
+    }
+
+    /**
+     * Cria missão extra do dia. XP é calculado no servidor (cliente não envia).
+     *
+     * @param  array{icone?: string, titulo: string, detalhe?: string|null}  $dados
+     */
+    public function criarHoje(User $user, array $dados): Missao
+    {
+        $this->ensureMissoesPadraoHoje($user);
+        $user->ensureDefaults();
+
+        /** @var Perfil $perfil */
+        $perfil = $user->perfil()->firstOrFail();
+        $hoje = now('America/Sao_Paulo')->toDateString();
+
+        $ordem = (int) Missao::query()
+            ->where('user_id', $user->id)
+            ->whereDate('data', $hoje)
+            ->max('ordem');
+
+        $peso = MissaoXpCalculator::estimarPeso(
+            $dados['titulo'] ?? null,
+            $dados['detalhe'] ?? null,
+        );
+
+        return Missao::query()->create([
+            'user_id' => $user->id,
+            'data' => $hoje,
+            'icone' => $dados['icone'] ?? '🎯',
+            'titulo' => $dados['titulo'],
+            'detalhe' => $dados['detalhe'] ?? null,
+            'xp' => MissaoXpCalculator::calcularXp(
+                (int) $perfil->xp_proximo_nivel,
+                $peso,
+                false,
+            ),
+            'concluida' => false,
+            'concluida_em' => null,
+            'ordem' => $ordem + 1,
+        ]);
     }
 
     private function ajustarXpPerfil(User $user, Missao $missao, bool $concluiu): void

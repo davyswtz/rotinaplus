@@ -42,17 +42,18 @@ private enum CoresMissoes {
     static let xpVerde = Color(red: 0.29, green: 0.87, blue: 0.50)
     static let check = Color(red: 0.29, green: 0.87, blue: 0.50)
     static let pendente = Color.white.opacity(0.22)
-    /// Fundo escuro esverdeado da missão concluída.
     static let cardConcluida = Color(red: 0.06, green: 0.12, blue: 0.09)
     static let bordaConcluida = Color(red: 0.29, green: 0.87, blue: 0.50)
     static let tituloConcluido = Color.white.opacity(0.45)
     static let detalheConcluido = Color.white.opacity(0.28)
+    static let roxoPrimario = Color(red: 0.48, green: 0.26, blue: 0.96)
 }
 
 /// Lista de missões do dia (abaixo do progresso diário).
 struct MissoesDoDiaView: View {
     @Binding var missoes: [MissaoDoDia]
     var onToggle: ((MissaoDoDia) -> Void)?
+    var onAdicionar: (() -> Void)?
 
     private var concluidas: Int {
         missoes.filter(\.concluida).count
@@ -77,6 +78,28 @@ struct MissoesDoDiaView: View {
                 ForEach(missoes) { missao in
                     botaoMissao(missao)
                 }
+            }
+
+            if onAdicionar != nil {
+                Button {
+                    onAdicionar?()
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 18, weight: .semibold))
+                        Text("Adicionar missão do dia")
+                            .font(.system(size: 15, weight: .semibold))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .foregroundStyle(.white)
+                    .background(
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(CoresMissoes.roxoPrimario)
+                    )
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 4)
             }
         }
     }
@@ -160,7 +183,7 @@ struct MissoesDoDiaView: View {
             ZStack {
                 Color(red: 0.05, green: 0.03, blue: 0.10).ignoresSafeArea()
                 ScrollView {
-                    MissoesDoDiaView(missoes: $missoes)
+                    MissoesDoDiaView(missoes: $missoes, onAdicionar: {})
                         .padding()
                 }
             }

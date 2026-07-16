@@ -33,9 +33,17 @@ Se preferir criar manualmente no Xcode, os arquivos Swift estão em `ios/RotinaP
 
 ## API Base URL
 
+- **Debug (Xcode / simulador):** `http://127.0.0.1:8000` — backend local Docker
+- **Release:** `http://181.215.135.114` — VPS
+
+Suba o backend local antes de rodar o app:
+
+```bash
+cd backend
+docker compose up -d
 ```
-http://181.215.135.114
-```
+
+API: `http://127.0.0.1:8000/api/v1`
 
 ## Arquitetura MVVM
 

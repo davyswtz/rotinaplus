@@ -20,6 +20,9 @@ class DashboardService
         $hoje = now('America/Sao_Paulo')->toDateString();
         $semana = SemanaHelper::inicioAtual()->toDateString();
 
+        app(MissaoService::class)->ensureMissoesPadraoHoje($user);
+        app(AcademiaService::class)->ensureSemanaAtual($user);
+
         $missoes = Missao::query()
             ->where('user_id', $user->id)
             ->whereDate('data', $hoje)
@@ -45,9 +48,11 @@ class DashboardService
     public function academia(User $user): array
     {
         $user->ensureDefaults();
-        $semana = SemanaHelper::inicioAtual()->toDateString();
+        app(AcademiaService::class)->ensureSemanaAtual($user);
 
-        $config = $user->academiaConfig;
+        $semana = SemanaHelper::inicioAtual()->toDateString();
+        $config = $user->academiaConfig()->first();
+
         $dias = AcademiaDia::query()
             ->where('user_id', $user->id)
             ->whereDate('semana_inicio', $semana)

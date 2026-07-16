@@ -25,9 +25,8 @@ sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T app
 echo "==> Rodando migrations..."
 sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T app php artisan migrate --force
 
-echo "==> Criando usuário de teste e dados demo..."
+echo "==> Criando usuário de teste (sem dados fictícios)..."
 sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T app php artisan db:seed --class=TestUserSeeder --force
-sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T app php artisan db:seed --class=DemoDataSeeder --force
 
 echo "==> Otimizando cache..."
 sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T app php artisan config:cache

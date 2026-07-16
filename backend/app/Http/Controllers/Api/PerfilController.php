@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PerfilResource;
 use App\Services\AcademiaService;
+use App\Support\ClassesCatalog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class PerfilController extends Controller
 {
@@ -37,9 +39,16 @@ class PerfilController extends Controller
         $validated = $request->validate([
             'nome_heroi' => ['sometimes', 'string', 'max:40'],
             'avatar_key' => ['sometimes', 'string', 'max:64'],
-            'classe' => ['sometimes', 'string', 'max:40'],
+            'classe' => ['sometimes', 'string', 'max:40', Rule::in(ClassesCatalog::nomes())],
             'emoji_classe' => ['sometimes', 'string', 'max:16'],
         ]);
+
+        if (isset($validated['classe']) && ! isset($validated['emoji_classe'])) {
+            $catalogo = ClassesCatalog::findByNome($validated['classe']);
+            if ($catalogo) {
+                $validated['emoji_classe'] = $catalogo['emoji'];
+            }
+        }
 
         $perfil = $this->academiaService->updatePerfil($request->user(), $validated);
 

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -41,31 +41,18 @@ const AVATAR_SOURCES: Record<string, ImageSourcePropType> = {
   selo: require('../assets/avatars/avatar_selo.png'),
 };
 
-function tracoDoAvatar(id: string): { emoji: string; nome: string } {
-  if (id.startsWith('guara_')) return { emoji: '🦊', nome: 'Explorador' };
-  if (['mapa_escrevendo', 'mapa_tesouro', 'pergaminho', 'map_maker'].includes(id)) {
-    return { emoji: '📚', nome: 'Estudioso' };
-  }
-  if (['bussola', 'lanterna', 'corda'].includes(id)) {
-    return { emoji: '🧭', nome: 'Navegador' };
-  }
-  if (['clava', 'emblema_clavas', 'escudo'].includes(id)) {
-    return { emoji: '⚔️', nome: 'Guerreiro' };
-  }
-  return { emoji: '🏆', nome: 'Colecionador' };
-}
-
 /** Passo 3 de 3 — espelha TelaNomeHeroi.swift / mock. */
 export function NomeHeroiScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<Rota>();
   const avatarId = route.params?.avatarId ?? 'guara_serio';
+  const classeNome = route.params?.classeNome ?? 'Sábio';
+  const emojiClasse = route.params?.emojiClasse ?? '🔮';
   const [nome, setNome] = useState('');
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
   const source = AVATAR_SOURCES[avatarId] ?? AVATAR_SOURCES.guara_serio;
-  const traco = useMemo(() => tracoDoAvatar(avatarId), [avatarId]);
   const nomeValido = nome.trim().length > 0;
 
   const handleComecar = async () => {
@@ -78,11 +65,13 @@ export function NomeHeroiScreen() {
       await updatePerfil({
         nome_heroi: limpo,
         avatar_key: avatarId,
-        classe: traco.nome,
-        emoji_classe: traco.emoji,
+        classe: classeNome,
+        emoji_classe: emojiClasse,
       });
       await AsyncStorage.setItem('nome_heroi', limpo);
       await AsyncStorage.setItem('avatar_selecionado', avatarId);
+      await AsyncStorage.setItem('classe_nome', classeNome);
+      await AsyncStorage.setItem('emoji_classe', emojiClasse);
       navigation.replace('Home');
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Falha ao salvar perfil.');
@@ -111,7 +100,7 @@ export function NomeHeroiScreen() {
           </View>
           <View style={styles.chip}>
             <Text style={styles.chipTexto}>
-              {traco.emoji} {traco.nome}
+              {emojiClasse} {classeNome}
             </Text>
           </View>
         </View>

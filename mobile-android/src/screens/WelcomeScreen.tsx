@@ -25,7 +25,7 @@ export function WelcomeScreen() {
   const navigation = useNavigation<Nav>();
 
   const concluir = () => {
-    navigation.replace('EscolhaAvatar');
+    navigation.replace('EscolhaClasse');
   };
 
   return (

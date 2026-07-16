@@ -8,13 +8,14 @@ import {
   View,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useNavigation } from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { cores } from '../theme/colors';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'EscolhaAvatar'>;
+type Rota = RouteProp<RootStackParamList, 'EscolhaAvatar'>;
 
 const AVATARES: { id: string; source: ImageSourcePropType }[] = [
   { id: 'guara_serio', source: require('../assets/avatars/avatar_guara_serio.png') },
@@ -38,9 +39,14 @@ const AVATARES: { id: string; source: ImageSourcePropType }[] = [
 /** Passo 2 de 3 — espelha TelaEscolhaAvatar.swift / mock. */
 export function EscolhaAvatarScreen() {
   const navigation = useNavigation<Nav>();
+  const route = useRoute<Rota>();
   const [selecionado, setSelecionado] = useState(AVATARES[0].id);
   const avatarSelecionado =
     AVATARES.find((avatar) => avatar.id === selecionado) ?? AVATARES[0];
+
+  const classeKey = route.params?.classeKey ?? 'sabio';
+  const classeNome = route.params?.classeNome ?? 'Sábio';
+  const emojiClasse = route.params?.emojiClasse ?? '🔮';
 
   return (
     <SafeAreaView style={styles.areaSegura}>
@@ -86,7 +92,12 @@ export function EscolhaAvatarScreen() {
           style={styles.botaoContinuar}
           onPress={() => {
             void AsyncStorage.setItem('avatar_selecionado', selecionado);
-            navigation.navigate('NomeHeroi', { avatarId: selecionado });
+            navigation.navigate('NomeHeroi', {
+              avatarId: selecionado,
+              classeKey,
+              classeNome,
+              emojiClasse,
+            });
           }}
           activeOpacity={0.85}
         >
@@ -95,7 +106,7 @@ export function EscolhaAvatarScreen() {
 
         <TouchableOpacity
           style={styles.botaoVoltar}
-          onPress={() => navigation.replace('Welcome')}
+          onPress={() => navigation.replace('EscolhaClasse')}
           activeOpacity={0.7}
         >
           <Text style={styles.textoVoltar}>← Voltar</Text>

@@ -22,6 +22,7 @@ import { MissoesDoDiaView, MissaoDoDia } from '../components/MissoesDoDiaView';
 import { AtalhosRapidosView } from '../components/AtalhosRapidosView';
 import { AbaFooter, FooterNavegacao } from '../components/FooterNavegacao';
 import { AcademiaScreen } from './AcademiaScreen';
+import { FinancasScreen } from './FinancasScreen';
 import { cores } from '../theme/colors';
 import { getLayoutDashboard } from '../theme/layout';
 import { useAuthStore } from '../store/authStore';
@@ -29,9 +30,11 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import {
   fetchDashboard,
   toggleMissao,
+  criarMissao,
 } from '../services/rotinaApi';
 import type { Perfil } from '../types';
 import { avatarAssetKey } from '../types';
+import { AdicionarMissaoModal } from '../components/AdicionarMissaoModal';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -84,6 +87,7 @@ export function HomeScreen() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [mostrarAdicionarMissao, setMostrarAdicionarMissao] = useState(false);
 
   const pad = layout.paddingHorizontal;
   const gap = layout.gapSecao;
@@ -250,7 +254,11 @@ export function HomeScreen() {
               <View
                 style={[styles.bloco, { paddingHorizontal: pad, paddingTop: gap + 4 }]}
               >
-                <MissoesDoDiaView missoes={missoes} onToggle={onToggleMissao} />
+                <MissoesDoDiaView
+                  missoes={missoes}
+                  onToggle={onToggleMissao}
+                  onAdicionar={() => setMostrarAdicionarMissao(true)}
+                />
               </View>
 
               <View
@@ -270,14 +278,12 @@ export function HomeScreen() {
         </ScrollView>
       ) : aba === 'academia' ? (
         <AcademiaScreen />
+      ) : aba === 'financas' ? (
+        <FinancasScreen />
       ) : (
         <View style={styles.placeholder}>
           <Text style={styles.placeholderTitulo}>
-            {aba === 'perfil'
-              ? 'Perfil'
-              : aba === 'financas'
-                ? 'Finanças'
-                : 'Estudos'}
+            {aba === 'perfil' ? 'Perfil' : 'Estudos'}
           </Text>
           <Text style={styles.placeholderTexto}>
             {aba === 'perfil'
@@ -297,6 +303,16 @@ export function HomeScreen() {
       )}
 
       <FooterNavegacao abaSelecionada={aba} onSelecionar={setAba} />
+
+      <AdicionarMissaoModal
+        visible={mostrarAdicionarMissao}
+        onClose={() => setMostrarAdicionarMissao(false)}
+        onSalvar={async (dados) => {
+          const criada = await criarMissao(dados);
+          setMissoes((atual) => [...atual, missaoFromApi(criada)]);
+          await carregar();
+        }}
+      />
     </SafeAreaView>
   );
 }

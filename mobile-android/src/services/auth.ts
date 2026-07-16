@@ -20,7 +20,13 @@ interface AuthResponse {
   token: string;
 }
 
-const ONBOARDING_KEYS = ['nome_heroi', 'avatar_selecionado'] as const;
+const ONBOARDING_KEYS = [
+  'nome_heroi',
+  'avatar_selecionado',
+  'classe_selecionada',
+  'classe_nome',
+  'emoji_classe',
+] as const;
 
 async function clearOnboardingLocalState(): Promise<void> {
   await AsyncStorage.multiRemove([...ONBOARDING_KEYS]);

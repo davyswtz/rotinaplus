@@ -3,6 +3,9 @@ import type {
   AcademiaData,
   ApiResponse,
   DashboardData,
+  FinancasData,
+  FinancasMeta,
+  FinancasTransacao,
   Missao,
   Notificacao,
   Perfil,
@@ -19,6 +22,16 @@ export async function toggleMissao(id: number): Promise<Missao> {
     `/api/v1/missoes/${id}/toggle`,
   );
   if (!data.data) throw new Error('Falha ao atualizar missão.');
+  return data.data;
+}
+
+export async function criarMissao(payload: {
+  titulo: string;
+  detalhe?: string;
+  icone?: string;
+}): Promise<Missao> {
+  const { data } = await api.post<ApiResponse<Missao>>('/api/v1/missoes', payload);
+  if (!data.data) throw new Error('Falha ao criar missão.');
   return data.data;
 }
 
@@ -47,10 +60,77 @@ export async function toggleAcademiaDia(id: number): Promise<void> {
   await api.patch(`/api/v1/academia/dias/${id}/toggle`);
 }
 
+export async function fetchFinancas(mes?: string): Promise<FinancasData> {
+  const { data } = await api.get<ApiResponse<FinancasData>>('/api/v1/financas', {
+    params: mes ? { mes } : undefined,
+  });
+  if (!data.data) throw new Error('Finanças vazias.');
+  return data.data;
+}
+
+export async function criarTransacao(payload: {
+  tipo: string;
+  categoria: string;
+  titulo: string;
+  icone?: string;
+  valor_centavos: number;
+  data: string;
+}): Promise<FinancasTransacao> {
+  const { data } = await api.post<ApiResponse<FinancasTransacao>>(
+    '/api/v1/financas/transacoes',
+    payload,
+  );
+  if (!data.data) throw new Error('Falha ao criar transação.');
+  return data.data;
+}
+
+export async function excluirTransacao(id: number): Promise<void> {
+  await api.delete(`/api/v1/financas/transacoes/${id}`);
+}
+
+export async function criarMeta(payload: {
+  titulo: string;
+  icone?: string;
+  valor_alvo_centavos: number;
+}): Promise<FinancasMeta> {
+  const { data } = await api.post<ApiResponse<FinancasMeta>>(
+    '/api/v1/financas/metas',
+    payload,
+  );
+  if (!data.data) throw new Error('Falha ao criar meta.');
+  return data.data;
+}
+
+export async function atualizarMeta(
+  id: number,
+  payload: { valor_atual_centavos?: number; titulo?: string },
+): Promise<FinancasMeta> {
+  const { data } = await api.patch<ApiResponse<FinancasMeta>>(
+    `/api/v1/financas/metas/${id}`,
+    payload,
+  );
+  if (!data.data) throw new Error('Falha ao atualizar meta.');
+  return data.data;
+}
+
 export async function updatePerfil(
   payload: Partial<Pick<Perfil, 'nome_heroi' | 'avatar_key' | 'classe' | 'emoji_classe'>>,
 ): Promise<Perfil> {
   const { data } = await api.put<ApiResponse<Perfil>>('/api/v1/perfil', payload);
   if (!data.data) throw new Error('Falha ao atualizar perfil.');
   return data.data;
+}
+
+export type ClasseCatalogItem = {
+  key: string;
+  nome: string;
+  emoji: string;
+  descricao: string;
+  bonus: string[];
+  tema: string;
+};
+
+export async function fetchClasses(): Promise<ClasseCatalogItem[]> {
+  const { data } = await api.get<ApiResponse<ClasseCatalogItem[]>>('/api/v1/classes');
+  return data.data ?? [];
 }

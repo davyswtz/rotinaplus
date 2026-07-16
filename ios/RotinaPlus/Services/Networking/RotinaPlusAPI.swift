@@ -62,6 +62,29 @@ enum RotinaPlusAPI {
         return data
     }
 
+    static func criarMissao(
+        titulo: String,
+        detalhe: String?,
+        icone: String
+    ) async throws -> MissaoAPI {
+        struct Body: Encodable {
+            let titulo: String
+            let detalhe: String?
+            let icone: String
+        }
+
+        let response: APIResponse<MissaoAPI> = try await APIClient.shared.request(
+            endpoint: .missoes,
+            method: .post,
+            body: Body(titulo: titulo, detalhe: detalhe, icone: icone),
+            requiresAuth: true
+        )
+        guard let data = response.data else {
+            throw APIError.invalidResponse
+        }
+        return data
+    }
+
     static func notificacoes() async throws -> [NotificacaoAPI] {
         let response: APIResponse<[NotificacaoAPI]> = try await APIClient.shared.request(
             endpoint: .notificacoes,
@@ -110,5 +133,115 @@ enum RotinaPlusAPI {
             method: .patch,
             requiresAuth: true
         )
+    }
+
+    static func financas(mes: String? = nil) async throws -> FinancasAPI {
+        let response: APIResponse<FinancasAPI> = try await APIClient.shared.request(
+            endpoint: .financas(mes: mes),
+            requiresAuth: true
+        )
+        guard let data = response.data else {
+            throw APIError.invalidResponse
+        }
+        return data
+    }
+
+    static func criarTransacao(
+        tipo: String,
+        categoria: String,
+        titulo: String,
+        icone: String?,
+        valorCentavos: Int,
+        data: String
+    ) async throws -> FinancasTransacaoAPI {
+        struct Body: Encodable {
+            let tipo: String
+            let categoria: String
+            let titulo: String
+            let icone: String?
+            let valorCentavos: Int
+            let data: String
+
+            enum CodingKeys: String, CodingKey {
+                case tipo, categoria, titulo, icone, data
+                case valorCentavos = "valor_centavos"
+            }
+        }
+
+        let response: APIResponse<FinancasTransacaoAPI> = try await APIClient.shared.request(
+            endpoint: .financasTransacoes,
+            method: .post,
+            body: Body(
+                tipo: tipo,
+                categoria: categoria,
+                titulo: titulo,
+                icone: icone,
+                valorCentavos: valorCentavos,
+                data: data
+            ),
+            requiresAuth: true
+        )
+        guard let data = response.data else {
+            throw APIError.invalidResponse
+        }
+        return data
+    }
+
+    static func excluirTransacao(id: Int) async throws {
+        struct Empty: Decodable {}
+        let _: APIResponse<Empty> = try await APIClient.shared.request(
+            endpoint: .financasTransacao(id: id),
+            method: .delete,
+            requiresAuth: true
+        )
+    }
+
+    static func criarMeta(
+        titulo: String,
+        icone: String?,
+        valorAlvoCentavos: Int
+    ) async throws -> FinancasMetaAPI {
+        struct Body: Encodable {
+            let titulo: String
+            let icone: String?
+            let valorAlvoCentavos: Int
+
+            enum CodingKeys: String, CodingKey {
+                case titulo, icone
+                case valorAlvoCentavos = "valor_alvo_centavos"
+            }
+        }
+
+        let response: APIResponse<FinancasMetaAPI> = try await APIClient.shared.request(
+            endpoint: .financasMetas,
+            method: .post,
+            body: Body(titulo: titulo, icone: icone, valorAlvoCentavos: valorAlvoCentavos),
+            requiresAuth: true
+        )
+        guard let data = response.data else {
+            throw APIError.invalidResponse
+        }
+        return data
+    }
+
+    static func atualizarMeta(id: Int, valorAtualCentavos: Int) async throws -> FinancasMetaAPI {
+        struct Body: Encodable {
+            let valorAtualCentavos: Int
+
+            enum CodingKeys: String, CodingKey {
+                case valorAtualCentavos = "valor_atual_centavos"
+            }
+        }
+
+        let response: APIResponse<FinancasMetaAPI> = try await APIClient.shared.request(
+            endpoint: .financasMeta(id: id),
+            method: .patch,
+            body: Body(valorAtualCentavos: valorAtualCentavos),
+            requiresAuth: true
+        )
+        guard let data = response.data else {
+            throw APIError.invalidResponse
+        }
+        return data
     }
 }

@@ -112,6 +112,77 @@ export interface AcademiaData {
   treino_hoje: AcademiaTreino | null;
 }
 
+export interface FinancasMes {
+  ano_mes: string;
+  label: string;
+  curto: string;
+}
+
+export interface FinancasSerie {
+  ano_mes: string;
+  curto: string;
+  receita_centavos: number;
+  gastos_centavos: number;
+  saldo_centavos: number;
+}
+
+export interface FinancasDistribuicao {
+  categoria: string;
+  nome: string;
+  cor: string;
+  valor_centavos: number;
+  percentual: number;
+}
+
+export interface FinancasTransacao {
+  id: number;
+  tipo: 'receita' | 'despesa' | string;
+  categoria: string;
+  categoria_nome: string;
+  categoria_cor: string;
+  titulo: string;
+  icone: string;
+  valor_centavos: number;
+  data: string;
+}
+
+export interface FinancasMeta {
+  id: number;
+  titulo: string;
+  icone: string;
+  categoria: string | null;
+  valor_alvo_centavos: number;
+  valor_atual_centavos: number;
+  percentual: number;
+}
+
+export interface FinancasCategoria {
+  chave: string;
+  nome: string;
+  cor: string;
+  icone: string;
+}
+
+export interface FinancasCategorias {
+  despesas: FinancasCategoria[];
+  receita: FinancasCategoria;
+}
+
+export interface FinancasData {
+  ano_mes: string;
+  mes_label: string;
+  meses: FinancasMes[];
+  saldo_centavos: number;
+  receita_centavos: number;
+  gastos_centavos: number;
+  serie_mensal: FinancasSerie[];
+  distribuicao: FinancasDistribuicao[];
+  recentes: FinancasTransacao[];
+  transacoes: FinancasTransacao[];
+  metas: FinancasMeta[];
+  categorias: FinancasCategorias;
+}
+
 export function avatarAssetKey(key: string): string {
   const trimmed = (key || '').trim();
   if (!trimmed) return 'guara_serio';
