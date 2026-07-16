@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -9,11 +10,16 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { getLayoutDashboard } from '../theme/layout';
+import {
+  fetchAcademia,
+  toggleAcademiaDia,
+} from '../services/rotinaApi';
+import type { AcademiaTreino, AcademiaVolume } from '../types';
 
 // MARK: - Modelos
 
 export type DiaSemanaTreino = {
-  id: string;
+  id: number;
   label: string;
   foco: string;
   concluido: boolean;
@@ -26,26 +32,6 @@ export type VolumeDia = {
   kg: number;
 };
 
-export const SEMANA_EXEMPLO: DiaSemanaTreino[] = [
-  { id: 'seg', label: 'Seg', foco: 'Peito', concluido: true, isRest: false },
-  { id: 'ter', label: 'Ter', foco: 'Costas', concluido: true, isRest: false },
-  { id: 'qua', label: 'Qua', foco: 'Ombros', concluido: false, isRest: false },
-  { id: 'qui', label: 'Qui', foco: 'Braços', concluido: false, isRest: false },
-  { id: 'sex', label: 'Sex', foco: 'Pernas', concluido: false, isRest: false },
-  { id: 'sab', label: 'Sáb', foco: 'Cardio', concluido: false, isRest: false },
-  { id: 'dom', label: 'Dom', foco: 'Rest', concluido: false, isRest: true },
-];
-
-const VOLUMES_EXEMPLO: VolumeDia[] = [
-  { id: 'seg', label: 'Seg', kg: 4200 },
-  { id: 'ter', label: 'Ter', kg: 3100 },
-  { id: 'qua', label: 'Qua', kg: 0 },
-  { id: 'qui', label: 'Qui', kg: 0 },
-  { id: 'sex', label: 'Sex', kg: 0 },
-  { id: 'sab', label: 'Sáb', kg: 0 },
-  { id: 'dom', label: 'Dom', kg: 0 },
-];
-
 const C = {
   roxo: '#7A42F5',
   laranja: '#FF8C33',
@@ -55,9 +41,7 @@ const C = {
   label: 'rgba(255,255,255,0.42)',
   labelMuted: 'rgba(255,255,255,0.32)',
   historicoFundo: '#4D1F1A',
-  ctaTop: '#6B2420',
   ctaMid: '#47171A',
-  ctaBot: '#240D14',
   diaAtivoFundo: 'rgba(122,66,245,0.28)',
   diaAtivoBorda: 'rgba(122,66,245,0.55)',
   diaInativoBorda: 'rgba(255,255,255,0.12)',
@@ -109,7 +93,7 @@ function EstaSemanaTreino({
   onToggle,
 }: {
   dias: DiaSemanaTreino[];
-  onToggle: (id: string) => void;
+  onToggle: (id: number) => void;
 }) {
   return (
     <View style={styles.semanaCard}>
@@ -222,7 +206,7 @@ function CardTreinoHoje({
 
 // MARK: - Volume Semanal
 
-function VolumeSemanalChart({ volumes = VOLUMES_EXEMPLO }: { volumes?: VolumeDia[] }) {
+function VolumeSemanalChart({ volumes }: { volumes: VolumeDia[] }) {
   const maxKg = Math.max(...volumes.map((v) => v.kg), 1);
 
   return (
@@ -303,20 +287,101 @@ export function AcademiaScreen({
   const layout = getLayoutDashboard(width);
   const pad = layout.paddingHorizontal;
   const gap = layout.gapSecao;
-  const [dias, setDias] = useState(SEMANA_EXEMPLO);
+  const [dias, setDias] = useState<DiaSemanaTreino[]>([]);
+  const [volumes, setVolumes] = useState<VolumeDia[]>([]);
+  const [metaSemana, setMetaSemana] = useState(5);
+  const [sequencia, setSequencia] = useState(0);
+  const [treino, setTreino] = useState<AcademiaTreino | null>(null);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
+
+  const carregar = useCallback(async () => {
+    setErro(null);
+    try {
+      const data = await fetchAcademia();
+      setMetaSemana(data.meta_semana);
+      setSequencia(data.sequencia_treinos);
+      setDias(
+        data.dias.map((d) => ({
+          id: d.id,
+          label: d.label,
+          foco: d.foco,
+          concluido: d.concluido,
+          isRest: d.is_rest,
+        })),
+      );
+      setVolumes(
+        data.volumes.map((v: AcademiaVolume) => ({
+          id: String(v.id),
+          label: v.label,
+          kg: v.kg,
+        })),
+      );
+      setTreino(data.treino_hoje);
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : 'Erro ao carregar academia.');
+    } finally {
+      setCarregando(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void carregar();
+  }, [carregar]);
 
   const feitos = useMemo(
     () => dias.filter((d) => d.concluido).length,
     [dias],
   );
 
-  const toggleDia = (id: string) => {
+  const toggleDia = async (id: number) => {
+    const anterior = dias.find((d) => d.id === id);
     setDias((atual) =>
       atual.map((d) =>
         d.id === id ? { ...d, concluido: !d.concluido } : d,
       ),
     );
+    if (anterior) {
+      setSequencia((s) => Math.max(0, s + (anterior.concluido ? -1 : 1)));
+    }
+    try {
+      await toggleAcademiaDia(id);
+    } catch {
+      setDias((atual) =>
+        atual.map((d) =>
+          d.id === id ? { ...d, concluido: !d.concluido } : d,
+        ),
+      );
+      if (anterior) {
+        setSequencia((s) => Math.max(0, s + (anterior.concluido ? 1 : -1)));
+      }
+    }
   };
+
+  if (carregando) {
+    return (
+      <View style={[styles.flex, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator color="#fff" />
+      </View>
+    );
+  }
+
+  if (erro) {
+    return (
+      <View style={[styles.flex, { justifyContent: 'center', alignItems: 'center', padding: 24 }]}>
+        <Text style={{ color: 'rgba(255,255,255,0.6)', textAlign: 'center' }}>{erro}</Text>
+        <TouchableOpacity
+          onPress={() => {
+            setCarregando(true);
+            void carregar();
+          }}
+          style={{ marginTop: 12 }}
+        >
+          <Text style={{ color: C.roxo, fontWeight: '600' }}>Tentar de novo</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <ScrollView
@@ -336,7 +401,11 @@ export function AcademiaScreen({
       </View>
 
       <View style={{ paddingHorizontal: pad, paddingTop: gap }}>
-        <StatsAcademia feitos={feitos} />
+        <StatsAcademia
+          metaSemana={metaSemana}
+          feitos={feitos}
+          sequencia={sequencia}
+        />
       </View>
 
       <View style={{ paddingHorizontal: pad, paddingTop: gap }}>
@@ -344,11 +413,18 @@ export function AcademiaScreen({
       </View>
 
       <View style={{ paddingHorizontal: pad, paddingTop: gap + 6 }}>
-        <CardTreinoHoje onIniciar={onIniciarTreino} onBiblioteca={onBiblioteca} />
+        <CardTreinoHoje
+          foco={treino?.foco ?? 'Ombros'}
+          exercicios={treino?.exercicios ?? 8}
+          minutos={treino?.minutos ?? 45}
+          xp={treino?.xp ?? 140}
+          onIniciar={onIniciarTreino}
+          onBiblioteca={onBiblioteca}
+        />
       </View>
 
       <View style={{ paddingHorizontal: pad, paddingTop: gap }}>
-        <VolumeSemanalChart />
+        <VolumeSemanalChart volumes={volumes} />
       </View>
 
       <View style={{ paddingHorizontal: pad, paddingTop: gap, paddingBottom: 24 }}>

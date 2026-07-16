@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct MissaoDoDia: Identifiable, Equatable {
-    let id: UUID
+    let id: Int
     var icone: String
     var titulo: String
     var detalhe: String
@@ -9,7 +9,7 @@ struct MissaoDoDia: Identifiable, Equatable {
     var concluida: Bool
 
     init(
-        id: UUID = UUID(),
+        id: Int,
         icone: String,
         titulo: String,
         detalhe: String,
@@ -25,11 +25,11 @@ struct MissaoDoDia: Identifiable, Equatable {
     }
 
     static let exemplos: [MissaoDoDia] = [
-        .init(icone: "💧", titulo: "Beber água", detalhe: "2L ao longo do dia", xp: 15, concluida: true),
-        .init(icone: "🏃", titulo: "Treinar", detalhe: "30 min de movimento", xp: 25, concluida: true),
-        .init(icone: "📚", titulo: "Estudar", detalhe: "1 Pomodoro focado", xp: 20, concluida: false),
-        .init(icone: "🧘", titulo: "Meditar", detalhe: "10 min de respiração", xp: 15, concluida: false),
-        .init(icone: "💰", titulo: "Registrar gastos", detalhe: "Anotar o dia no app", xp: 10, concluida: false),
+        .init(id: 1, icone: "💧", titulo: "Beber água", detalhe: "2L ao longo do dia", xp: 15, concluida: true),
+        .init(id: 2, icone: "🏃", titulo: "Treinar", detalhe: "30 min de movimento", xp: 25, concluida: true),
+        .init(id: 3, icone: "📚", titulo: "Estudar", detalhe: "1 Pomodoro focado", xp: 20, concluida: false),
+        .init(id: 4, icone: "🧘", titulo: "Meditar", detalhe: "10 min de respiração", xp: 15, concluida: false),
+        .init(id: 5, icone: "💰", titulo: "Registrar gastos", detalhe: "Anotar o dia no app", xp: 10, concluida: false),
     ]
 }
 
@@ -145,7 +145,7 @@ struct MissoesDoDiaView: View {
         .buttonStyle(.plain)
     }
 
-    private func toggle(_ id: UUID) {
+    private func toggle(_ id: Int) {
         guard let indice = missoes.firstIndex(where: { $0.id == id }) else { return }
         withAnimation(.easeInOut(duration: 0.2)) {
             missoes[indice].concluida.toggle()

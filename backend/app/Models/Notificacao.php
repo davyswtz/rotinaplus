@@ -2,25 +2,27 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Rotina extends Model
+class Notificacao extends Model
 {
-    use HasFactory;
+    protected $table = 'notificacoes';
 
     protected $fillable = [
         'user_id',
+        'icone',
         'titulo',
-        'descricao',
-        'concluida',
+        'mensagem',
+        'lida',
+        'lida_em',
     ];
 
     protected function casts(): array
     {
         return [
-            'concluida' => 'boolean',
+            'lida' => 'boolean',
+            'lida_em' => 'datetime',
         ];
     }
 

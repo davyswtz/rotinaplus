@@ -2,25 +2,33 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Rotina extends Model
+class Missao extends Model
 {
-    use HasFactory;
+    protected $table = 'missoes';
 
     protected $fillable = [
         'user_id',
+        'data',
+        'icone',
         'titulo',
-        'descricao',
+        'detalhe',
+        'xp',
         'concluida',
+        'concluida_em',
+        'ordem',
     ];
 
     protected function casts(): array
     {
         return [
+            'data' => 'date',
+            'xp' => 'integer',
             'concluida' => 'boolean',
+            'concluida_em' => 'datetime',
+            'ordem' => 'integer',
         ];
     }
 

@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
+  ActivityIndicator,
   FlatList,
   StyleSheet,
   Text,
@@ -7,91 +8,67 @@ import {
   View,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { cores } from '../theme/colors';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import {
+  fetchNotificacoes,
+  lerTodasNotificacoes,
+  marcarNotificacaoLida,
+} from '../services/rotinaApi';
+import type { Notificacao } from '../types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Notificacoes'>;
 
-export type NotificacaoItem = {
-  id: string;
-  icone: string;
-  titulo: string;
-  mensagem: string;
-  quando: string;
-  lida: boolean;
-};
-
-const EXEMPLOS: NotificacaoItem[] = [
-  {
-    id: '1',
-    icone: '🔥',
-    titulo: 'Streak em risco!',
-    mensagem:
-      'Complete pelo menos 1 hábito hoje para manter sua sequência de 3 dias.',
-    quando: 'Agora',
-    lida: false,
-  },
-  {
-    id: '2',
-    icone: '⚡',
-    titulo: 'XP desbloqueado',
-    mensagem:
-      'Você ganhou 35 XP pela missão diária de hidratação. Continue assim!',
-    quando: '2h atrás',
-    lida: false,
-  },
-  {
-    id: '3',
-    icone: '🏆',
-    titulo: 'Conquista próxima',
-    mensagem:
-      'Faltam 2 treinos para desbloquear a medalha Guerreiro Consistente.',
-    quando: '4h atrás',
-    lida: true,
-  },
-  {
-    id: '4',
-    icone: '🦊',
-    titulo: 'Fox diz: Boa noite!',
-    mensagem:
-      'Lembre de registrar seus hábitos antes de dormir. Seu eu de amanhã agradece.',
-    quando: 'Ontem',
-    lida: true,
-  },
-  {
-    id: '5',
-    icone: '💰',
-    titulo: 'Meta de poupança 69%',
-    mensagem: 'Você está quase lá! Faltam R$ 620 para bater a meta do mês.',
-    quando: 'Ontem',
-    lida: true,
-  },
-  {
-    id: '6',
-    icone: '📚',
-    titulo: 'Hora de estudar',
-    mensagem: 'Que tal uma sessão de Pomodoro agora? 25 min fazem diferença.',
-    quando: '2 dias',
-    lida: true,
-  },
-];
-
-/** Espelha TelaNotificacoes.swift / mock. */
 export function NotificacoesScreen() {
   const navigation = useNavigation<Nav>();
-  const [itens, setItens] = useState<NotificacaoItem[]>(EXEMPLOS);
+  const [itens, setItens] = useState<Notificacao[]>([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
   const naoLidas = useMemo(() => itens.filter((i) => !i.lida).length, [itens]);
 
-  const marcarLida = (id: string) => {
+  const carregar = useCallback(async () => {
+    setErro(null);
+    try {
+      const lista = await fetchNotificacoes();
+      setItens(lista);
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : 'Erro ao carregar.');
+    } finally {
+      setCarregando(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      setCarregando(true);
+      void carregar();
+    }, [carregar]),
+  );
+
+  const marcarLida = async (id: number) => {
+    const item = itens.find((i) => i.id === id);
+    if (!item || item.lida) return;
     setItens((atual) =>
-      atual.map((item) => (item.id === id ? { ...item, lida: true } : item)),
+      atual.map((n) => (n.id === id ? { ...n, lida: true } : n)),
     );
+    try {
+      await marcarNotificacaoLida(id);
+    } catch {
+      setItens((atual) =>
+        atual.map((n) => (n.id === id ? { ...n, lida: false } : n)),
+      );
+    }
   };
 
-  const marcarTodas = () => {
+  const marcarTodas = async () => {
     setItens((atual) => atual.map((item) => ({ ...item, lida: true })));
+    try {
+      await lerTodasNotificacoes();
+    } catch {
+      void carregar();
+    }
   };
 
   return (
@@ -110,7 +87,7 @@ export function NotificacoesScreen() {
         <Text style={styles.titulo}>Notificações</Text>
 
         <TouchableOpacity
-          onPress={marcarTodas}
+          onPress={() => void marcarTodas()}
           disabled={naoLidas === 0}
           activeOpacity={0.8}
           style={styles.botaoLerTodas}
@@ -126,27 +103,38 @@ export function NotificacoesScreen() {
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={itens}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.lista}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={[styles.card, !item.lida && styles.cardNaoLida]}
-            onPress={() => marcarLida(item.id)}
-            activeOpacity={0.85}
-          >
-            {!item.lida ? <View style={styles.ponto} /> : null}
-            <Text style={styles.icone}>{item.icone}</Text>
-            <View style={styles.textoColuna}>
-              <Text style={styles.cardTitulo}>{item.titulo}</Text>
-              <Text style={styles.cardMensagem}>{item.mensagem}</Text>
-              <Text style={styles.cardQuando}>{item.quando}</Text>
-            </View>
+      {carregando ? (
+        <ActivityIndicator color="#fff" style={{ marginTop: 40 }} />
+      ) : erro ? (
+        <View style={styles.erroBox}>
+          <Text style={styles.erroTexto}>{erro}</Text>
+          <TouchableOpacity onPress={() => void carregar()}>
+            <Text style={styles.textoLerTodas}>Tentar de novo</Text>
           </TouchableOpacity>
-        )}
-      />
+        </View>
+      ) : (
+        <FlatList
+          data={itens}
+          keyExtractor={(item) => String(item.id)}
+          contentContainerStyle={styles.lista}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={[styles.card, !item.lida && styles.cardNaoLida]}
+              onPress={() => void marcarLida(item.id)}
+              activeOpacity={0.85}
+            >
+              {!item.lida ? <View style={styles.ponto} /> : null}
+              <Text style={styles.icone}>{item.icone}</Text>
+              <View style={styles.textoColuna}>
+                <Text style={styles.cardTitulo}>{item.titulo}</Text>
+                <Text style={styles.cardMensagem}>{item.mensagem}</Text>
+                <Text style={styles.cardQuando}>{item.quando}</Text>
+              </View>
+            </TouchableOpacity>
+          )}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -252,5 +240,14 @@ const styles = StyleSheet.create({
     marginTop: 2,
     color: 'rgba(255,255,255,0.35)',
     fontSize: 12,
+  },
+  erroBox: {
+    padding: 24,
+    alignItems: 'center',
+    gap: 12,
+  },
+  erroTexto: {
+    color: 'rgba(255,255,255,0.55)',
+    textAlign: 'center',
   },
 });

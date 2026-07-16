@@ -4,21 +4,29 @@ import SwiftUI
 struct HomeView: View {
     @ObservedObject private var authManager = AuthManager.shared
     @State private var mostrarNotificacoes = false
-    @State private var notificacoesNaoLidas = 2
-    @State private var missoes = MissaoDoDia.exemplos
+    @State private var notificacoesNaoLidas = 0
+    @State private var missoes: [MissaoDoDia] = []
+    @State private var perfil: PerfilAPI?
+    @State private var xpHojeAPI = 0
     @State private var abaSelecionada: AbaFooter = .inicio
+    @State private var carregando = true
+    @State private var erro: String?
 
     private var dadosHeader: DadosHeaderApp {
-        let nomeSalvo = UserDefaults.standard.string(forKey: "nome_heroi")?
+        let p = perfil
+        let nomeLocal = UserDefaults.standard.string(forKey: "nome_heroi")?
             .trimmingCharacters(in: .whitespacesAndNewlines)
-        let nome = (nomeSalvo?.isEmpty == false) ? nomeSalvo! : "herói"
-        let avatar = UserDefaults.standard.string(forKey: "avatar_selecionado")
+        let nome = p?.nomeExibicao
+            ?? ((nomeLocal?.isEmpty == false) ? nomeLocal!.lowercased() : "herói")
+        let avatar = p?.avatarAsset
+            ?? UserDefaults.standard.string(forKey: "avatar_selecionado")
             ?? AvatarExplorador.guaraSerio.rawValue
+
         return DadosHeaderApp(
-            nomeUsuario: nome.lowercased(),
-            nivel: 1,
-            streakDias: 3,
-            moedas: 480,
+            nomeUsuario: nome,
+            nivel: p?.nivel ?? 1,
+            streakDias: p?.streakDias ?? 0,
+            moedas: p?.moedas ?? 0,
             notificacoes: notificacoesNaoLidas,
             avatarAsset: avatar
         )
@@ -88,10 +96,11 @@ struct HomeView: View {
             }
         }
         .preferredColorScheme(.dark)
+        .task { await carregarDashboard() }
         .fullScreenCover(isPresented: $mostrarNotificacoes) {
             TelaNotificacoes {
                 mostrarNotificacoes = false
-                notificacoesNaoLidas = 0
+                Task { await carregarDashboard() }
             }
         }
     }
@@ -99,55 +108,74 @@ struct HomeView: View {
     private func conteudoInicio(pad: CGFloat, gap: CGFloat) -> some View {
         ScrollView {
             VStack(spacing: 0) {
-                CardPerfilHeroi(
-                    dados: DadosCardPerfil(
-                        nomeUsuario: dadosHeader.nomeUsuario,
-                        classe: "Sábio",
-                        emojiClasse: "🔮",
-                        nivel: dadosHeader.nivel,
-                        xpAtual: 240,
-                        xpProximoNivel: 500,
-                        avatarAsset: dadosHeader.avatarAsset
+                if carregando && perfil == nil {
+                    ProgressView()
+                        .tint(.white)
+                        .padding(.top, 40)
+                } else if let erro, perfil == nil {
+                    Text(erro)
+                        .foregroundStyle(.white.opacity(0.6))
+                        .padding(.horizontal, pad)
+                        .padding(.top, gap)
+                    Button("Tentar de novo") {
+                        Task { await carregarDashboard() }
+                    }
+                    .foregroundStyle(Color(red: 0.48, green: 0.26, blue: 0.96))
+                    .padding(.top, 8)
+                } else {
+                    CardPerfilHeroi(
+                        dados: DadosCardPerfil(
+                            nomeUsuario: dadosHeader.nomeUsuario,
+                            classe: perfil?.classe ?? "Sábio",
+                            emojiClasse: perfil?.emojiClasse ?? "🔮",
+                            nivel: dadosHeader.nivel,
+                            xpAtual: perfil?.xpAtual ?? 0,
+                            xpProximoNivel: perfil?.xpProximoNivel ?? 500,
+                            avatarAsset: dadosHeader.avatarAsset
+                        )
                     )
-                )
-                .padding(.horizontal, pad)
-                .padding(.top, gap)
+                    .padding(.horizontal, pad)
+                    .padding(.top, gap)
 
-                GradeStatsDashboard(
-                    dados: DadosGradeStats(
-                        streakDias: dadosHeader.streakDias,
-                        habitosHojeConcluidos: missoesConcluidas,
-                        habitosHojeTotal: missoes.count,
-                        xpHoje: xpHoje,
-                        moedas: dadosHeader.moedas
+                    GradeStatsDashboard(
+                        dados: DadosGradeStats(
+                            streakDias: dadosHeader.streakDias,
+                            habitosHojeConcluidos: missoesConcluidas,
+                            habitosHojeTotal: max(missoes.count, 1),
+                            xpHoje: xpHoje,
+                            moedas: dadosHeader.moedas
+                        )
                     )
-                )
-                .padding(.horizontal, pad)
-                .padding(.top, gap)
+                    .padding(.horizontal, pad)
+                    .padding(.top, gap)
 
-                ProgressoDiarioCard(
-                    dados: DadosProgressoDiario(
-                        concluidos: missoesConcluidas,
-                        total: missoes.count
+                    ProgressoDiarioCard(
+                        dados: DadosProgressoDiario(
+                            concluidos: missoesConcluidas,
+                            total: max(missoes.count, 1)
+                        )
                     )
-                )
-                .padding(.horizontal, pad)
-                .padding(.top, gap)
+                    .padding(.horizontal, pad)
+                    .padding(.top, gap)
 
-                MissoesDoDiaView(missoes: $missoes)
+                    MissoesDoDiaView(missoes: $missoes) { missao in
+                        Task { await toggleMissao(missao) }
+                    }
                     .padding(.horizontal, pad)
                     .padding(.top, gap + 4)
 
-                AtalhosRapidosView { atalho in
-                    if let aba = atalho.abaDestino {
-                        abaSelecionada = aba
+                    AtalhosRapidosView { atalho in
+                        if let aba = atalho.abaDestino {
+                            abaSelecionada = aba
+                        }
                     }
+                    .padding(.horizontal, pad)
+                    .padding(.top, gap + 4)
+                    .padding(.bottom, 24)
                 }
-                .padding(.horizontal, pad)
-                .padding(.top, gap + 4)
-                .padding(.bottom, 24)
             }
         }
+        .refreshable { await carregarDashboard() }
     }
 
     private func conteudoPlaceholder(
@@ -169,6 +197,43 @@ struct HomeView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity)
+    }
+
+    @MainActor
+    private func carregarDashboard() async {
+        carregando = true
+        erro = nil
+        do {
+            let data = try await RotinaPlusAPI.dashboard()
+            perfil = data.perfil
+            missoes = data.missoes.map { $0.asMissaoDoDia() }
+            notificacoesNaoLidas = data.notificacoesNaoLidas
+            xpHojeAPI = data.xpHoje
+
+            if let nome = data.perfil.nomeHeroi, !nome.isEmpty {
+                UserDefaults.standard.set(nome, forKey: "nome_heroi")
+            }
+            UserDefaults.standard.set(data.perfil.avatarAsset, forKey: "avatar_selecionado")
+        } catch {
+            erro = error.localizedDescription
+        }
+        carregando = false
+    }
+
+    @MainActor
+    private func toggleMissao(_ missao: MissaoDoDia) async {
+        // UI já alternou localmente em MissoesDoDiaView
+        do {
+            _ = try await RotinaPlusAPI.toggleMissao(id: missao.id)
+            // Atualiza XP/nível do perfil
+            let data = try await RotinaPlusAPI.dashboard()
+            perfil = data.perfil
+            notificacoesNaoLidas = data.notificacoesNaoLidas
+        } catch {
+            if let i = missoes.firstIndex(where: { $0.id == missao.id }) {
+                missoes[i].concluida.toggle()
+            }
+        }
     }
 }
 

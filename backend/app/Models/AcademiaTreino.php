@@ -2,25 +2,29 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Rotina extends Model
+class AcademiaTreino extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'user_id',
+        'foco',
         'titulo',
-        'descricao',
-        'concluida',
+        'exercicios',
+        'minutos',
+        'xp',
+        'dia_chave',
+        'ativo',
     ];
 
     protected function casts(): array
     {
         return [
-            'concluida' => 'boolean',
+            'exercicios' => 'integer',
+            'minutos' => 'integer',
+            'xp' => 'integer',
+            'ativo' => 'boolean',
         ];
     }
 

@@ -9,12 +9,14 @@ class TestUserSeeder extends Seeder
 {
     public function run(): void
     {
-        User::query()->updateOrCreate(
+        $user = User::query()->updateOrCreate(
             ['email' => 'davy@teste.com'],
             [
                 'name' => 'Davy Teste',
                 'password' => 'senha123',
             ],
         );
+
+        $user->ensureDefaults();
     }
 }

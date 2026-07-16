@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  ActivityIndicator,
   ImageSourcePropType,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,16 +13,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { HeaderApp } from '../components/HeaderApp';
 import { CardPerfilHeroi } from '../components/CardPerfilHeroi';
 import { GradeStatsDashboard } from '../components/GradeStatsDashboard';
 import { ProgressoDiarioCard } from '../components/ProgressoDiarioCard';
-import {
-  MissoesDoDiaView,
-  MISSOES_EXEMPLO,
-  MissaoDoDia,
-} from '../components/MissoesDoDiaView';
+import { MissoesDoDiaView, MissaoDoDia } from '../components/MissoesDoDiaView';
 import { AtalhosRapidosView } from '../components/AtalhosRapidosView';
 import { AbaFooter, FooterNavegacao } from '../components/FooterNavegacao';
 import { AcademiaScreen } from './AcademiaScreen';
@@ -28,6 +26,12 @@ import { cores } from '../theme/colors';
 import { getLayoutDashboard } from '../theme/layout';
 import { useAuthStore } from '../store/authStore';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import {
+  fetchDashboard,
+  toggleMissao,
+} from '../services/rotinaApi';
+import type { Perfil } from '../types';
+import { avatarAssetKey } from '../types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -50,35 +54,72 @@ const AVATARES: Record<string, ImageSourcePropType> = {
   selo: require('../assets/avatars/avatar_selo.png'),
 };
 
-// MARK: - Dashboard inicial (espelha HomeView.swift)
+function missaoFromApi(m: {
+  id: number;
+  icone: string;
+  titulo: string;
+  detalhe: string | null;
+  xp: number;
+  concluida: boolean;
+}): MissaoDoDia {
+  return {
+    id: m.id,
+    icone: m.icone,
+    titulo: m.titulo,
+    detalhe: m.detalhe ?? '',
+    xp: m.xp,
+    concluida: m.concluida,
+  };
+}
+
 export function HomeScreen() {
   const navigation = useNavigation<Nav>();
   const logout = useAuthStore((state) => state.logout);
   const { width } = useWindowDimensions();
   const layout = getLayoutDashboard(width);
-  const [nome, setNome] = useState('herói');
-  const [avatarId, setAvatarId] = useState('guara_serio');
-  const [notificacoesNaoLidas, setNotificacoesNaoLidas] = useState(2);
-  const [missoes, setMissoes] = useState<MissaoDoDia[]>(MISSOES_EXEMPLO);
+  const [perfil, setPerfil] = useState<Perfil | null>(null);
+  const [notificacoesNaoLidas, setNotificacoesNaoLidas] = useState(0);
+  const [missoes, setMissoes] = useState<MissaoDoDia[]>([]);
   const [aba, setAba] = useState<AbaFooter>('inicio');
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const pad = layout.paddingHorizontal;
   const gap = layout.gapSecao;
 
-  React.useEffect(() => {
-    void Promise.all([
-      AsyncStorage.getItem('nome_heroi'),
-      AsyncStorage.getItem('avatar_selecionado'),
-    ]).then(([nomeSalvo, avatarSalvo]) => {
-      if (nomeSalvo?.trim()) {
-        setNome(nomeSalvo.trim().toLowerCase());
+  const carregar = useCallback(async () => {
+    setErro(null);
+    try {
+      const data = await fetchDashboard();
+      setPerfil(data.perfil);
+      setMissoes(data.missoes.map(missaoFromApi));
+      setNotificacoesNaoLidas(data.notificacoes_nao_lidas);
+
+      if (data.perfil.nome_heroi?.trim()) {
+        await AsyncStorage.setItem('nome_heroi', data.perfil.nome_heroi.trim());
       }
-      if (avatarSalvo?.trim()) {
-        const id = avatarSalvo.replace(/^avatar_/, '');
-        setAvatarId(id);
-      }
-    });
+      await AsyncStorage.setItem(
+        'avatar_selecionado',
+        avatarAssetKey(data.perfil.avatar_key),
+      );
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : 'Erro ao carregar.');
+    } finally {
+      setCarregando(false);
+      setRefreshing(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void carregar();
+  }, [carregar]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void carregar();
+    }, [carregar]),
+  );
 
   const concluidas = useMemo(
     () => missoes.filter((m) => m.concluida).length,
@@ -90,17 +131,39 @@ export function HomeScreen() {
     [missoes],
   );
 
+  const avatarId = avatarAssetKey(perfil?.avatar_key ?? 'guara_serio');
+  const nome =
+    perfil?.nome_heroi?.trim().toLowerCase() || 'herói';
+
   const dados = useMemo(
     () => ({
       nomeUsuario: nome,
-      nivel: 1,
-      streakDias: 3,
-      moedas: 480,
+      nivel: perfil?.nivel ?? 1,
+      streakDias: perfil?.streak_dias ?? 0,
+      moedas: perfil?.moedas ?? 0,
       notificacoes: notificacoesNaoLidas,
       avatarSource: AVATARES[avatarId] ?? AVATARES.guara_serio,
     }),
-    [nome, avatarId, notificacoesNaoLidas],
+    [nome, perfil, avatarId, notificacoesNaoLidas],
   );
+
+  const onToggleMissao = async (id: number) => {
+    setMissoes((atual) =>
+      atual.map((m) =>
+        m.id === id ? { ...m, concluida: !m.concluida } : m,
+      ),
+    );
+    try {
+      await toggleMissao(id);
+      await carregar();
+    } catch {
+      setMissoes((atual) =>
+        atual.map((m) =>
+          m.id === id ? { ...m, concluida: !m.concluida } : m,
+        ),
+      );
+    }
+  };
 
   return (
     <SafeAreaView style={styles.areaSegura}>
@@ -110,7 +173,6 @@ export function HomeScreen() {
         dados={dados}
         onToquePerfil={() => setAba('perfil')}
         onToqueNotificacoes={() => {
-          setNotificacoesNaoLidas(0);
           navigation.navigate('Notificacoes');
         }}
       />
@@ -120,64 +182,91 @@ export function HomeScreen() {
           contentContainerStyle={styles.scroll}
           showsVerticalScrollIndicator={false}
           style={styles.flex}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => {
+                setRefreshing(true);
+                void carregar();
+              }}
+              tintColor="#fff"
+            />
+          }
         >
-          <View style={[styles.cardWrap, { paddingHorizontal: pad, paddingTop: gap }]}>
-            <CardPerfilHeroi
-              dados={{
-                nomeUsuario: nome,
-                classe: 'Sábio',
-                emojiClasse: '🔮',
-                nivel: 1,
-                xpAtual: 240,
-                xpProximoNivel: 500,
-                avatarSource: AVATARES[avatarId] ?? AVATARES.guara_serio,
-              }}
-            />
-          </View>
+          {carregando && !perfil ? (
+            <ActivityIndicator color="#fff" style={{ marginTop: 40 }} />
+          ) : erro && !perfil ? (
+            <View style={styles.placeholder}>
+              <Text style={styles.placeholderTexto}>{erro}</Text>
+              <TouchableOpacity
+                style={styles.botao}
+                onPress={() => {
+                  setCarregando(true);
+                  void carregar();
+                }}
+              >
+                <Text style={styles.textoBotao}>Tentar de novo</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <>
+              <View
+                style={[styles.cardWrap, { paddingHorizontal: pad, paddingTop: gap }]}
+              >
+                <CardPerfilHeroi
+                  dados={{
+                    nomeUsuario: nome,
+                    classe: perfil?.classe ?? 'Sábio',
+                    emojiClasse: perfil?.emoji_classe ?? '🔮',
+                    nivel: perfil?.nivel ?? 1,
+                    xpAtual: perfil?.xp_atual ?? 0,
+                    xpProximoNivel: perfil?.xp_proximo_nivel ?? 500,
+                    avatarSource: AVATARES[avatarId] ?? AVATARES.guara_serio,
+                  }}
+                />
+              </View>
 
-          <View style={[styles.bloco, { paddingHorizontal: pad, paddingTop: gap }]}>
-            <GradeStatsDashboard
-              dados={{
-                streakDias: 3,
-                habitosHojeConcluidos: concluidas,
-                habitosHojeTotal: missoes.length,
-                xpHoje,
-                moedas: 480,
-              }}
-            />
-          </View>
+              <View style={[styles.bloco, { paddingHorizontal: pad, paddingTop: gap }]}>
+                <GradeStatsDashboard
+                  dados={{
+                    streakDias: perfil?.streak_dias ?? 0,
+                    habitosHojeConcluidos: concluidas,
+                    habitosHojeTotal: Math.max(missoes.length, 1),
+                    xpHoje,
+                    moedas: perfil?.moedas ?? 0,
+                  }}
+                />
+              </View>
 
-          <View style={[styles.bloco, { paddingHorizontal: pad, paddingTop: gap }]}>
-            <ProgressoDiarioCard
-              dados={{ concluidos: concluidas, total: missoes.length }}
-            />
-          </View>
+              <View style={[styles.bloco, { paddingHorizontal: pad, paddingTop: gap }]}>
+                <ProgressoDiarioCard
+                  dados={{
+                    concluidos: concluidas,
+                    total: Math.max(missoes.length, 1),
+                  }}
+                />
+              </View>
 
-          <View style={[styles.bloco, { paddingHorizontal: pad, paddingTop: gap + 4 }]}>
-            <MissoesDoDiaView
-              missoes={missoes}
-              onToggle={(id) => {
-                setMissoes((atual) =>
-                  atual.map((m) =>
-                    m.id === id ? { ...m, concluida: !m.concluida } : m,
-                  ),
-                );
-              }}
-            />
-          </View>
+              <View
+                style={[styles.bloco, { paddingHorizontal: pad, paddingTop: gap + 4 }]}
+              >
+                <MissoesDoDiaView missoes={missoes} onToggle={onToggleMissao} />
+              </View>
 
-          <View
-            style={[
-              styles.bloco,
-              { paddingHorizontal: pad, paddingTop: gap + 4, paddingBottom: 16 },
-            ]}
-          >
-            <AtalhosRapidosView
-              onAtalho={(_id, abaDestino) => {
-                if (abaDestino) setAba(abaDestino);
-              }}
-            />
-          </View>
+              <View
+                style={[
+                  styles.bloco,
+                  { paddingHorizontal: pad, paddingTop: gap + 4, paddingBottom: 16 },
+                ]}
+              >
+                <AtalhosRapidosView
+                  onAtalho={(_id, abaDestino) => {
+                    if (abaDestino) setAba(abaDestino);
+                  }}
+                />
+              </View>
+            </>
+          )}
         </ScrollView>
       ) : aba === 'academia' ? (
         <AcademiaScreen />

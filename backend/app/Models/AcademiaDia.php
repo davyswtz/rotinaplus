@@ -2,25 +2,29 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Rotina extends Model
+class AcademiaDia extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'user_id',
-        'titulo',
-        'descricao',
-        'concluida',
+        'semana_inicio',
+        'dia_chave',
+        'label',
+        'foco',
+        'is_rest',
+        'concluido',
+        'ordem',
     ];
 
     protected function casts(): array
     {
         return [
-            'concluida' => 'boolean',
+            'semana_inicio' => 'date',
+            'is_rest' => 'boolean',
+            'concluido' => 'boolean',
+            'ordem' => 'integer',
         ];
     }
 

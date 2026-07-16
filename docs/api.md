@@ -75,11 +75,50 @@ Todas as respostas de erro da API seguem este formato:
 
 ## Endpoints
 
+> Rotas autenticadas exigem header `Authorization: Bearer {token}`.
+
+### Auth
+
+| Método | Endpoint | Auth | Descrição |
+|--------|----------|------|-----------|
+| POST | `/auth/login` | Não | Login email/senha → `{ user, perfil, token }` |
+| POST | `/auth/social` | Não | Login social |
+
+### Perfil / Dashboard
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| GET | `/me` | Usuário + perfil do herói |
+| PUT | `/perfil` | Atualiza nome_heroi, avatar_key, classe |
+| GET | `/dashboard` | Home: perfil, missões do dia, XP, badge notificações, resumo academia |
+
+### Missões
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| GET | `/missoes` | Missões do dia (hoje) |
+| PATCH | `/missoes/{id}/toggle` | Conclui / reabre missão (+/- XP no perfil) |
+
+### Notificações
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| GET | `/notificacoes` | Lista notificações |
+| PATCH | `/notificacoes/{id}/lida` | Marca uma como lida |
+| POST | `/notificacoes/ler-todas` | Marca todas como lidas |
+
+### Academia
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| GET | `/academia` | Stats, dias da semana, volumes, treino de hoje |
+| PATCH | `/academia/dias/{id}/toggle` | Marca/desmarca dia como feito |
+
 ### Rotinas
 
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
-| GET | `/rotinas` | Lista todas as rotinas |
+| GET | `/rotinas` | Lista rotinas do usuário autenticado |
 | POST | `/rotinas` | Cria uma rotina |
 | GET | `/rotinas/{id}` | Exibe uma rotina |
 | PUT | `/rotinas/{id}` | Atualiza uma rotina |
@@ -111,6 +150,20 @@ Todas as respostas de erro da API seguem este formato:
   }
 }
 ```
+
+## Tabelas (domínio gamificação)
+
+| Tabela | Uso |
+|--------|-----|
+| `perfis` | Herói: avatar, classe, nível, XP, moedas, streak |
+| `missoes` | Missões do dia por usuário/data |
+| `notificacoes` | Inbox do usuário |
+| `academia_configs` | Meta semanal + sequência de treinos |
+| `academia_dias` | Cápsulas da semana (Seg–Dom) |
+| `academia_volumes` | Volume semanal (kg) |
+| `academia_treinos` | Treino de hoje / biblioteca |
+
+Seed demo: `php artisan db:seed` (usuário `davy@teste.com` / `senha123`).
 
 ## Implementação
 

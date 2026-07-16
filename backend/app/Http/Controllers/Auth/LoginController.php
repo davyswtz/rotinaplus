@@ -27,11 +27,19 @@ class LoginController extends Controller
         }
 
         $user->update(['last_login_at' => now()]);
+        $user->ensureDefaults();
+        $user->load('perfil');
 
         $token = $user->createToken('mobile-app')->plainTextToken;
 
         return response()->json([
-            'user' => $user,
+            'success' => true,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ],
+            'perfil' => $user->perfil,
             'token' => $token,
         ]);
     }

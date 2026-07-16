@@ -3,20 +3,20 @@ import SwiftUI
 // MARK: - Modelos
 
 struct DiaSemanaTreino: Identifiable, Equatable {
-    let id: String
+    let id: Int
     let label: String
     let foco: String
     var concluido: Bool
     let isRest: Bool
 
     static let semanaExemplo: [DiaSemanaTreino] = [
-        .init(id: "seg", label: "Seg", foco: "Peito", concluido: true, isRest: false),
-        .init(id: "ter", label: "Ter", foco: "Costas", concluido: true, isRest: false),
-        .init(id: "qua", label: "Qua", foco: "Ombros", concluido: false, isRest: false),
-        .init(id: "qui", label: "Qui", foco: "Braços", concluido: false, isRest: false),
-        .init(id: "sex", label: "Sex", foco: "Pernas", concluido: false, isRest: false),
-        .init(id: "sab", label: "Sáb", foco: "Cardio", concluido: false, isRest: false),
-        .init(id: "dom", label: "Dom", foco: "Rest", concluido: false, isRest: true),
+        .init(id: 1, label: "Seg", foco: "Peito", concluido: true, isRest: false),
+        .init(id: 2, label: "Ter", foco: "Costas", concluido: true, isRest: false),
+        .init(id: 3, label: "Qua", foco: "Ombros", concluido: false, isRest: false),
+        .init(id: 4, label: "Qui", foco: "Braços", concluido: false, isRest: false),
+        .init(id: 5, label: "Sex", foco: "Pernas", concluido: false, isRest: false),
+        .init(id: 6, label: "Sáb", foco: "Cardio", concluido: false, isRest: false),
+        .init(id: 7, label: "Dom", foco: "Rest", concluido: false, isRest: true),
     ]
 }
 
@@ -96,6 +96,7 @@ struct StatsAcademiaView: View {
 
 struct EstaSemanaTreinoView: View {
     @Binding var dias: [DiaSemanaTreino]
+    var onToggle: ((DiaSemanaTreino) -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -110,6 +111,7 @@ struct EstaSemanaTreinoView: View {
                         withAnimation(.easeInOut(duration: 0.18)) {
                             dia.concluido.toggle()
                         }
+                        onToggle?(dia)
                     } label: {
                         CapsulaDiaSemana(dia: dia)
                     }
@@ -350,7 +352,16 @@ struct AtalhosAcademiaView: View {
 // MARK: - Tela Academia
 
 struct TelaAcademia: View {
-    @State private var dias = DiaSemanaTreino.semanaExemplo
+    @State private var dias: [DiaSemanaTreino] = []
+    @State private var volumes: [VolumeDia] = []
+    @State private var metaSemana = 5
+    @State private var sequencia = 0
+    @State private var treinoFoco = "Ombros"
+    @State private var treinoExercicios = 8
+    @State private var treinoMinutos = 45
+    @State private var treinoXP = 140
+    @State private var carregando = true
+    @State private var erro: String?
 
     var onHistorico: () -> Void = {}
     var onBiblioteca: () -> Void = {}
@@ -386,33 +397,93 @@ struct TelaAcademia: View {
                     .padding(.horizontal, pad)
                     .padding(.top, gap)
 
-                    StatsAcademiaView(feitos: feitos)
+                    if carregando {
+                        ProgressView()
+                            .tint(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 40)
+                    } else if let erro {
+                        Text(erro)
+                            .font(.subheadline)
+                            .foregroundStyle(.white.opacity(0.6))
+                            .padding(.horizontal, pad)
+                            .padding(.top, gap)
+                        Button("Tentar de novo") {
+                            Task { await carregar() }
+                        }
+                        .foregroundStyle(CoresAcademia.roxo)
+                        .padding(.horizontal, pad)
+                        .padding(.top, 8)
+                    } else {
+                        StatsAcademiaView(metaSemana: metaSemana, feitos: feitos, sequencia: sequencia)
+                            .padding(.horizontal, pad)
+                            .padding(.top, gap)
+
+                        EstaSemanaTreinoView(dias: $dias, onToggle: { dia in
+                            Task { await toggleDia(dia) }
+                        })
                         .padding(.horizontal, pad)
                         .padding(.top, gap)
 
-                    EstaSemanaTreinoView(dias: $dias)
+                        CardTreinoHoje(
+                            foco: treinoFoco,
+                            exercicios: treinoExercicios,
+                            minutos: treinoMinutos,
+                            xp: treinoXP,
+                            onIniciar: onIniciarTreino,
+                            onBiblioteca: onBiblioteca
+                        )
+                        .padding(.horizontal, pad)
+                        .padding(.top, gap + 6)
+
+                        VolumeSemanalChart(volumes: volumes)
+                            .padding(.horizontal, pad)
+                            .padding(.top, gap)
+
+                        AtalhosAcademiaView(
+                            onNovo: onNovoTreino,
+                            onHistorico: onHistorico
+                        )
                         .padding(.horizontal, pad)
                         .padding(.top, gap)
-
-                    CardTreinoHoje(
-                        onIniciar: onIniciarTreino,
-                        onBiblioteca: onBiblioteca
-                    )
-                    .padding(.horizontal, pad)
-                    .padding(.top, gap + 6)
-
-                    VolumeSemanalChart()
-                        .padding(.horizontal, pad)
-                        .padding(.top, gap)
-
-                    AtalhosAcademiaView(
-                        onNovo: onNovoTreino,
-                        onHistorico: onHistorico
-                    )
-                    .padding(.horizontal, pad)
-                    .padding(.top, gap)
-                    .padding(.bottom, 24)
+                        .padding(.bottom, 24)
+                    }
                 }
+            }
+        }
+        .task { await carregar() }
+    }
+
+    @MainActor
+    private func carregar() async {
+        carregando = true
+        erro = nil
+        do {
+            let data = try await RotinaPlusAPI.academia()
+            metaSemana = data.metaSemana
+            sequencia = data.sequenciaTreinos
+            dias = data.dias.map { $0.asDiaSemana() }
+            volumes = data.volumes.map { $0.asVolume() }
+            if let treino = data.treinoHoje {
+                treinoFoco = treino.foco
+                treinoExercicios = treino.exercicios
+                treinoMinutos = treino.minutos
+                treinoXP = treino.xp
+            }
+        } catch {
+            erro = error.localizedDescription
+        }
+        carregando = false
+    }
+
+    @MainActor
+    private func toggleDia(_ dia: DiaSemanaTreino) async {
+        do {
+            try await RotinaPlusAPI.toggleAcademiaDia(id: dia.id)
+            sequencia = max(0, sequencia + (dia.concluido ? 1 : -1))
+        } catch {
+            if let i = dias.firstIndex(where: { $0.id == dia.id }) {
+                dias[i].concluido.toggle()
             }
         }
     }

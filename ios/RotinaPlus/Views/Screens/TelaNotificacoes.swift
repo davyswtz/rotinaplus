@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct NotificacaoItem: Identifiable, Equatable {
-    let id: UUID
+    let id: Int
     var icone: String
     var titulo: String
     var mensagem: String
@@ -9,7 +9,7 @@ struct NotificacaoItem: Identifiable, Equatable {
     var lida: Bool
 
     init(
-        id: UUID = UUID(),
+        id: Int,
         icone: String,
         titulo: String,
         mensagem: String,
@@ -23,51 +23,6 @@ struct NotificacaoItem: Identifiable, Equatable {
         self.quando = quando
         self.lida = lida
     }
-
-    static let exemplos: [NotificacaoItem] = [
-        .init(
-            icone: "🔥",
-            titulo: "Streak em risco!",
-            mensagem: "Complete pelo menos 1 hábito hoje para manter sua sequência de 3 dias.",
-            quando: "Agora",
-            lida: false
-        ),
-        .init(
-            icone: "⚡",
-            titulo: "XP desbloqueado",
-            mensagem: "Você ganhou 35 XP pela missão diária de hidratação. Continue assim!",
-            quando: "2h atrás",
-            lida: false
-        ),
-        .init(
-            icone: "🏆",
-            titulo: "Conquista próxima",
-            mensagem: "Faltam 2 treinos para desbloquear a medalha Guerreiro Consistente.",
-            quando: "4h atrás",
-            lida: true
-        ),
-        .init(
-            icone: "🦊",
-            titulo: "Fox diz: Boa noite!",
-            mensagem: "Lembre de registrar seus hábitos antes de dormir. Seu eu de amanhã agradece.",
-            quando: "Ontem",
-            lida: true
-        ),
-        .init(
-            icone: "💰",
-            titulo: "Meta de poupança 69%",
-            mensagem: "Você está quase lá! Faltam R$ 620 para bater a meta do mês.",
-            quando: "Ontem",
-            lida: true
-        ),
-        .init(
-            icone: "📚",
-            titulo: "Hora de estudar",
-            mensagem: "Que tal uma sessão de Pomodoro agora? 25 min fazem diferença.",
-            quando: "2 dias",
-            lida: true
-        ),
-    ]
 }
 
 private enum CoresNotificacoes {
@@ -84,7 +39,9 @@ private enum CoresNotificacoes {
 struct TelaNotificacoes: View {
     var onVoltar: () -> Void = {}
 
-    @State private var itens: [NotificacaoItem] = NotificacaoItem.exemplos
+    @State private var itens: [NotificacaoItem] = []
+    @State private var carregando = true
+    @State private var erro: String?
 
     private var naoLidas: Int {
         itens.filter { !$0.lida }.count
@@ -105,61 +62,71 @@ struct TelaNotificacoes: View {
                     .padding(.top, 8)
                     .padding(.bottom, 16)
 
-                ScrollView {
-                    LazyVStack(spacing: 10) {
-                        ForEach(itens) { item in
-                            botaoCard(item)
-                        }
+                if carregando {
+                    Spacer()
+                    ProgressView().tint(.white)
+                    Spacer()
+                } else if let erro {
+                    Spacer()
+                    Text(erro)
+                        .foregroundStyle(.white.opacity(0.6))
+                        .multilineTextAlignment(.center)
+                        .padding()
+                    Button("Tentar de novo") {
+                        Task { await carregar() }
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 24)
+                    .foregroundStyle(CoresNotificacoes.roxoPrimario)
+                    Spacer()
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 10) {
+                            ForEach(itens) { item in
+                                botaoCard(item)
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 24)
+                    }
                 }
             }
         }
-        .preferredColorScheme(.dark)
+        .task { await carregar() }
     }
 
     private var cabecalho: some View {
         HStack {
-            Button {
-                onVoltar()
-            } label: {
+            Button(action: onVoltar) {
                 Image(systemName: "chevron.left")
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(.white)
                     .frame(width: 40, height: 40)
                     .background(Circle().fill(CoresNotificacoes.botaoVoltar))
             }
-            .buttonStyle(.plain)
 
-            Spacer()
-
-            Text("Notificações")
-                .font(.system(size: 18, weight: .bold))
-                .foregroundStyle(.white)
-
-            Spacer()
-
-            Button {
-                marcarTodasComoLidas()
-            } label: {
-                Text("Ler todas")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(
-                        naoLidas > 0
-                            ? CoresNotificacoes.roxoPrimario
-                            : CoresNotificacoes.textoTerciario
-                    )
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Notificações")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundStyle(.white)
+                Text(naoLidas == 0 ? "Tudo lido" : "\(naoLidas) não lidas")
+                    .font(.system(size: 13))
+                    .foregroundStyle(CoresNotificacoes.textoSecundario)
             }
-            .buttonStyle(.plain)
-            .disabled(naoLidas == 0)
-            .frame(minWidth: 72, alignment: .trailing)
+
+            Spacer()
+
+            if naoLidas > 0 {
+                Button("Ler todas") {
+                    Task { await lerTodas() }
+                }
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(CoresNotificacoes.roxoPrimario)
+            }
         }
     }
 
     private func botaoCard(_ item: NotificacaoItem) -> some View {
         Button {
-            marcarComoLida(item.id)
+            Task { await marcarComoLida(item.id) }
         } label: {
             card(item)
         }
@@ -215,19 +182,40 @@ struct TelaNotificacoes: View {
         }
     }
 
-    private func marcarComoLida(_ id: UUID) {
+    @MainActor
+    private func carregar() async {
+        carregando = true
+        erro = nil
+        do {
+            let lista = try await RotinaPlusAPI.notificacoes()
+            itens = lista.map { $0.asItem() }
+        } catch {
+            erro = error.localizedDescription
+        }
+        carregando = false
+    }
+
+    @MainActor
+    private func marcarComoLida(_ id: Int) async {
         guard let indice = itens.firstIndex(where: { $0.id == id }), !itens[indice].lida else { return }
         withAnimation(.easeInOut(duration: 0.2)) {
             itens[indice].lida = true
         }
+        do {
+            try await RotinaPlusAPI.marcarNotificacaoLida(id: id)
+        } catch {
+            itens[indice].lida = false
+        }
     }
 
-    private func marcarTodasComoLidas() {
+    @MainActor
+    private func lerTodas() async {
         withAnimation(.easeInOut(duration: 0.2)) {
             for indice in itens.indices {
                 itens[indice].lida = true
             }
         }
+        try? await RotinaPlusAPI.lerTodasNotificacoes()
     }
 }
 

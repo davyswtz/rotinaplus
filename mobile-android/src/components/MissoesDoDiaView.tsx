@@ -3,7 +3,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { cores } from '../theme/colors';
 
 export type MissaoDoDia = {
-  id: string;
+  id: number;
   icone: string;
   titulo: string;
   detalhe: string;
@@ -13,7 +13,7 @@ export type MissaoDoDia = {
 
 export const MISSOES_EXEMPLO: MissaoDoDia[] = [
   {
-    id: '1',
+    id: 1,
     icone: '💧',
     titulo: 'Beber água',
     detalhe: '2L ao longo do dia',
@@ -21,7 +21,7 @@ export const MISSOES_EXEMPLO: MissaoDoDia[] = [
     concluida: true,
   },
   {
-    id: '2',
+    id: 2,
     icone: '🏃',
     titulo: 'Treinar',
     detalhe: '30 min de movimento',
@@ -29,7 +29,7 @@ export const MISSOES_EXEMPLO: MissaoDoDia[] = [
     concluida: true,
   },
   {
-    id: '3',
+    id: 3,
     icone: '📚',
     titulo: 'Estudar',
     detalhe: '1 Pomodoro focado',
@@ -37,7 +37,7 @@ export const MISSOES_EXEMPLO: MissaoDoDia[] = [
     concluida: false,
   },
   {
-    id: '4',
+    id: 4,
     icone: '🧘',
     titulo: 'Meditar',
     detalhe: '10 min de respiração',
@@ -45,7 +45,7 @@ export const MISSOES_EXEMPLO: MissaoDoDia[] = [
     concluida: false,
   },
   {
-    id: '5',
+    id: 5,
     icone: '💰',
     titulo: 'Registrar gastos',
     detalhe: 'Anotar o dia no app',
@@ -56,7 +56,7 @@ export const MISSOES_EXEMPLO: MissaoDoDia[] = [
 
 type Props = {
   missoes: MissaoDoDia[];
-  onToggle: (id: string) => void;
+  onToggle: (id: number) => void;
 };
 
 /** Lista de missões do dia — espelha MissoesDoDiaView.swift. */
