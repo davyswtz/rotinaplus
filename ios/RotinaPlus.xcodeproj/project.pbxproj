@@ -38,7 +38,6 @@
 		BC56F3198E042E2DC7E38DC8 /* _splash_guara.png in Resources */ = {isa = PBXBuildFile; fileRef = DF227AC1062610AB4BAB7B80 /* _splash_guara.png */; };
 		CD2977F3B619690833850BC0 /* RotinaPlusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85161E62B62BE74F95E1AFFC /* RotinaPlusApp.swift */; };
 		CDC583457884B50EC4F9D614 /* TelaNotificacoes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 713AFC38548F20CEB7E8C927 /* TelaNotificacoes.swift */; };
-		F4A8B1C2D3E4F5061728394A /* TelaAcademia.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A8B1C2D3E4F5061728394B /* TelaAcademia.swift */; };
 		D3263123CFFFF320F5CAC98F /* _icons_preview.png in Resources */ = {isa = PBXBuildFile; fileRef = F8EF2ED900DB4DC58EEDC56B /* _icons_preview.png */; };
 		D9566768B2D91F4119C24E8B /* LayoutDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6078EF931F7249D1FABF5EF /* LayoutDashboard.swift */; };
 		DAF7C790B5C355351888769A /* CardPerfilHeroi.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6B0E4D73CA7586D49CB7205 /* CardPerfilHeroi.swift */; };
@@ -46,13 +45,14 @@
 		E6DCAA9C40DD92DF543A680A /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D94C60C5E896AED65A2FDCA /* AppConfig.swift */; };
 		EBB6BE2DEF5081E4667171DD /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = AFB03256A6FF8F73D5B75DF5 /* Localizable.strings */; };
 		EBB998C9D191356BC7E64787 /* _cell0.png in Resources */ = {isa = PBXBuildFile; fileRef = 08632F606ABDBCAA510C10C7 /* _cell0.png */; };
+		F4A8B1C2D3E4F5061728394A /* TelaAcademia.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A8B1C2D3E4F5061728394B /* TelaAcademia.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		08632F606ABDBCAA510C10C7 /* _cell0.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = _cell0.png; sourceTree = "<group>"; };
 		0ECAD16E703F8F6FA38184E7 /* TelaBemVindo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaBemVindo.swift; sourceTree = "<group>"; };
 		125980BFC9B0A546484E270F /* Rotina.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rotina.swift; sourceTree = "<group>"; };
-		1D3736D6B9B9DBCD4BD6E017 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		1D3736D6B9B9DBCD4BD6E017 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 		2C9C8017C0591D903A264A02 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		304E05A076A85F6859B184EF /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
 		36EE44E27F40448EF4F06915 /* HeaderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderApp.swift; sourceTree = "<group>"; };
@@ -67,7 +67,6 @@
 		5D94C60C5E896AED65A2FDCA /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
 		63DBAF71F7F90F2E93387559 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		713AFC38548F20CEB7E8C927 /* TelaNotificacoes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaNotificacoes.swift; sourceTree = "<group>"; };
-		E4A8B1C2D3E4F5061728394B /* TelaAcademia.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaAcademia.swift; sourceTree = "<group>"; };
 		7195527E68F0E912AE8FE4BD /* colecao_icones_explorador.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = colecao_icones_explorador.png; sourceTree = "<group>"; };
 		7600D5F8FA76B8FFB364AB04 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		7BDECFF96D9D7EA16D00DA42 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
@@ -87,9 +86,10 @@
 		C7B31E3FE121617ABF759DC2 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		DF227AC1062610AB4BAB7B80 /* _splash_guara.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = _splash_guara.png; sourceTree = "<group>"; };
 		E0C4B9BC4F827F0F0C2D2CE1 /* MissoesDoDiaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissoesDoDiaView.swift; sourceTree = "<group>"; };
+		E4A8B1C2D3E4F5061728394B /* TelaAcademia.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaAcademia.swift; sourceTree = "<group>"; };
 		E6078EF931F7249D1FABF5EF /* LayoutDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutDashboard.swift; sourceTree = "<group>"; };
 		F2865C182562E82CFAD74364 /* _icon0_check.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = _icon0_check.png; sourceTree = "<group>"; };
-		F6660249C15BA031E5D46016 /* RotinaPlus.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = RotinaPlus.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6660249C15BA031E5D46016 /* RotinaPlus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RotinaPlus.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F8EF2ED900DB4DC58EEDC56B /* _icons_preview.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = _icons_preview.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -108,7 +108,6 @@
 			children = (
 				63DBAF71F7F90F2E93387559 /* Info.plist */,
 				965165B369D7F8A56112045F /* App */,
-				B2337484F4500EFF28B6A63A /* Models */,
 				90F715CA16683E0B09B38BE3 /* Resources */,
 				E367A0B1708D6233C0E839C9 /* Services */,
 				3EDED179B99A9051672B4FF9 /* Utils */,
@@ -216,6 +215,7 @@
 				5D374E0472A5A0D36930F02C /* AppDelegate.swift */,
 				7600D5F8FA76B8FFB364AB04 /* RootView.swift */,
 				85161E62B62BE74F95E1AFFC /* RotinaPlusApp.swift */,
+				B2337484F4500EFF28B6A63A /* Models */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -283,8 +283,6 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1500;
-				TargetAttributes = {
-				};
 			};
 			buildConfigurationList = C3A03CE4DB018E0C9EC6B89F /* Build configuration list for PBXProject "RotinaPlus" */;
 			developmentRegion = en;
@@ -371,6 +369,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = KN5WA38572;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = RotinaPlus/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = RotinaPlus;
@@ -451,6 +450,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = KN5WA38572;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = RotinaPlus/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = RotinaPlus;
