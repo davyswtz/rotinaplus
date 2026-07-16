@@ -8,6 +8,12 @@ interface AuthState {
   error: string | null;
   hydrate: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    passwordConfirmation: string,
+  ) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -29,6 +35,20 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       await authService.login(email, password);
+      set({ isAuthenticated: true, isLoading: false });
+    } catch (error) {
+      set({
+        isAuthenticated: false,
+        isLoading: false,
+        error: error instanceof Error ? error.message : 'Erro desconhecido.',
+      });
+    }
+  },
+
+  register: async (name, email, password, passwordConfirmation) => {
+    set({ isLoading: true, error: null });
+    try {
+      await authService.register(name, email, password, passwordConfirmation);
       set({ isAuthenticated: true, isLoading: false });
     } catch (error) {
       set({

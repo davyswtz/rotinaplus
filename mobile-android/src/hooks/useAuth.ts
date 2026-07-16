@@ -5,7 +5,8 @@ export function useAuth() {
   const isLoading = useAuthStore((s) => s.isLoading);
   const error = useAuthStore((s) => s.error);
   const login = useAuthStore((s) => s.login);
+  const register = useAuthStore((s) => s.register);
   const logout = useAuthStore((s) => s.logout);
 
-  return { isAuthenticated, isLoading, error, login, logout };
+  return { isAuthenticated, isLoading, error, login, register, logout };
 }

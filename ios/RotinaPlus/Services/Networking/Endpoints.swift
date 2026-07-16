@@ -2,7 +2,9 @@ import Foundation
 
 enum Endpoints {
     case login
+    case register
     case me
+    case perfil
     case dashboard
     case missoes
     case toggleMissao(id: Int)
@@ -18,8 +20,12 @@ enum Endpoints {
         switch self {
         case .login:
             return "/api/v1/auth/login"
+        case .register:
+            return "/api/v1/auth/register"
         case .me:
             return "/api/v1/me"
+        case .perfil:
+            return "/api/v1/perfil"
         case .dashboard:
             return "/api/v1/dashboard"
         case .missoes:

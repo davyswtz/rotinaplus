@@ -19,34 +19,44 @@ import { useAuth } from '../hooks/useAuth';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { cores } from '../theme/colors';
 
-const TEST_EMAIL = __DEV__ ? 'davy@teste.com' : '';
-const TEST_PASSWORD = __DEV__ ? 'senha123' : '';
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Register'>;
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
+// MARK: - Tela de Criar Conta (Android / React Native)
+// Layout espelhado do CadastroView.swift no iOS e do LoginScreen.tsx.
 
-// MARK: - Tela de Login (Android / React Native)
-// Layout espelhado do LoginView.swift no iOS.
-// Apenas UI + hook useAuth; botões sociais são placeholders até integrar SDKs.
-
-export function LoginScreen() {
+export function RegisterScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordConfirmation, setPasswordConfirmation] = useState('');
+  const [localError, setLocalError] = useState<string | null>(null);
 
-  // MARK: - Estado local dos campos
-  const [email, setEmail] = useState(TEST_EMAIL);
-  const [password, setPassword] = useState(TEST_PASSWORD);
+  const { register, isLoading, error } = useAuth();
 
-  // MARK: - Autenticação (e-mail/senha via API)
-  const { login, isLoading, error } = useAuth();
+  const handleRegister = () => {
+    const nome = name.trim();
+    const emailTrim = email.trim();
 
-  // MARK: - Ação do botão "Entrar"
-  const handleLogin = () => {
-    if (!email.trim() || !password.trim()) {
+    if (!nome || !emailTrim || !password || !passwordConfirmation) {
+      setLocalError('Preencha todos os campos.');
       return;
     }
-    void login(email, password);
+
+    if (password !== passwordConfirmation) {
+      setLocalError('A confirmação de senha não confere.');
+      return;
+    }
+
+    if (password.length < 8) {
+      setLocalError('A senha deve ter pelo menos 8 caracteres.');
+      return;
+    }
+
+    setLocalError(null);
+    void register(nome, emailTrim, password, passwordConfirmation);
   };
 
-  // MARK: - Ações dos botões sociais (somente front — conectar depois)
   const handleGoogleLogin = () => {
     // TODO: integrar Google Sign-In e enviar token para /api/v1/auth/social
   };
@@ -55,19 +65,10 @@ export function LoginScreen() {
     // TODO: integrar Sign in with Apple e enviar token para /api/v1/auth/social
   };
 
-  // MARK: - Link "Esqueci minha senha" (somente front)
-  const handleEsqueciSenha = () => {
-    // TODO: navegar para tela de recuperação de senha
-  };
-
-  // MARK: - Link "Criar conta"
-  const handleCriarConta = () => {
-    navigation.navigate('Register');
-  };
+  const erroExibido = localError ?? error;
 
   return (
     <SafeAreaView style={styles.areaSegura}>
-      {/* MARK: Fundo roxo escuro (mesma paleta do onboarding iOS) */}
       <View style={styles.fundo} />
 
       <KeyboardAvoidingView
@@ -79,20 +80,26 @@ export function LoginScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* MARK: Cabeçalho — mascote + título + subtítulo */}
           <View style={styles.cabecalho}>
-            {/* TODO: substituir por Image(require('../assets/guara.png')) */}
             <Text style={styles.mascote}>🐾</Text>
-
-            <Text style={styles.titulo}>Entrar no RotinaPlus</Text>
-
+            <Text style={styles.titulo}>Criar conta no RotinaPlus</Text>
             <Text style={styles.subtitulo}>
-              Continue sua aventura RPG e evolua seus hábitos diários.
+              Comece sua aventura RPG e transforme hábitos em XP.
             </Text>
           </View>
 
-          {/* MARK: Formulário — e-mail e senha */}
           <View style={styles.formulario}>
+            <Text style={styles.rotulo}>Nome</Text>
+            <TextInput
+              style={styles.campo}
+              placeholder="Seu nome"
+              placeholderTextColor={cores.textoPlaceholder}
+              value={name}
+              onChangeText={setName}
+              autoCapitalize="words"
+              autoCorrect={false}
+            />
+
             <Text style={styles.rotulo}>E-mail</Text>
             <TextInput
               style={styles.campo}
@@ -108,30 +115,29 @@ export function LoginScreen() {
             <Text style={styles.rotulo}>Senha</Text>
             <TextInput
               style={styles.campo}
-              placeholder="••••••••"
+              placeholder="Mínimo 8 caracteres"
               placeholderTextColor={cores.textoPlaceholder}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
             />
 
-            {/* MARK: Link esqueci senha */}
-            <TouchableOpacity
-              style={styles.linkEsqueci}
-              onPress={handleEsqueciSenha}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.textoLink}>Esqueci minha senha</Text>
-            </TouchableOpacity>
+            <Text style={styles.rotulo}>Confirmar senha</Text>
+            <TextInput
+              style={styles.campo}
+              placeholder="Repita a senha"
+              placeholderTextColor={cores.textoPlaceholder}
+              value={passwordConfirmation}
+              onChangeText={setPasswordConfirmation}
+              secureTextEntry
+            />
           </View>
 
-          {/* MARK: Mensagem de erro da API */}
-          {error ? <Text style={styles.erro}>{error}</Text> : null}
+          {erroExibido ? <Text style={styles.erro}>{erroExibido}</Text> : null}
 
-          {/* MARK: Botão principal "Entrar" */}
           <PrimaryButton
-            title={isLoading ? 'Entrando...' : 'Entrar'}
-            onPress={handleLogin}
+            title={isLoading ? 'Criando conta...' : 'Criar conta'}
+            onPress={handleRegister}
             disabled={isLoading}
           />
 
@@ -142,14 +148,12 @@ export function LoginScreen() {
             />
           ) : null}
 
-          {/* MARK: Divisor "ou continue com" */}
           <View style={styles.divisor}>
             <View style={styles.linhaDivisor} />
             <Text style={styles.textoDivisor}>ou continue com</Text>
             <View style={styles.linhaDivisor} />
           </View>
 
-          {/* MARK: Botões de login social */}
           <View style={styles.social}>
             <SocialLoginButton
               title="Continuar com Google"
@@ -165,11 +169,13 @@ export function LoginScreen() {
             />
           </View>
 
-          {/* MARK: Rodapé — link para criar conta */}
           <View style={styles.rodape}>
-            <Text style={styles.textoRodape}>Ainda não tem conta? </Text>
-            <TouchableOpacity onPress={handleCriarConta} activeOpacity={0.7}>
-              <Text style={styles.linkCriarConta}>Criar conta</Text>
+            <Text style={styles.textoRodape}>Já tem conta? </Text>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Login')}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.linkEntrar}>Entrar</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -178,7 +184,6 @@ export function LoginScreen() {
   );
 }
 
-// MARK: - Estilos da tela de login
 const styles = StyleSheet.create({
   areaSegura: {
     flex: 1,
@@ -197,8 +202,6 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
     justifyContent: 'center',
   },
-
-  // Cabeçalho
   cabecalho: {
     alignItems: 'center',
     marginBottom: 32,
@@ -222,8 +225,6 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     paddingHorizontal: 8,
   },
-
-  // Formulário
   formulario: {
     marginBottom: 8,
   },
@@ -245,17 +246,6 @@ const styles = StyleSheet.create({
     color: cores.textoPrimario,
     marginBottom: 16,
   },
-  linkEsqueci: {
-    alignSelf: 'flex-end',
-    marginBottom: 8,
-  },
-  textoLink: {
-    color: cores.roxoPrimario,
-    fontSize: 14,
-    fontWeight: '500',
-  },
-
-  // Feedback
   erro: {
     color: cores.erro,
     fontSize: 14,
@@ -265,8 +255,6 @@ const styles = StyleSheet.create({
   carregando: {
     marginTop: 12,
   },
-
-  // Divisor social
   divisor: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -282,13 +270,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginHorizontal: 12,
   },
-
-  // Social
   social: {
     marginBottom: 24,
   },
-
-  // Rodapé
   rodape: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -298,7 +282,7 @@ const styles = StyleSheet.create({
     color: cores.textoSecundario,
     fontSize: 14,
   },
-  linkCriarConta: {
+  linkEntrar: {
     color: cores.roxoPrimario,
     fontSize: 14,
     fontWeight: '600',

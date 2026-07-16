@@ -1,8 +1,7 @@
 import SwiftUI
 
-// MARK: - Cores da tela de login
-// Paleta espelhada de TelaBemVindo.swift e do theme/colors.ts (Android).
-private enum CoresLogin {
+// MARK: - Cores da tela de cadastro (mesma paleta do login)
+private enum CoresCadastro {
     static let fundoSuperior = Color(red: 0.10, green: 0.06, blue: 0.18)
     static let fundoInferior = Color(red: 0.05, green: 0.03, blue: 0.10)
     static let roxoPrimario = Color(red: 0.48, green: 0.26, blue: 0.96)
@@ -16,65 +15,54 @@ private enum CoresLogin {
     static let botaoSocialBorda = Color.white.opacity(0.15)
 }
 
-// MARK: - Tela de Login (iOS)
-// Layout espelhado do LoginScreen.tsx no Android.
-// Apenas UI + LoginViewModel; botões sociais são placeholders até integrar SDKs.
-struct LoginView: View {
-    var onCriarConta: () -> Void = {}
+// MARK: - Tela de Criar Conta (iOS)
+// Layout espelhado do LoginView.swift / RegisterScreen.tsx (Android).
+struct CadastroView: View {
+    var onVoltar: () -> Void = {}
 
-    @StateObject private var viewModel = LoginViewModel()
+    @StateObject private var viewModel = CadastroViewModel()
 
     var body: some View {
         ZStack {
-            // MARK: Fundo
-            // Gradiente roxo escuro — mesma identidade visual do onboarding.
             LinearGradient(
-                colors: [CoresLogin.fundoSuperior, CoresLogin.fundoInferior],
+                colors: [CoresCadastro.fundoSuperior, CoresCadastro.fundoInferior],
                 startPoint: .top,
                 endPoint: .bottom
             )
             .ignoresSafeArea()
 
-            // MARK: Conteúdo rolável (evita sobreposição do teclado)
             ScrollView {
                 VStack(spacing: 0) {
-                    // MARK: Cabeçalho — mascote + título + subtítulo
                     cabecalho
                         .padding(.top, 32)
                         .padding(.bottom, 32)
 
-                    // MARK: Formulário — e-mail e senha
                     formulario
                         .padding(.bottom, 8)
 
-                    // MARK: Mensagem de erro da API
                     if let error = viewModel.errorMessage {
                         Text(error)
                             .font(.subheadline)
-                            .foregroundStyle(CoresLogin.erro)
+                            .foregroundStyle(CoresCadastro.erro)
                             .multilineTextAlignment(.center)
                             .padding(.bottom, 12)
                     }
 
-                    // MARK: Botão principal "Entrar"
-                    botaoEntrar
+                    botaoCriarConta
                         .padding(.bottom, viewModel.isLoading ? 12 : 0)
 
                     if viewModel.isLoading {
                         ProgressView()
-                            .tint(CoresLogin.roxoPrimario)
+                            .tint(CoresCadastro.roxoPrimario)
                             .padding(.bottom, 8)
                     }
 
-                    // MARK: Divisor "ou continue com"
                     divisorSocial
                         .padding(.vertical, 24)
 
-                    // MARK: Botões de login social
                     botoesSociais
                         .padding(.bottom, 24)
 
-                    // MARK: Rodapé — link para criar conta
                     rodape
                         .padding(.bottom, 32)
                 }
@@ -88,20 +76,19 @@ struct LoginView: View {
     // MARK: Cabeçalho
     private var cabecalho: some View {
         VStack(spacing: 16) {
-            // TODO: substituir por Image("guara") quando o asset estiver no projeto.
             Image(systemName: "pawprint.fill")
                 .font(.system(size: 56))
-                .foregroundStyle(CoresLogin.laranjaMascote)
+                .foregroundStyle(CoresCadastro.laranjaMascote)
 
-            Text("Entrar no RotinaPlus")
+            Text("Criar conta no RotinaPlus")
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
 
-            Text("Continue sua aventura RPG e evolua seus hábitos diários.")
+            Text("Comece sua aventura RPG e transforme hábitos em XP.")
                 .font(.subheadline)
-                .foregroundStyle(CoresLogin.textoSecundario)
+                .foregroundStyle(CoresCadastro.textoSecundario)
                 .multilineTextAlignment(.center)
                 .lineSpacing(4)
         }
@@ -111,33 +98,44 @@ struct LoginView: View {
     private var formulario: some View {
         VStack(alignment: .leading, spacing: 16) {
             campoTexto(
+                rotulo: "Nome",
+                placeholder: "Seu nome",
+                texto: $viewModel.name,
+                tipoConteudo: .name,
+                teclado: .default,
+                seguro: false,
+                autocapitalizacao: .words
+            )
+
+            campoTexto(
                 rotulo: "E-mail",
                 placeholder: "seu@email.com",
                 texto: $viewModel.email,
                 tipoConteudo: .emailAddress,
                 teclado: .emailAddress,
-                seguro: false
+                seguro: false,
+                autocapitalizacao: .never
             )
 
             campoTexto(
                 rotulo: "Senha",
-                placeholder: "••••••••",
+                placeholder: "Mínimo 8 caracteres",
                 texto: $viewModel.password,
-                tipoConteudo: .password,
+                tipoConteudo: .newPassword,
                 teclado: .default,
-                seguro: true
+                seguro: true,
+                autocapitalizacao: .never
             )
 
-            // MARK: Link esqueci senha
-            Button {
-                // TODO: navegar para tela de recuperação de senha
-            } label: {
-                Text("Esqueci minha senha")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundStyle(CoresLogin.roxoPrimario)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-            }
+            campoTexto(
+                rotulo: "Confirmar senha",
+                placeholder: "Repita a senha",
+                texto: $viewModel.passwordConfirmation,
+                tipoConteudo: .newPassword,
+                teclado: .default,
+                seguro: true,
+                autocapitalizacao: .never
+            )
         }
     }
 
@@ -148,51 +146,53 @@ struct LoginView: View {
         texto: Binding<String>,
         tipoConteudo: UITextContentType,
         teclado: UIKeyboardType,
-        seguro: Bool
+        seguro: Bool,
+        autocapitalizacao: TextInputAutocapitalization
     ) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(rotulo)
                 .font(.caption)
                 .fontWeight(.semibold)
-                .foregroundStyle(CoresLogin.textoSecundario)
+                .foregroundStyle(CoresCadastro.textoSecundario)
                 .padding(.leading, 4)
 
             Group {
                 if seguro {
                     SecureField(placeholder, text: texto)
+                        .textContentType(tipoConteudo)
                 } else {
                     TextField(placeholder, text: texto)
                         .textContentType(tipoConteudo)
                         .keyboardType(teclado)
-                        .autocapitalization(.none)
+                        .textInputAutocapitalization(autocapitalizacao)
                         .autocorrectionDisabled()
                 }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
-            .background(CoresLogin.campoFundo)
+            .background(CoresCadastro.campoFundo)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(CoresLogin.campoBorda, lineWidth: 1)
+                    .stroke(CoresCadastro.campoBorda, lineWidth: 1)
             )
             .foregroundStyle(.white)
-            .tint(CoresLogin.roxoPrimario)
+            .tint(CoresCadastro.roxoPrimario)
         }
     }
 
-    // MARK: Botão "Entrar"
-    private var botaoEntrar: some View {
+    // MARK: Botão "Criar conta"
+    private var botaoCriarConta: some View {
         Button {
-            Task { await viewModel.login() }
+            Task { await viewModel.register() }
         } label: {
-            Text(viewModel.isLoading ? "Entrando..." : "Entrar")
+            Text(viewModel.isLoading ? "Criando conta..." : "Criar conta")
                 .fontWeight(.semibold)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
                 .background(
                     viewModel.isLoading
-                        ? CoresLogin.roxoPrimario.opacity(0.45)
-                        : CoresLogin.roxoPrimario
+                        ? CoresCadastro.roxoPrimario.opacity(0.45)
+                        : CoresCadastro.roxoPrimario
                 )
                 .foregroundStyle(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 14))
@@ -204,16 +204,16 @@ struct LoginView: View {
     private var divisorSocial: some View {
         HStack(spacing: 12) {
             Rectangle()
-                .fill(CoresLogin.campoBorda)
+                .fill(CoresCadastro.campoBorda)
                 .frame(height: 1)
 
             Text("ou continue com")
                 .font(.caption)
-                .foregroundStyle(CoresLogin.textoSecundario)
+                .foregroundStyle(CoresCadastro.textoSecundario)
                 .fixedSize()
 
             Rectangle()
-                .fill(CoresLogin.campoBorda)
+                .fill(CoresCadastro.campoBorda)
                 .frame(height: 1)
         }
     }
@@ -233,7 +233,6 @@ struct LoginView: View {
         .opacity(viewModel.isLoading ? 0.5 : 1)
     }
 
-    // MARK: Botão social reutilizável
     private func botaoSocial(
         titulo: String,
         icone: String,
@@ -257,10 +256,10 @@ struct LoginView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
-            .background(CoresLogin.botaoSocialFundo)
+            .background(CoresCadastro.botaoSocialFundo)
             .overlay(
                 RoundedRectangle(cornerRadius: 14)
-                    .stroke(CoresLogin.botaoSocialBorda, lineWidth: 1)
+                    .stroke(CoresCadastro.botaoSocialBorda, lineWidth: 1)
             )
             .foregroundStyle(.white)
         }
@@ -269,22 +268,22 @@ struct LoginView: View {
     // MARK: Rodapé
     private var rodape: some View {
         HStack(spacing: 4) {
-            Text("Ainda não tem conta?")
+            Text("Já tem conta?")
                 .font(.subheadline)
-                .foregroundStyle(CoresLogin.textoSecundario)
+                .foregroundStyle(CoresCadastro.textoSecundario)
 
             Button {
-                onCriarConta()
+                onVoltar()
             } label: {
-                Text("Criar conta")
+                Text("Entrar")
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundStyle(CoresLogin.roxoPrimario)
+                    .foregroundStyle(CoresCadastro.roxoPrimario)
             }
         }
     }
 }
 
 #Preview {
-    LoginView()
+    CadastroView()
 }

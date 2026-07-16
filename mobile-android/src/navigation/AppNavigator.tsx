@@ -2,6 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { LoginScreen } from '../screens/LoginScreen';
+import { RegisterScreen } from '../screens/RegisterScreen';
 import { WelcomeScreen } from '../screens/WelcomeScreen';
 import { EscolhaAvatarScreen } from '../screens/EscolhaAvatarScreen';
 import { NomeHeroiScreen } from '../screens/NomeHeroiScreen';
@@ -11,6 +12,7 @@ import { useAuthStore } from '../store/authStore';
 
 export type RootStackParamList = {
   Login: undefined;
+  Register: undefined;
   Welcome: undefined;
   EscolhaAvatar: undefined;
   NomeHeroi: { avatarId: string };
@@ -44,7 +46,10 @@ export function AppNavigator() {
             <Stack.Screen name="Notificacoes" component={NotificacoesScreen} />
           </>
         ) : (
-          <Stack.Screen name="Login" component={LoginScreen} />
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Register" component={RegisterScreen} />
+          </>
         )}
       </Stack.Navigator>
     </NavigationContainer>

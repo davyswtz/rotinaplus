@@ -34,10 +34,12 @@ extension AvatarExplorador {
 /// Passo 3 de 3 — nome do herói + preview do avatar escolhido.
 struct TelaNomeHeroi: View {
     let avatar: AvatarExplorador
-    var onComecar: (String) -> Void = { _ in }
+    var onComecar: (String) async throws -> Void = { _ in }
     var onVoltar: () -> Void = {}
 
     @State private var nome = ""
+    @State private var salvando = false
+    @State private var erroSalvar: String?
     @FocusState private var focoNome: Bool
 
     private let limiteNome = 20
@@ -89,24 +91,48 @@ struct TelaNomeHeroi: View {
 
                 Spacer(minLength: 16)
 
+                if let erroSalvar {
+                    Text(erroSalvar)
+                        .font(.subheadline)
+                        .foregroundStyle(Color(red: 1.0, green: 0.27, blue: 0.23))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 8)
+                }
+
                 Button {
                     let limpo = nome.trimmingCharacters(in: .whitespacesAndNewlines)
-                    guard !limpo.isEmpty else { return }
-                    onComecar(limpo)
+                    guard !limpo.isEmpty, !salvando else { return }
+                    salvando = true
+                    erroSalvar = nil
+                    Task {
+                        do {
+                            try await onComecar(limpo)
+                        } catch {
+                            erroSalvar = error.localizedDescription
+                            salvando = false
+                        }
+                    }
                 } label: {
-                    Text("Começar aventura 🦊⚡")
-                        .fontWeight(.semibold)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 18)
-                        .background(
-                            nomeValido
-                                ? CoresNomeHeroi.roxoPrimario
-                                : CoresNomeHeroi.roxoPrimario.opacity(0.45)
-                        )
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                    HStack(spacing: 8) {
+                        if salvando {
+                            ProgressView()
+                                .tint(.white)
+                        }
+                        Text(salvando ? "Salvando herói..." : "Começar aventura 🦊⚡")
+                            .fontWeight(.semibold)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 18)
+                    .background(
+                        nomeValido && !salvando
+                            ? CoresNomeHeroi.roxoPrimario
+                            : CoresNomeHeroi.roxoPrimario.opacity(0.45)
+                    )
+                    .foregroundStyle(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
                 }
-                .disabled(!nomeValido)
+                .disabled(!nomeValido || salvando)
                 .padding(.horizontal, 24)
 
                 Button {

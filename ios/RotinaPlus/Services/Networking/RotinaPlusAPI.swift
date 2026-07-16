@@ -13,6 +13,43 @@ enum RotinaPlusAPI {
         return data
     }
 
+    static func updatePerfil(
+        nomeHeroi: String,
+        avatarKey: String,
+        classe: String,
+        emojiClasse: String
+    ) async throws -> PerfilAPI {
+        struct Body: Encodable {
+            let nomeHeroi: String
+            let avatarKey: String
+            let classe: String
+            let emojiClasse: String
+
+            enum CodingKeys: String, CodingKey {
+                case nomeHeroi = "nome_heroi"
+                case avatarKey = "avatar_key"
+                case classe
+                case emojiClasse = "emoji_classe"
+            }
+        }
+
+        let response: APIResponse<PerfilAPI> = try await APIClient.shared.request(
+            endpoint: .perfil,
+            method: .put,
+            body: Body(
+                nomeHeroi: nomeHeroi,
+                avatarKey: avatarKey,
+                classe: classe,
+                emojiClasse: emojiClasse
+            ),
+            requiresAuth: true
+        )
+        guard let data = response.data else {
+            throw APIError.invalidResponse
+        }
+        return data
+    }
+
     static func toggleMissao(id: Int) async throws -> MissaoAPI {
         let response: APIResponse<MissaoAPI> = try await APIClient.shared.request(
             endpoint: .toggleMissao(id: id),

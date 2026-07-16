@@ -7,9 +7,14 @@ private enum OnboardingFase {
     case home
 }
 
+private enum AuthGuestRoute: Hashable {
+    case cadastro
+}
+
 struct RootView: View {
     @ObservedObject private var authManager = AuthManager.shared
     @State private var onboarding: OnboardingFase = Self.faseInicial
+    @State private var guestPath = NavigationPath()
     @State private var avatarSelecionado: AvatarExplorador = .guaraSerio
     @State private var mostrandoLoading = true
 
@@ -50,9 +55,28 @@ struct RootView: View {
                     TelaNomeHeroi(
                         avatar: avatarSelecionado,
                         onComecar: { nome in
+                            let traco = avatarSelecionado.traco
+                            let avatarKey = AvatarHelper.apiKey(from: avatarSelecionado.rawValue)
+
                             UserDefaults.standard.set(nome, forKey: "nome_heroi")
-                            withAnimation(.easeInOut(duration: 0.25)) {
-                                onboarding = .home
+                            UserDefaults.standard.set(
+                                avatarSelecionado.rawValue,
+                                forKey: "avatar_selecionado"
+                            )
+
+                            // Persiste no backend para a Home (dashboard) exibir o herói certo.
+                            _ = try await RotinaPlusAPI.updatePerfil(
+                                nomeHeroi: nome,
+                                avatarKey: avatarKey,
+                                classe: traco.nome,
+                                emojiClasse: traco.emoji
+                            )
+
+                            await MainActor.run {
+                                authManager.markOnboardingComplete()
+                                withAnimation(.easeInOut(duration: 0.25)) {
+                                    onboarding = .home
+                                }
                             }
                         },
                         onVoltar: {
@@ -65,7 +89,24 @@ struct RootView: View {
                     HomeView()
                 }
             } else {
-                LoginView()
+                // MARK: Fluxo guest — Login → Criar conta
+                NavigationStack(path: $guestPath) {
+                    LoginView(
+                        onCriarConta: {
+                            guestPath.append(AuthGuestRoute.cadastro)
+                        }
+                    )
+                    .navigationDestination(for: AuthGuestRoute.self) { route in
+                        switch route {
+                        case .cadastro:
+                            CadastroView(
+                                onVoltar: {
+                                    guestPath.removeLast()
+                                }
+                            )
+                        }
+                    }
+                }
             }
         }
         .onAppear {
@@ -78,8 +119,11 @@ struct RootView: View {
         }
         .onChange(of: authManager.isAuthenticated) { autenticado in
             if autenticado {
-                onboarding = Self.faseInicial
+                // Conta nova: sempre Bem-vindo → avatar → nome → Home.
+                // Login: retoma Home se o onboarding local já foi concluído.
+                onboarding = authManager.forceOnboarding ? .bemVindo : Self.faseInicial
                 avatarSelecionado = .guaraSerio
+                guestPath = NavigationPath()
             }
         }
     }

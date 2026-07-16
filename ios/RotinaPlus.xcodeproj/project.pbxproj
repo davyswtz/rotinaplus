@@ -14,6 +14,8 @@
 		1C379C0B1D009404FD32089F /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BDECFF96D9D7EA16D00DA42 /* User.swift */; };
 		A11D45B0A8D00000000002 /* DashboardModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11D45B0A8D00000000001 /* DashboardModels.swift */; };
 		A011A7115A910000000002 /* RotinaPlusAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A011A7115A910000000001 /* RotinaPlusAPI.swift */; };
+		B0CADA50A8D00000000002 /* CadastroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0CADA50A8D00000000001 /* CadastroView.swift */; };
+		B0CADA50A8D00000000004 /* CadastroViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0CADA50A8D00000000003 /* CadastroViewModel.swift */; };
 		1D11F24CE886B10D693156D7 /* ProgressoDiarioCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7A494F59A17ADF97C21BFC9 /* ProgressoDiarioCard.swift */; };
 		209F2BDFFA6B1099BA65F5F0 /* _content_mask.png in Resources */ = {isa = PBXBuildFile; fileRef = 7FF3BF138F2FE9DEAC6CD397 /* _content_mask.png */; };
 		28F2ED12AC657D19EB2001A1 /* FooterNavegacao.swift in Sources */ = {isa = PBXBuildFile; fileRef = 597840AEC84B2E30C6C8DAC6 /* FooterNavegacao.swift */; };
@@ -57,6 +59,8 @@
 		1D3736D6B9B9DBCD4BD6E017 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 		2C9C8017C0591D903A264A02 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		304E05A076A85F6859B184EF /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
+		B0CADA50A8D00000000001 /* CadastroView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CadastroView.swift; sourceTree = "<group>"; };
+		B0CADA50A8D00000000003 /* CadastroViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CadastroViewModel.swift; sourceTree = "<group>"; };
 		36EE44E27F40448EF4F06915 /* HeaderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderApp.swift; sourceTree = "<group>"; };
 		3DC5E216D08AE7B9B009E435 /* TelaLoading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaLoading.swift; sourceTree = "<group>"; };
 		3EC6EA046F94F6FA0EC3D5AE /* Endpoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Endpoints.swift; sourceTree = "<group>"; };
@@ -169,6 +173,7 @@
 			children = (
 				9368C816DE1CA6CD890F75B0 /* HomeView.swift */,
 				40D7E49E387608C929069271 /* LoginView.swift */,
+				B0CADA50A8D00000000001 /* CadastroView.swift */,
 				0ECAD16E703F8F6FA38184E7 /* TelaBemVindo.swift */,
 				80BBB4E7A5C758E62CE4DC19 /* TelaCriePersonagem.swift */,
 				BDB438512CABDF75AA754A5D /* TelaEscolhaAvatar.swift */,
@@ -248,6 +253,7 @@
 			isa = PBXGroup;
 			children = (
 				2C9C8017C0591D903A264A02 /* LoginViewModel.swift */,
+				B0CADA50A8D00000000003 /* CadastroViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -349,6 +355,8 @@
 				D9566768B2D91F4119C24E8B /* LayoutDashboard.swift in Sources */,
 				89D0441C35B855202146CD91 /* LoginView.swift in Sources */,
 				81033F456D18267F1CECE0AE /* LoginViewModel.swift in Sources */,
+				B0CADA50A8D00000000002 /* CadastroView.swift in Sources */,
+				B0CADA50A8D00000000004 /* CadastroViewModel.swift in Sources */,
 				68F93255BFE614C7C573955C /* MissoesDoDiaView.swift in Sources */,
 				A42611753EC809A312832560 /* PrimaryButton.swift in Sources */,
 				1D11F24CE886B10D693156D7 /* ProgressoDiarioCard.swift in Sources */,

@@ -82,7 +82,10 @@ Todas as respostas de erro da API seguem este formato:
 | Método | Endpoint | Auth | Descrição |
 |--------|----------|------|-----------|
 | POST | `/auth/login` | Não | Login email/senha → `{ user, perfil, token }` |
+| POST | `/auth/register` | Não | Criar conta → `{ user, perfil, token }` (201) |
 | POST | `/auth/social` | Não | Login social |
+
+**Register body:** `{ name, email, password, password_confirmation }` — senha mín. 8 caracteres.
 
 ### Perfil / Dashboard
 

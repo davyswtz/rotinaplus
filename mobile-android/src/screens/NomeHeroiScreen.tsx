@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import {
+  ActivityIndicator,
   Image,
   ImageSourcePropType,
   StyleSheet,
@@ -14,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { cores } from '../theme/colors';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { updatePerfil } from '../services/rotinaApi';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'NomeHeroi'>;
 type Rota = RouteProp<RootStackParamList, 'NomeHeroi'>;
@@ -59,10 +61,34 @@ export function NomeHeroiScreen() {
   const route = useRoute<Rota>();
   const avatarId = route.params?.avatarId ?? 'guara_serio';
   const [nome, setNome] = useState('');
+  const [salvando, setSalvando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
 
   const source = AVATAR_SOURCES[avatarId] ?? AVATAR_SOURCES.guara_serio;
   const traco = useMemo(() => tracoDoAvatar(avatarId), [avatarId]);
   const nomeValido = nome.trim().length > 0;
+
+  const handleComecar = async () => {
+    const limpo = nome.trim();
+    if (!limpo || salvando) return;
+
+    setSalvando(true);
+    setErro(null);
+    try {
+      await updatePerfil({
+        nome_heroi: limpo,
+        avatar_key: avatarId,
+        classe: traco.nome,
+        emoji_classe: traco.emoji,
+      });
+      await AsyncStorage.setItem('nome_heroi', limpo);
+      await AsyncStorage.setItem('avatar_selecionado', avatarId);
+      navigation.replace('Home');
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : 'Falha ao salvar perfil.');
+      setSalvando(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.areaSegura}>
@@ -100,30 +126,39 @@ export function NomeHeroiScreen() {
           autoCapitalize="words"
           autoCorrect={false}
           maxLength={LIMITE_NOME}
+          editable={!salvando}
         />
         <Text style={styles.contador}>
           {nome.length}/{LIMITE_NOME}
         </Text>
 
+        {erro ? <Text style={styles.erro}>{erro}</Text> : null}
+
         <View style={styles.espacador} />
 
         <TouchableOpacity
-          style={[styles.botaoComecar, !nomeValido && styles.botaoDesabilitado]}
+          style={[
+            styles.botaoComecar,
+            (!nomeValido || salvando) && styles.botaoDesabilitado,
+          ]}
           onPress={() => {
-            if (!nomeValido) return;
-            void AsyncStorage.setItem('nome_heroi', nome.trim());
-            navigation.replace('Home');
+            void handleComecar();
           }}
           activeOpacity={0.85}
-          disabled={!nomeValido}
+          disabled={!nomeValido || salvando}
         >
-          <Text style={styles.textoComecar}>Começar aventura 🦊⚡</Text>
+          {salvando ? (
+            <ActivityIndicator color={cores.textoPrimario} />
+          ) : (
+            <Text style={styles.textoComecar}>Começar aventura 🦊⚡</Text>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.botaoVoltar}
           onPress={() => navigation.replace('EscolhaAvatar')}
           activeOpacity={0.7}
+          disabled={salvando}
         >
           <Text style={styles.textoVoltar}>← Voltar</Text>
         </TouchableOpacity>
@@ -231,6 +266,12 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     fontSize: 12,
     color: 'rgba(255,255,255,0.55)',
+  },
+  erro: {
+    marginTop: 12,
+    color: cores.erro,
+    fontSize: 14,
+    textAlign: 'center',
   },
   espacador: {
     flex: 1,
