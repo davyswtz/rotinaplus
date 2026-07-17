@@ -131,8 +131,18 @@ XP das missões: ≈ 35% do `xp_proximo_nivel` distribuído nas 5 padrão (peso 
 | DELETE | `/financas/transacoes/{id}` | Remove transação |
 | POST | `/financas/metas` | Cria meta financeira |
 | PATCH | `/financas/metas/{id}` | Atualiza meta (título / valor atual) |
+| GET | `/financas/pluggy/status` | Status da integração Pluggy |
+| POST | `/financas/pluggy/connect-token` | Token para o widget Connect (sandbox) |
+| POST | `/financas/pluggy/vincular` | Vincula `item_id` e importa transações |
+| POST | `/financas/pluggy/sincronizar` | Re-sincroniza conexão existente |
 
 Valores monetários em **centavos** (`valor_centavos`). Categorias de despesa: `moradia`, `alimentacao`, `transporte`, `lazer`, `saude`, `educacao`, `outros`.
+
+#### Pluggy sandbox
+
+1. Crie conta em [dashboard.pluggy.ai](https://dashboard.pluggy.ai) e copie `CLIENT_ID` / `CLIENT_SECRET` para o `.env`.
+2. No app: **Conectar sandbox** → conector Sandbox → `user-ok` / `password-ok` (MFA `123456` se pedir).
+3. Sem chaves: `PLUGGY_LOCAL_SANDBOX=true` importa um sandbox local para testar a UI.
 
 #### POST /financas/transacoes — Body
 

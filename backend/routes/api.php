@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\FinancasController;
 use App\Http\Controllers\Api\MissaoController;
 use App\Http\Controllers\Api\NotificacaoController;
 use App\Http\Controllers\Api\PerfilController;
+use App\Http\Controllers\Api\PluggyController;
 use App\Http\Controllers\Api\RotinaController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -40,6 +41,11 @@ Route::prefix('v1')->group(function () {
         Route::delete('/financas/transacoes/{id}', [FinancasController::class, 'destroyTransacao']);
         Route::post('/financas/metas', [FinancasController::class, 'storeMeta']);
         Route::patch('/financas/metas/{id}', [FinancasController::class, 'updateMeta']);
+
+        Route::get('/financas/pluggy/status', [PluggyController::class, 'status']);
+        Route::post('/financas/pluggy/connect-token', [PluggyController::class, 'connectToken']);
+        Route::post('/financas/pluggy/vincular', [PluggyController::class, 'vincular']);
+        Route::post('/financas/pluggy/sincronizar', [PluggyController::class, 'sincronizar']);
 
         Route::apiResource('rotinas', RotinaController::class);
     });

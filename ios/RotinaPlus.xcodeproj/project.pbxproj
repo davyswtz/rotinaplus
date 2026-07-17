@@ -53,6 +53,7 @@
 		EBB998C9D191356BC7E64787 /* _cell0.png in Resources */ = {isa = PBXBuildFile; fileRef = 08632F606ABDBCAA510C10C7 /* _cell0.png */; };
 		F4A8B1C2D3E4F5061728394A /* TelaAcademia.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A8B1C2D3E4F5061728394B /* TelaAcademia.swift */; };
 		F1N4NC45A8D00000000002 /* TelaFinancas.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1N4NC45A8D00000000001 /* TelaFinancas.swift */; };
+		PLUGGYCONN5A8D000000002 /* PluggyConnectSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = PLUGGYCONN5A8D000000001 /* PluggyConnectSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -101,6 +102,7 @@
 		D2ADDM155A8D0000000001 /* AdicionarMissaoSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdicionarMissaoSheet.swift; sourceTree = "<group>"; };
 		E4A8B1C2D3E4F5061728394B /* TelaAcademia.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaAcademia.swift; sourceTree = "<group>"; };
 		F1N4NC45A8D00000000001 /* TelaFinancas.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaFinancas.swift; sourceTree = "<group>"; };
+		PLUGGYCONN5A8D000000001 /* PluggyConnectSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluggyConnectSheet.swift; sourceTree = "<group>"; };
 		E6078EF931F7249D1FABF5EF /* LayoutDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutDashboard.swift; sourceTree = "<group>"; };
 		F2865C182562E82CFAD74364 /* _icon0_check.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = _icon0_check.png; sourceTree = "<group>"; };
 		F6660249C15BA031E5D46016 /* RotinaPlus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RotinaPlus.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -188,6 +190,7 @@
 				AEB298F80086AB3BA2B83FFB /* TelaNomeHeroi.swift */,
 				E4A8B1C2D3E4F5061728394B /* TelaAcademia.swift */,
 				F1N4NC45A8D00000000001 /* TelaFinancas.swift */,
+				PLUGGYCONN5A8D000000001 /* PluggyConnectSheet.swift */,
 				713AFC38548F20CEB7E8C927 /* TelaNotificacoes.swift */,
 			);
 			path = Screens;
@@ -381,6 +384,7 @@
 				8EEDE49A57999BCBAE0EC531 /* TelaNomeHeroi.swift in Sources */,
 				F4A8B1C2D3E4F5061728394A /* TelaAcademia.swift in Sources */,
 				F1N4NC45A8D00000000002 /* TelaFinancas.swift in Sources */,
+				PLUGGYCONN5A8D000000002 /* PluggyConnectSheet.swift in Sources */,
 				CDC583457884B50EC4F9D614 /* TelaNotificacoes.swift in Sources */,
 				1C379C0B1D009404FD32089F /* User.swift in Sources */,
 				A11D45B0A8D00000000002 /* DashboardModels.swift in Sources */,

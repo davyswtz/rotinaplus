@@ -24,6 +24,7 @@ class FinancasTransacaoResource extends JsonResource
             'icone' => $this->icone,
             'valor_centavos' => $this->valor_centavos,
             'data' => $this->data?->toDateString(),
+            'origem' => $this->origem ?? 'manual',
         ];
     }
 }

@@ -18,6 +18,9 @@ enum Endpoints {
     case financasTransacao(id: Int)
     case financasMetas
     case financasMeta(id: Int)
+    case pluggyConnectToken
+    case pluggyVincular
+    case pluggySincronizar
     case rotinas
     case rotina(id: Int)
 
@@ -60,6 +63,12 @@ enum Endpoints {
             return "/api/v1/financas/metas"
         case .financasMeta(let id):
             return "/api/v1/financas/metas/\(id)"
+        case .pluggyConnectToken:
+            return "/api/v1/financas/pluggy/connect-token"
+        case .pluggyVincular:
+            return "/api/v1/financas/pluggy/vincular"
+        case .pluggySincronizar:
+            return "/api/v1/financas/pluggy/sincronizar"
         case .rotinas:
             return "/api/v1/rotinas"
         case .rotina(let id):

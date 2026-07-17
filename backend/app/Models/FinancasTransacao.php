@@ -17,6 +17,9 @@ class FinancasTransacao extends Model
         'icone',
         'valor_centavos',
         'data',
+        'origem',
+        'external_id',
+        'conexao_id',
     ];
 
     protected function casts(): array
@@ -30,5 +33,10 @@ class FinancasTransacao extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function conexao(): BelongsTo
+    {
+        return $this->belongsTo(FinancasConexao::class, 'conexao_id');
     }
 }

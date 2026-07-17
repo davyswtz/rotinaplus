@@ -43,4 +43,11 @@ return [
         'client_id' => env('GOOGLE_CLIENT_ID'),
     ],
 
+    'pluggy' => [
+        'client_id' => env('PLUGGY_CLIENT_ID'),
+        'client_secret' => env('PLUGGY_CLIENT_SECRET'),
+        // Sem chaves Pluggy, permite sync local de sandbox para testes.
+        'local_sandbox' => env('PLUGGY_LOCAL_SANDBOX', true),
+    ],
+
 ];

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\FinancasMetaResource;
 use App\Http\Resources\FinancasTransacaoResource;
 use App\Services\FinancasService;
+use App\Services\Pluggy\PluggySyncService;
 use App\Support\FinancasCatalog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,6 +16,7 @@ class FinancasController extends Controller
 {
     public function __construct(
         private readonly FinancasService $financasService,
+        private readonly PluggySyncService $pluggySync,
     ) {}
 
     public function show(Request $request): JsonResponse
@@ -39,6 +41,7 @@ class FinancasController extends Controller
                 'transacoes' => FinancasTransacaoResource::collection($data['transacoes']),
                 'metas' => FinancasMetaResource::collection($data['metas']),
                 'categorias' => $data['categorias'],
+                'pluggy' => $this->pluggySync->status($request->user()),
             ],
         ]);
     }

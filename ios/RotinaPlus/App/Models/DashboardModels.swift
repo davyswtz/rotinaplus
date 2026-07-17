@@ -253,9 +253,10 @@ struct FinancasTransacaoAPI: Codable, Equatable, Identifiable {
     var icone: String
     var valorCentavos: Int
     var data: String
+    var origem: String?
 
     enum CodingKeys: String, CodingKey {
-        case id, tipo, categoria, titulo, icone, data
+        case id, tipo, categoria, titulo, icone, data, origem
         case categoriaNome = "categoria_nome"
         case categoriaCor = "categoria_cor"
         case valorCentavos = "valor_centavos"
@@ -294,6 +295,52 @@ struct FinancasCategoriasAPI: Codable, Equatable {
     var receita: FinancasCategoriaAPI
 }
 
+struct FinancasConexaoAPI: Codable, Equatable, Identifiable {
+    let id: Int
+    var provider: String
+    var itemId: String?
+    var connectorName: String?
+    var status: String
+    var lastSyncAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, provider, status
+        case itemId = "item_id"
+        case connectorName = "connector_name"
+        case lastSyncAt = "last_sync_at"
+    }
+}
+
+struct FinancasPluggyAPI: Codable, Equatable {
+    var configured: Bool
+    var localSandbox: Bool
+    var conexoes: [FinancasConexaoAPI]
+
+    enum CodingKeys: String, CodingKey {
+        case configured, conexoes
+        case localSandbox = "local_sandbox"
+    }
+
+    var temConexao: Bool { !conexoes.isEmpty }
+}
+
+struct PluggyConnectTokenAPI: Codable, Equatable {
+    var mode: String
+    var accessToken: String
+    var includeSandbox: Bool?
+
+    enum CodingKeys: String, CodingKey {
+        case mode
+        case accessToken = "access_token"
+        case includeSandbox = "include_sandbox"
+    }
+}
+
+struct PluggySyncResultAPI: Codable, Equatable {
+    var importadas: Int
+    var atualizadas: Int
+}
+
 struct FinancasAPI: Codable, Equatable {
     var anoMes: String
     var mesLabel: String
@@ -307,9 +354,10 @@ struct FinancasAPI: Codable, Equatable {
     var transacoes: [FinancasTransacaoAPI]
     var metas: [FinancasMetaAPI]
     var categorias: FinancasCategoriasAPI
+    var pluggy: FinancasPluggyAPI?
 
     enum CodingKeys: String, CodingKey {
-        case meses, distribuicao, recentes, transacoes, metas, categorias
+        case meses, distribuicao, recentes, transacoes, metas, categorias, pluggy
         case anoMes = "ano_mes"
         case mesLabel = "mes_label"
         case saldoCentavos = "saldo_centavos"

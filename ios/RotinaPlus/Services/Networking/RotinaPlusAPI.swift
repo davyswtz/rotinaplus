@@ -244,4 +244,45 @@ enum RotinaPlusAPI {
         }
         return data
     }
+
+    static func pluggyConnectToken() async throws -> PluggyConnectTokenAPI {
+        let response: APIResponse<PluggyConnectTokenAPI> = try await APIClient.shared.request(
+            endpoint: .pluggyConnectToken,
+            method: .post,
+            requiresAuth: true
+        )
+        guard let data = response.data else {
+            throw APIError.invalidResponse
+        }
+        return data
+    }
+
+    static func pluggyVincular(itemId: String) async throws -> PluggySyncResultAPI {
+        struct Body: Encodable {
+            let itemId: String
+            enum CodingKeys: String, CodingKey { case itemId = "item_id" }
+        }
+        let response: APIResponse<PluggySyncResultAPI> = try await APIClient.shared.request(
+            endpoint: .pluggyVincular,
+            method: .post,
+            body: Body(itemId: itemId),
+            requiresAuth: true
+        )
+        guard let data = response.data else {
+            throw APIError.invalidResponse
+        }
+        return data
+    }
+
+    static func pluggySincronizar() async throws -> PluggySyncResultAPI {
+        let response: APIResponse<PluggySyncResultAPI> = try await APIClient.shared.request(
+            endpoint: .pluggySincronizar,
+            method: .post,
+            requiresAuth: true
+        )
+        guard let data = response.data else {
+            throw APIError.invalidResponse
+        }
+        return data
+    }
 }

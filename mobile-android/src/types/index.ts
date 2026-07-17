@@ -168,6 +168,21 @@ export interface FinancasCategorias {
   receita: FinancasCategoria;
 }
 
+export interface FinancasConexao {
+  id: number;
+  provider: string;
+  item_id: string | null;
+  connector_name: string | null;
+  status: string;
+  last_sync_at: string | null;
+}
+
+export interface FinancasPluggy {
+  configured: boolean;
+  local_sandbox: boolean;
+  conexoes: FinancasConexao[];
+}
+
 export interface FinancasData {
   ano_mes: string;
   mes_label: string;
@@ -181,6 +196,18 @@ export interface FinancasData {
   transacoes: FinancasTransacao[];
   metas: FinancasMeta[];
   categorias: FinancasCategorias;
+  pluggy?: FinancasPluggy;
+}
+
+export interface PluggyConnectToken {
+  mode: string;
+  access_token: string;
+  include_sandbox?: boolean;
+}
+
+export interface PluggySyncResult {
+  importadas: number;
+  atualizadas: number;
 }
 
 export function avatarAssetKey(key: string): string {

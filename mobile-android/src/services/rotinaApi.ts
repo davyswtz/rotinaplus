@@ -113,6 +113,37 @@ export async function atualizarMeta(
   return data.data;
 }
 
+export async function pluggyConnectToken(): Promise<
+  import('../types').PluggyConnectToken
+> {
+  const { data } = await api.post<ApiResponse<import('../types').PluggyConnectToken>>(
+    '/api/v1/financas/pluggy/connect-token',
+  );
+  if (!data.data) throw new Error(data.message || 'Falha no connect token.');
+  return data.data;
+}
+
+export async function pluggyVincular(
+  itemId: string,
+): Promise<import('../types').PluggySyncResult> {
+  const { data } = await api.post<ApiResponse<import('../types').PluggySyncResult>>(
+    '/api/v1/financas/pluggy/vincular',
+    { item_id: itemId },
+  );
+  if (!data.data) throw new Error(data.message || 'Falha ao vincular banco.');
+  return data.data;
+}
+
+export async function pluggySincronizar(): Promise<
+  import('../types').PluggySyncResult
+> {
+  const { data } = await api.post<ApiResponse<import('../types').PluggySyncResult>>(
+    '/api/v1/financas/pluggy/sincronizar',
+  );
+  if (!data.data) throw new Error(data.message || 'Falha ao sincronizar.');
+  return data.data;
+}
+
 export async function updatePerfil(
   payload: Partial<Pick<Perfil, 'nome_heroi' | 'avatar_key' | 'classe' | 'emoji_classe'>>,
 ): Promise<Perfil> {

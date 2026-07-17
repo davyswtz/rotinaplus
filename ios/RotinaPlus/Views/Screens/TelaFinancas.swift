@@ -63,6 +63,10 @@ struct TelaFinancas: View {
     @State private var mostrarAdicionar = false
     @State private var mostrarTransacoes = false
     @State private var mostrarMetas = false
+    @State private var mostrarPluggy = false
+    @State private var pluggyToken: String?
+    @State private var syncMensagem: String?
+    @State private var syncando = false
 
     var body: some View {
         GeometryReader { geo in
@@ -117,6 +121,16 @@ struct TelaFinancas: View {
                             saldo: dados.saldoCentavos,
                             receita: dados.receitaCentavos,
                             gastos: dados.gastosCentavos
+                        )
+                        .padding(.horizontal, pad)
+                        .padding(.top, gap)
+
+                        BancoConnectCard(
+                            pluggy: dados.pluggy,
+                            syncando: syncando,
+                            mensagem: syncMensagem,
+                            onConectar: { Task { await conectarBanco() } },
+                            onSincronizar: { Task { await sincronizarBanco() } }
                         )
                         .padding(.horizontal, pad)
                         .padding(.top, gap)
@@ -200,6 +214,18 @@ struct TelaFinancas: View {
                 )
             }
         }
+        .sheet(isPresented: $mostrarPluggy) {
+            if let token = pluggyToken {
+                PluggyConnectSheet(
+                    accessToken: token,
+                    onSuccess: { itemId in
+                        mostrarPluggy = false
+                        Task { await vincularItem(itemId) }
+                    },
+                    onCancel: { mostrarPluggy = false }
+                )
+            }
+        }
     }
 
     @MainActor
@@ -214,6 +240,133 @@ struct TelaFinancas: View {
             erro = error.localizedDescription
         }
         carregando = false
+    }
+
+    @MainActor
+    private func conectarBanco() async {
+        syncMensagem = nil
+        syncando = true
+        do {
+            let token = try await RotinaPlusAPI.pluggyConnectToken()
+            if token.mode == "local" {
+                await vincularItem("local-sandbox")
+            } else {
+                pluggyToken = token.accessToken
+                mostrarPluggy = true
+            }
+        } catch {
+            syncMensagem = error.localizedDescription
+        }
+        syncando = false
+    }
+
+    @MainActor
+    private func vincularItem(_ itemId: String) async {
+        syncando = true
+        do {
+            let result = try await RotinaPlusAPI.pluggyVincular(itemId: itemId)
+            syncMensagem = "Importadas \(result.importadas) · atualizadas \(result.atualizadas)"
+            await carregar(mes: mesSelecionado ?? dados?.anoMes)
+        } catch {
+            syncMensagem = error.localizedDescription
+        }
+        syncando = false
+    }
+
+    @MainActor
+    private func sincronizarBanco() async {
+        syncando = true
+        syncMensagem = nil
+        do {
+            let result = try await RotinaPlusAPI.pluggySincronizar()
+            syncMensagem = "Importadas \(result.importadas) · atualizadas \(result.atualizadas)"
+            await carregar(mes: mesSelecionado ?? dados?.anoMes)
+        } catch {
+            syncMensagem = error.localizedDescription
+        }
+        syncando = false
+    }
+}
+
+// MARK: - Banco / Pluggy
+
+private struct BancoConnectCard: View {
+    let pluggy: FinancasPluggyAPI?
+    var syncando: Bool
+    var mensagem: String?
+    var onConectar: () -> Void
+    var onSincronizar: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("BANCO (SANDBOX)")
+                .font(.system(size: 11, weight: .bold))
+                .tracking(1.0)
+                .foregroundStyle(CoresFinancas.label)
+
+            if let nome = pluggy?.conexoes.first?.connectorName {
+                Text(nome)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.white)
+                Text("Conectado · sync automático via Pluggy")
+                    .font(.system(size: 12))
+                    .foregroundStyle(CoresFinancas.label)
+            } else {
+                Text("Conecte o sandbox para importar transações automaticamente.")
+                    .font(.system(size: 13))
+                    .foregroundStyle(CoresFinancas.label)
+            }
+
+            HStack(spacing: 10) {
+                Button(action: onConectar) {
+                    Text(pluggy?.temConexao == true ? "Reconectar" : "Conectar sandbox")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(RoundedRectangle(cornerRadius: 12).fill(CoresFinancas.roxo))
+                }
+                .buttonStyle(.plain)
+                .disabled(syncando)
+
+                if pluggy?.temConexao == true {
+                    Button(action: onSincronizar) {
+                        Text(syncando ? "…" : "Sincronizar")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundStyle(CoresFinancas.roxo)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(CoresFinancas.roxo, lineWidth: 1)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(syncando)
+                }
+            }
+
+            if let mensagem {
+                Text(mensagem)
+                    .font(.system(size: 12))
+                    .foregroundStyle(CoresFinancas.verde)
+            }
+
+            if pluggy?.configured != true && pluggy?.localSandbox == true {
+                Text("Modo local: sem chaves Pluggy ainda. Toque em Conectar para importar o sandbox de teste.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(CoresFinancas.label)
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(CoresFinancas.card)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(CoresFinancas.borda, lineWidth: 1)
+        )
     }
 }
 
