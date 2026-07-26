@@ -1,10 +1,10 @@
 import SwiftUI
 
-// MARK: - Cores (onboarding + acento teal do mock)
+// MARK: - Cores (onboarding)
 private enum CoresNomeHeroi {
-    static let fundoSuperior = Color(red: 0.10, green: 0.06, blue: 0.18)
-    static let fundoInferior = Color(red: 0.05, green: 0.03, blue: 0.10)
-    static let roxoPrimario = Color(red: 0.48, green: 0.26, blue: 0.96)
+    static let fundoSuperior = Color(red: 0.094, green: 0.078, blue: 0.059)
+    static let fundoInferior = Color(red: 0.039, green: 0.031, blue: 0.024)
+    static let roxoPrimario = Color(red: 0.910, green: 0.471, blue: 0.188)
     static let textoSecundario = Color.white.opacity(0.55)
     static let tile = Color.white.opacity(0.06)
     static let acentoTeal = Color(red: 0.45, green: 0.82, blue: 0.90)
@@ -34,7 +34,7 @@ extension AvatarExplorador {
 /// Passo 3 de 3 — nome do herói + preview do avatar escolhido.
 struct TelaNomeHeroi: View {
     let avatar: AvatarExplorador
-    var classe: ClasseHeroi = .sabio
+    var classe: ClasseHeroi
     var onComecar: (String) async throws -> Void = { _ in }
     var onVoltar: () -> Void = {}
 
@@ -232,5 +232,15 @@ struct TelaNomeHeroi: View {
 }
 
 #Preview {
-    TelaNomeHeroi(avatar: .guaraSorriso, classe: .guerreiro)
+    TelaNomeHeroi(
+        avatar: .guaraSorriso,
+        classe: ClasseHeroi(
+            key: "guerreiro",
+            nome: "Guerreiro",
+            emoji: "⚔️",
+            descricao: "",
+            bonus: [],
+            tema: "laranja"
+        )
+    )
 }

@@ -4,7 +4,7 @@ enum AtalhoRapido: String, CaseIterable, Identifiable {
     case treino
     case financas
     case estudar
-    case ranking
+    case diario
     case loja
     case conquistas
 
@@ -14,8 +14,8 @@ enum AtalhoRapido: String, CaseIterable, Identifiable {
         switch self {
         case .treino: return "Treino"
         case .financas: return "Finanças"
-        case .estudar: return "Estudar"
-        case .ranking: return "Ranking"
+        case .estudar: return "Estudos"
+        case .diario: return "Diário"
         case .loja: return "Loja"
         case .conquistas: return "Conquistas"
         }
@@ -26,7 +26,7 @@ enum AtalhoRapido: String, CaseIterable, Identifiable {
         case .treino: return "🏋️"
         case .financas: return "📊"
         case .estudar: return "📚"
-        case .ranking: return "🏆"
+        case .diario: return "📓"
         case .loja: return "🛒"
         case .conquistas: return "🎯"
         }
@@ -38,6 +38,7 @@ enum AtalhoRapido: String, CaseIterable, Identifiable {
         case .treino: return .academia
         case .financas: return .financas
         case .estudar: return .estudos
+        case .diario: return .diario
         default: return nil
         }
     }
@@ -47,7 +48,7 @@ private enum CoresAtalhos {
     static let titulo = Color.white
     static let label = Color.white.opacity(0.55)
     static let card = Color.white.opacity(0.04)
-    static let borda = Color(red: 0.48, green: 0.26, blue: 0.96).opacity(0.28)
+    static let borda = Color(red: 0.910, green: 0.471, blue: 0.188).opacity(0.28)
     static let mensagem = Color.white.opacity(0.55)
 }
 
@@ -115,13 +116,13 @@ struct AtalhosRapidosView: View {
             }
             .frame(width: geo.size.width, alignment: .topLeading)
         }
-        .frame(minHeight: LayoutDashboard.isCompacto(UIScreen.main.bounds.width) ? 260 : 280)
+        .frame(minHeight: LayoutDashboard.isCompacto(UIScreen.main.bounds.width) ? 300 : 320)
     }
 }
 
 #Preview {
     ZStack {
-        Color(red: 0.05, green: 0.03, blue: 0.10).ignoresSafeArea()
+        Color(red: 0.039, green: 0.031, blue: 0.024).ignoresSafeArea()
         AtalhosRapidosView()
             .padding()
     }

@@ -65,7 +65,7 @@ final class ClassesCatalog
                     'Bônus de equilíbrio',
                     'Sabedoria ancestral',
                 ],
-                'tema' => 'roxo',
+                'tema' => 'ambar',
             ],
         ];
     }

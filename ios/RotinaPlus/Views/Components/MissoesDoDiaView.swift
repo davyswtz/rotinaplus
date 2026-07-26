@@ -24,13 +24,6 @@ struct MissaoDoDia: Identifiable, Equatable {
         self.concluida = concluida
     }
 
-    static let exemplos: [MissaoDoDia] = [
-        .init(id: 1, icone: "💧", titulo: "Beber água", detalhe: "2L ao longo do dia", xp: 15, concluida: true),
-        .init(id: 2, icone: "🏃", titulo: "Treinar", detalhe: "30 min de movimento", xp: 25, concluida: true),
-        .init(id: 3, icone: "📚", titulo: "Estudar", detalhe: "1 Pomodoro focado", xp: 20, concluida: false),
-        .init(id: 4, icone: "🧘", titulo: "Meditar", detalhe: "10 min de respiração", xp: 15, concluida: false),
-        .init(id: 5, icone: "💰", titulo: "Registrar gastos", detalhe: "Anotar o dia no app", xp: 10, concluida: false),
-    ]
 }
 
 private enum CoresMissoes {
@@ -38,7 +31,7 @@ private enum CoresMissoes {
     static let card = Color.white.opacity(0.05)
     static let borda = Color.white.opacity(0.08)
     static let detalhe = Color.white.opacity(0.45)
-    static let xp = Color(red: 0.62, green: 0.42, blue: 0.98)
+    static let xp = Color(red: 0.941, green: 0.659, blue: 0.349)
     static let xpVerde = Color(red: 0.29, green: 0.87, blue: 0.50)
     static let check = Color(red: 0.29, green: 0.87, blue: 0.50)
     static let pendente = Color.white.opacity(0.22)
@@ -46,7 +39,7 @@ private enum CoresMissoes {
     static let bordaConcluida = Color(red: 0.29, green: 0.87, blue: 0.50)
     static let tituloConcluido = Color.white.opacity(0.45)
     static let detalheConcluido = Color.white.opacity(0.28)
-    static let roxoPrimario = Color(red: 0.48, green: 0.26, blue: 0.96)
+    static let roxoPrimario = Color(red: 0.910, green: 0.471, blue: 0.188)
 }
 
 /// Lista de missões do dia (abaixo do progresso diário).
@@ -178,10 +171,10 @@ struct MissoesDoDiaView: View {
 
 #Preview {
     struct PreviewHost: View {
-        @State private var missoes = MissaoDoDia.exemplos
+        @State private var missoes: [MissaoDoDia] = []
         var body: some View {
             ZStack {
-                Color(red: 0.05, green: 0.03, blue: 0.10).ignoresSafeArea()
+                Color(red: 0.039, green: 0.031, blue: 0.024).ignoresSafeArea()
                 ScrollView {
                     MissoesDoDiaView(missoes: $missoes, onAdicionar: {})
                         .padding()

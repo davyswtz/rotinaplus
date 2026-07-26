@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class LoginApiTest extends TestCase
@@ -15,7 +14,7 @@ class LoginApiTest extends TestCase
     {
         $user = User::factory()->create([
             'email' => 'user@rotinaplus.test',
-            'password' => Hash::make('secret123'),
+            'password' => 'secret123',
         ]);
 
         $response = $this->postJson('/api/v1/auth/login', [
@@ -38,7 +37,7 @@ class LoginApiTest extends TestCase
     {
         User::factory()->create([
             'email' => 'user@rotinaplus.test',
-            'password' => Hash::make('secret123'),
+            'password' => 'secret123',
         ]);
 
         $response = $this->postJson('/api/v1/auth/login', [

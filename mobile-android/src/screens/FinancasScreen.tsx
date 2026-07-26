@@ -19,22 +19,18 @@ import {
   criarTransacao,
   excluirTransacao,
   fetchFinancas,
-  pluggyConnectToken,
-  pluggySincronizar,
-  pluggyVincular,
 } from '../services/rotinaApi';
 import type {
   FinancasCategoria,
   FinancasData,
   FinancasDistribuicao,
   FinancasMeta,
-  FinancasPluggy,
   FinancasSerie,
   FinancasTransacao,
 } from '../types';
 
 const C = {
-  roxo: '#7A42F5',
+  roxo: '#E87830',
   verde: '#4ADE80',
   vermelho: '#F25A72',
   card: 'rgba(255,255,255,0.055)',
@@ -81,8 +77,6 @@ export function FinancasScreen() {
   const [mostrarAdd, setMostrarAdd] = useState(false);
   const [mostrarTx, setMostrarTx] = useState(false);
   const [mostrarMetas, setMostrarMetas] = useState(false);
-  const [syncando, setSyncando] = useState(false);
-  const [syncMsg, setSyncMsg] = useState<string | null>(null);
 
   const carregar = useCallback(async (anoMes?: string) => {
     setErro(null);
@@ -101,45 +95,6 @@ export function FinancasScreen() {
     setCarregando(true);
     void carregar();
   }, [carregar]);
-
-  const conectarBanco = async () => {
-    setSyncando(true);
-    setSyncMsg(null);
-    try {
-      const token = await pluggyConnectToken();
-      if (token.mode === 'local') {
-        const result = await pluggyVincular('local-sandbox');
-        setSyncMsg(`Importadas ${result.importadas} · atualizadas ${result.atualizadas}`);
-        await carregar(mes);
-      } else {
-        Alert.alert(
-          'Pluggy configurado',
-          'No Android, use o sync após conectar pelo dashboard, ou use o modo local. Para o widget completo, use o iOS ou configure WebView Pluggy.',
-        );
-        // Fluxo simplificado: se tiver token real, ainda permite sync se já houver item —
-        // para sandbox sem widget RN, sugerimos local até integrar WebView.
-        setSyncMsg('Defina o widget Pluggy ou use sandbox local.');
-      }
-    } catch (e) {
-      setSyncMsg(e instanceof Error ? e.message : 'Erro ao conectar.');
-    } finally {
-      setSyncando(false);
-    }
-  };
-
-  const sincronizar = async () => {
-    setSyncando(true);
-    setSyncMsg(null);
-    try {
-      const result = await pluggySincronizar();
-      setSyncMsg(`Importadas ${result.importadas} · atualizadas ${result.atualizadas}`);
-      await carregar(mes);
-    } catch (e) {
-      setSyncMsg(e instanceof Error ? e.message : 'Erro ao sincronizar.');
-    } finally {
-      setSyncando(false);
-    }
-  };
 
   const pad = layout.paddingHorizontal;
   const gap = layout.gapSecao;
@@ -198,16 +153,6 @@ export function FinancasScreen() {
               saldo={dados.saldo_centavos}
               receita={dados.receita_centavos}
               gastos={dados.gastos_centavos}
-            />
-          </View>
-
-          <View style={{ paddingHorizontal: pad, marginTop: gap }}>
-            <BancoCard
-              pluggy={dados.pluggy}
-              syncando={syncando}
-              mensagem={syncMsg}
-              onConectar={() => void conectarBanco()}
-              onSincronizar={() => void sincronizar()}
             />
           </View>
 
@@ -305,62 +250,6 @@ function CardSaldo({
           <Text style={styles.miniValor}>{formatarReais(gastos)}</Text>
         </View>
       </View>
-    </View>
-  );
-}
-
-function BancoCard({
-  pluggy,
-  syncando,
-  mensagem,
-  onConectar,
-  onSincronizar,
-}: {
-  pluggy?: FinancasPluggy;
-  syncando: boolean;
-  mensagem: string | null;
-  onConectar: () => void;
-  onSincronizar: () => void;
-}) {
-  const tem = (pluggy?.conexoes?.length ?? 0) > 0;
-  return (
-    <View style={styles.card}>
-      <Text style={styles.secaoLabel}>BANCO (SANDBOX)</Text>
-      <Text style={styles.vazio}>
-        {tem
-          ? `${pluggy?.conexoes[0]?.connector_name ?? 'Banco'} conectado`
-          : 'Conecte o sandbox para importar transações automaticamente.'}
-      </Text>
-      <View style={{ flexDirection: 'row', gap: 10, marginTop: 10 }}>
-        <TouchableOpacity
-          style={[styles.botaoSalvar, { flex: 1, alignItems: 'center' }]}
-          onPress={onConectar}
-          disabled={syncando}
-        >
-          <Text style={styles.botaoSalvarTexto}>
-            {tem ? 'Reconectar' : 'Conectar sandbox'}
-          </Text>
-        </TouchableOpacity>
-        {tem ? (
-          <TouchableOpacity
-            style={[styles.botaoOutline, { flex: 1 }]}
-            onPress={onSincronizar}
-            disabled={syncando}
-          >
-            <Text style={[styles.linkRoxo, { textAlign: 'center' }]}>
-              {syncando ? '…' : 'Sincronizar'}
-            </Text>
-          </TouchableOpacity>
-        ) : null}
-      </View>
-      {mensagem ? (
-        <Text style={[styles.vazio, { color: C.verde, marginTop: 8 }]}>{mensagem}</Text>
-      ) : null}
-      {!pluggy?.configured && pluggy?.local_sandbox ? (
-        <Text style={[styles.vazio, { marginTop: 8, fontSize: 11 }]}>
-          Modo local ativo (sem chaves Pluggy). Ideal para testar agora.
-        </Text>
-      ) : null}
     </View>
   );
 }
@@ -824,7 +713,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(122,66,245,0.18)',
+    backgroundColor: 'rgba(232,120,48,0.18)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 10,

@@ -23,7 +23,7 @@ export function PrimaryButton({ title, onPress, disabled = false }: PrimaryButto
 const styles = StyleSheet.create({
   button: {
     // Roxo primário — mesma cor de TelaBemVindo / LoginView (iOS)
-    backgroundColor: '#7A42F5',
+    backgroundColor: '#E87830',
     paddingVertical: 14,
     paddingHorizontal: 24,
     borderRadius: 10,

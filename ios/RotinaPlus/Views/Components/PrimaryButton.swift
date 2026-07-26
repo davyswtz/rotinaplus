@@ -11,7 +11,7 @@ struct PrimaryButton: View {
                 .frame(maxWidth: .infinity)
                 .padding()
                 // Roxo primário — mesma cor de TelaBemVindo / LoginView
-                .background(Color(red: 0.48, green: 0.26, blue: 0.96))
+                .background(Color(red: 0.910, green: 0.471, blue: 0.188))
                 .foregroundColor(.white)
                 .cornerRadius(10)
         }

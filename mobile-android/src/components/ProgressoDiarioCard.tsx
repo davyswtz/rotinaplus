@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     backgroundColor: 'rgba(255,255,255,0.04)',
     borderWidth: 1,
-    borderColor: 'rgba(122, 66, 245, 0.28)',
+    borderColor: 'rgba(232, 120, 48, 0.28)',
     gap: 12,
   },
   topo: {
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   label: {
-    color: '#B89DEB',
+    color: '#E8B88A',
     fontSize: 11,
     fontWeight: '600',
     letterSpacing: 0.8,

@@ -2,13 +2,13 @@ import SwiftUI
 
 // MARK: - Cores da splash / loading
 private enum CoresLoading {
-    static let fundoSuperior = Color(red: 0.05, green: 0.03, blue: 0.09)
+    static let fundoSuperior = Color(red: 0.039, green: 0.031, blue: 0.024)
     static let fundoInferior = Color(red: 0.04, green: 0.06, blue: 0.06)
-    static let tituloInicio = Color(red: 0.67, green: 0.49, blue: 1.0)
+    static let tituloInicio = Color(red: 1.0, green: 0.608, blue: 0.290)
     static let tituloFim = Color(red: 0.29, green: 0.91, blue: 0.65)
     static let tagline = Color.white.opacity(0.40)
-    static let ponto = Color(red: 0.62, green: 0.45, blue: 0.95)
-    static let patinha = Color(red: 1.0, green: 0.55, blue: 0.20)
+    static let ponto = Color(red: 0.910, green: 0.471, blue: 0.188)
+    static let patinha = Color(red: 1.0, green: 0.608, blue: 0.290)
 }
 
 /// Tela de loading / splash exibida na abertura do app.
@@ -28,19 +28,8 @@ struct TelaLoading: View {
                 Image("splash_guara")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 160, height: 160)
-                    .padding(.bottom, 28)
-
-                Text("Rotina Plus")
-                    .font(.system(size: 34, weight: .bold, design: .rounded))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [CoresLoading.tituloInicio, CoresLoading.tituloFim],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .padding(.bottom, 10)
+                    .frame(width: 200, height: 230)
+                    .padding(.bottom, 20)
 
                 Text("GAMIFIQUE SUA VIDA REAL")
                     .font(.system(size: 12, weight: .medium, design: .monospaced))

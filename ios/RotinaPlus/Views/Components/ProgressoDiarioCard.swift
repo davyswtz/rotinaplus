@@ -18,11 +18,11 @@ struct DadosProgressoDiario: Equatable {
 
 private enum CoresProgressoDiario {
     static let fundo = Color.white.opacity(0.04)
-    static let borda = Color(red: 0.48, green: 0.26, blue: 0.96).opacity(0.28)
-    static let label = Color(red: 0.72, green: 0.62, blue: 0.92)
+    static let borda = Color(red: 0.910, green: 0.471, blue: 0.188).opacity(0.28)
+    static let label = Color(red: 0.910, green: 0.722, blue: 0.541)
     static let percentual = Color(red: 0.45, green: 0.95, blue: 0.55)
     static let track = Color.white.opacity(0.08)
-    static let fill = Color(red: 0.48, green: 0.26, blue: 0.96)
+    static let fill = Color(red: 0.910, green: 0.471, blue: 0.188)
 }
 
 /// Card de progresso diário das tarefas/hábitos.
@@ -71,7 +71,7 @@ struct ProgressoDiarioCard: View {
 
 #Preview {
     ZStack {
-        Color(red: 0.05, green: 0.03, blue: 0.10).ignoresSafeArea()
+        Color(red: 0.039, green: 0.031, blue: 0.024).ignoresSafeArea()
         ProgressoDiarioCard(dados: .preview)
             .padding()
     }

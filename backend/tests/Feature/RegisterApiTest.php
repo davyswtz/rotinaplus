@@ -36,6 +36,11 @@ class RegisterApiTest extends TestCase
             'name' => 'Novo Herói',
         ]);
 
+        $user = User::query()->where('email', 'novo@rotinaplus.test')->first();
+        $this->assertNotNull($user);
+        $this->assertNotEmpty($user->getRawOriginal('password'));
+        $this->assertTrue(Hash::check('senha12345', $user->getAuthPassword()));
+
         $this->assertNotEmpty($response->json('token'));
         $this->assertDatabaseHas('perfis', [
             'user_id' => $response->json('user.id'),

@@ -26,10 +26,10 @@ struct NotificacaoItem: Identifiable, Equatable {
 }
 
 private enum CoresNotificacoes {
-    static let fundoSuperior = Color(red: 0.10, green: 0.06, blue: 0.18)
-    static let fundoInferior = Color(red: 0.05, green: 0.03, blue: 0.10)
-    static let roxoPrimario = Color(red: 0.48, green: 0.26, blue: 0.96)
-    static let cardNaoLida = Color(red: 0.14, green: 0.09, blue: 0.24)
+    static let fundoSuperior = Color(red: 0.094, green: 0.078, blue: 0.059)
+    static let fundoInferior = Color(red: 0.039, green: 0.031, blue: 0.024)
+    static let roxoPrimario = Color(red: 0.910, green: 0.471, blue: 0.188)
+    static let cardNaoLida = Color(red: 0.141, green: 0.110, blue: 0.078)
     static let cardLida = Color.white.opacity(0.04)
     static let textoSecundario = Color.white.opacity(0.55)
     static let textoTerciario = Color.white.opacity(0.35)

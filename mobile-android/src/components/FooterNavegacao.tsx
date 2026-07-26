@@ -13,6 +13,7 @@ export type AbaFooter =
   | 'inicio'
   | 'academia'
   | 'financas'
+  | 'diario'
   | 'estudos'
   | 'perfil';
 
@@ -20,7 +21,8 @@ const ABAS: { id: AbaFooter; titulo: string; icone: string }[] = [
   { id: 'inicio', titulo: 'Início', icone: '🏠' },
   { id: 'academia', titulo: 'Academia', icone: '🏋️' },
   { id: 'financas', titulo: 'Finanças', icone: '💳' },
-  { id: 'estudos', titulo: 'Estudos', icone: '📖' },
+  { id: 'diario', titulo: 'Diário', icone: '📓' },
+  { id: 'estudos', titulo: 'Estudos', icone: '📚' },
   { id: 'perfil', titulo: 'Perfil', icone: '👤' },
 ];
 
@@ -89,9 +91,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 999,
     paddingHorizontal: 6,
-    backgroundColor: '#1A1229',
+    backgroundColor: '#161310',
     borderWidth: 1,
-    borderColor: 'rgba(122, 66, 245, 0.35)',
+    borderColor: 'rgba(232, 120, 48, 0.35)',
   },
   item: {
     flex: 1,

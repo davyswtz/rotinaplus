@@ -23,6 +23,8 @@ import { AtalhosRapidosView } from '../components/AtalhosRapidosView';
 import { AbaFooter, FooterNavegacao } from '../components/FooterNavegacao';
 import { AcademiaScreen } from './AcademiaScreen';
 import { FinancasScreen } from './FinancasScreen';
+import { DiarioHabitosScreen } from './DiarioHabitosScreen';
+import { PerfilScreen } from './PerfilScreen';
 import { cores } from '../theme/colors';
 import { getLayoutDashboard } from '../theme/layout';
 import { useAuthStore } from '../store/authStore';
@@ -32,7 +34,7 @@ import {
   toggleMissao,
   criarMissao,
 } from '../services/rotinaApi';
-import type { Perfil } from '../types';
+import type { HabitosResumo, Perfil } from '../types';
 import { avatarAssetKey } from '../types';
 import { AdicionarMissaoModal } from '../components/AdicionarMissaoModal';
 
@@ -81,6 +83,7 @@ export function HomeScreen() {
   const { width } = useWindowDimensions();
   const layout = getLayoutDashboard(width);
   const [perfil, setPerfil] = useState<Perfil | null>(null);
+  const [habitosResumo, setHabitosResumo] = useState<HabitosResumo | null>(null);
   const [notificacoesNaoLidas, setNotificacoesNaoLidas] = useState(0);
   const [missoes, setMissoes] = useState<MissaoDoDia[]>([]);
   const [aba, setAba] = useState<AbaFooter>('inicio');
@@ -99,6 +102,7 @@ export function HomeScreen() {
       setPerfil(data.perfil);
       setMissoes(data.missoes.map(missaoFromApi));
       setNotificacoesNaoLidas(data.notificacoes_nao_lidas);
+      setHabitosResumo(data.habitos_resumo ?? null);
 
       if (data.perfil.nome_heroi?.trim()) {
         await AsyncStorage.setItem('nome_heroi', data.perfil.nome_heroi.trim());
@@ -220,11 +224,11 @@ export function HomeScreen() {
                 <CardPerfilHeroi
                   dados={{
                     nomeUsuario: nome,
-                    classe: perfil?.classe ?? 'Sábio',
-                    emojiClasse: perfil?.emoji_classe ?? '🔮',
+                    classe: perfil?.classe ?? '',
+                    emojiClasse: perfil?.emoji_classe ?? '',
                     nivel: perfil?.nivel ?? 1,
                     xpAtual: perfil?.xp_atual ?? 0,
-                    xpProximoNivel: perfil?.xp_proximo_nivel ?? 500,
+                    xpProximoNivel: perfil?.xp_proximo_nivel ?? 0,
                     avatarSource: AVATARES[avatarId] ?? AVATARES.guara_serio,
                   }}
                 />
@@ -233,9 +237,10 @@ export function HomeScreen() {
               <View style={[styles.bloco, { paddingHorizontal: pad, paddingTop: gap }]}>
                 <GradeStatsDashboard
                   dados={{
-                    streakDias: perfil?.streak_dias ?? 0,
-                    habitosHojeConcluidos: concluidas,
-                    habitosHojeTotal: Math.max(missoes.length, 1),
+                    streakDias: perfil?.streak_dias ?? habitosResumo?.streak_geral ?? 0,
+                    habitosHojeConcluidos:
+                      habitosResumo?.concluidos ?? concluidas,
+                    habitosHojeTotal: habitosResumo?.total ?? missoes.length,
                     xpHoje,
                     moedas: perfil?.moedas ?? 0,
                   }}
@@ -245,8 +250,8 @@ export function HomeScreen() {
               <View style={[styles.bloco, { paddingHorizontal: pad, paddingTop: gap }]}>
                 <ProgressoDiarioCard
                   dados={{
-                    concluidos: concluidas,
-                    total: Math.max(missoes.length, 1),
+                    concluidos: habitosResumo?.concluidos ?? concluidas,
+                    total: habitosResumo?.total ?? missoes.length,
                   }}
                 />
               </View>
@@ -280,26 +285,22 @@ export function HomeScreen() {
         <AcademiaScreen />
       ) : aba === 'financas' ? (
         <FinancasScreen />
-      ) : (
+      ) : aba === 'diario' ? (
+        <DiarioHabitosScreen onAbrirArea={setAba} />
+      ) : aba === 'estudos' ? (
         <View style={styles.placeholder}>
-          <Text style={styles.placeholderTitulo}>
-            {aba === 'perfil' ? 'Perfil' : 'Estudos'}
-          </Text>
+          <Text style={styles.placeholderTitulo}>Estudos</Text>
           <Text style={styles.placeholderTexto}>
-            {aba === 'perfil'
-              ? 'Em breve: editar herói, classe e preferências.'
-              : 'Esta área chega nas próximas etapas.'}
+            Esta área chega nas próximas etapas.
           </Text>
-          {aba === 'perfil' ? (
-            <TouchableOpacity
-              style={styles.botao}
-              onPress={logout}
-              activeOpacity={0.85}
-            >
-              <Text style={styles.textoBotao}>Sair</Text>
-            </TouchableOpacity>
-          ) : null}
         </View>
+      ) : (
+        <PerfilScreen
+          onPerfilAtualizado={setPerfil}
+          onSair={() => {
+            void logout();
+          }}
+        />
       )}
 
       <FooterNavegacao abaSelecionada={aba} onSelecionar={setAba} />

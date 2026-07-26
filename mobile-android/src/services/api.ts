@@ -48,8 +48,11 @@ function parseApiErrorMessage(data: LaravelErrorBody | ApiErrorResponse | undefi
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError<LaravelErrorBody | ApiErrorResponse>) => {
+    const status = error.response?.status;
     const message = parseApiErrorMessage(error.response?.data);
-    return Promise.reject(new Error(message));
+    const err = new Error(message) as Error & { status?: number };
+    err.status = status;
+    return Promise.reject(err);
   },
 );
 

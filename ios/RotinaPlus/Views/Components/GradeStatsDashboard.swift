@@ -79,13 +79,13 @@ private enum CoresGradeStats {
     static let label = Color.white.opacity(0.40)
     static let streak = Color(red: 1.0, green: 0.55, blue: 0.28)
     static let hoje = Color(red: 0.30, green: 0.85, blue: 0.45)
-    static let xp = Color(red: 0.62, green: 0.42, blue: 0.98)
+    static let xp = Color(red: 0.941, green: 0.659, blue: 0.349)
     static let moedas = Color(red: 1.0, green: 0.82, blue: 0.28)
 }
 
 #Preview {
     ZStack {
-        Color(red: 0.05, green: 0.03, blue: 0.10).ignoresSafeArea()
+        Color(red: 0.039, green: 0.031, blue: 0.024).ignoresSafeArea()
         GradeStatsDashboard(dados: .preview)
             .padding()
     }

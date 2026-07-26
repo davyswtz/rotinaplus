@@ -40,7 +40,10 @@ export async function hydrate(): Promise<void> {
 export async function login(email: string, password: string): Promise<void> {
   const { data } = await api.post<AuthResponse>(
     '/api/v1/auth/login',
-    { email, password } satisfies LoginPayload,
+    {
+      email: email.trim().toLowerCase(),
+      password,
+    } satisfies LoginPayload,
   );
 
   if (!data.token) {
@@ -60,8 +63,8 @@ export async function register(
   const { data } = await api.post<AuthResponse>(
     '/api/v1/auth/register',
     {
-      name,
-      email,
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
       password,
       password_confirmation: passwordConfirmation,
     } satisfies RegisterPayload,

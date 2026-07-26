@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
@@ -12,16 +13,36 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { cores } from '../theme/colors';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { CLASSES_HEROI, ClasseHeroi } from '../data/classes';
+import { ClasseHeroi, mapClasseApi } from '../data/classes';
+import { fetchClasses } from '../services/rotinaApi';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'EscolhaClasse'>;
 
-/** Passo 1 de 3 — espelha TelaEscolhaClasse.swift / mock. */
+/** Passo 1 de 3 — classes vindas da API. */
 export function EscolhaClasseScreen() {
   const navigation = useNavigation<Nav>();
-  const [selecionada, setSelecionada] = useState<ClasseHeroi>(CLASSES_HEROI[0]);
+  const [classes, setClasses] = useState<ClasseHeroi[]>([]);
+  const [selecionada, setSelecionada] = useState<ClasseHeroi | null>(null);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
 
-  const cards = useMemo(() => CLASSES_HEROI, []);
+  const carregar = useCallback(async () => {
+    setCarregando(true);
+    setErro(null);
+    try {
+      const lista = (await fetchClasses()).map(mapClasseApi);
+      setClasses(lista);
+      setSelecionada((atual) => atual ?? lista[0] ?? null);
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : 'Erro ao carregar classes.');
+    } finally {
+      setCarregando(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void carregar();
+  }, [carregar]);
 
   return (
     <SafeAreaView style={styles.areaSegura}>
@@ -40,199 +61,157 @@ export function EscolhaClasseScreen() {
           Define seus bônus iniciais e estilo de jogo
         </Text>
 
-        <ScrollView
-          style={styles.lista}
-          contentContainerStyle={styles.listaConteudo}
-          showsVerticalScrollIndicator={false}
-        >
-          {cards.map((classe) => {
-            const ativo = selecionada.key === classe.key;
-            return (
-              <TouchableOpacity
-                key={classe.key}
-                style={[styles.card, ativo && styles.cardAtivo]}
-                onPress={() => setSelecionada(classe)}
-                activeOpacity={0.85}
-              >
-                <View style={styles.cardTopo}>
-                  <Text style={styles.emoji}>{classe.emoji}</Text>
-                  <View style={styles.cardTextos}>
-                    <Text style={styles.cardTitulo}>{classe.nome}</Text>
-                    <Text style={styles.cardDescricao}>{classe.descricao}</Text>
-                  </View>
-                </View>
-                <View style={styles.bonusWrap}>
-                  {classe.bonus.map((tag) => (
-                    <View
-                      key={tag}
-                      style={[
-                        styles.bonusTag,
-                        { backgroundColor: `${classe.cor}2E` },
-                      ]}
-                    >
-                      <Text style={[styles.bonusTexto, { color: classe.cor }]}>
-                        {tag}
-                      </Text>
+        {carregando ? (
+          <ActivityIndicator color="#fff" style={{ marginTop: 40 }} />
+        ) : erro ? (
+          <View style={styles.erroBox}>
+            <Text style={styles.erroTexto}>{erro}</Text>
+            <TouchableOpacity onPress={() => void carregar()}>
+              <Text style={styles.erroRetry}>Tentar de novo</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <>
+            <ScrollView
+              style={styles.lista}
+              contentContainerStyle={styles.listaConteudo}
+              showsVerticalScrollIndicator={false}
+            >
+              {classes.map((classe) => {
+                const ativo = selecionada?.key === classe.key;
+                return (
+                  <TouchableOpacity
+                    key={classe.key}
+                    style={[styles.card, ativo && styles.cardAtivo]}
+                    onPress={() => setSelecionada(classe)}
+                    activeOpacity={0.85}
+                  >
+                    <View style={styles.cardTopo}>
+                      <Text style={styles.emoji}>{classe.emoji}</Text>
+                      <View style={styles.cardTextos}>
+                        <Text style={styles.cardTitulo}>{classe.nome}</Text>
+                        <Text style={styles.cardDescricao}>{classe.descricao}</Text>
+                      </View>
                     </View>
-                  ))}
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
+                    <View style={styles.bonusWrap}>
+                      {classe.bonus.map((tag) => (
+                        <View
+                          key={tag}
+                          style={[
+                            styles.bonusTag,
+                            { backgroundColor: `${classe.cor}2E` },
+                          ]}
+                        >
+                          <Text style={[styles.bonusTexto, { color: classe.cor }]}>
+                            {tag}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
 
-        <TouchableOpacity
-          style={styles.botaoContinuar}
-          onPress={() => {
-            void AsyncStorage.multiSet([
-              ['classe_selecionada', selecionada.key],
-              ['classe_nome', selecionada.nome],
-              ['emoji_classe', selecionada.emoji],
-            ]);
-            navigation.navigate('EscolhaAvatar', {
-              classeKey: selecionada.key,
-              classeNome: selecionada.nome,
-              emojiClasse: selecionada.emoji,
-            });
-          }}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.textoContinuar}>Continuar →</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.botaoVoltar}
-          onPress={() => navigation.replace('Welcome')}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.textoVoltar}>← Voltar</Text>
-        </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.botaoContinuar, !selecionada && styles.botaoDesabilitado]}
+              disabled={!selecionada}
+              onPress={() => {
+                if (!selecionada) return;
+                void AsyncStorage.multiSet([
+                  ['classe_selecionada', selecionada.key],
+                  ['classe_nome', selecionada.nome],
+                  ['emoji_classe', selecionada.emoji],
+                ]);
+                navigation.navigate('EscolhaAvatar', {
+                  classeKey: selecionada.key,
+                  classeNome: selecionada.nome,
+                  emojiClasse: selecionada.emoji,
+                });
+              }}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.textoContinuar}>Continuar →</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  areaSegura: {
-    flex: 1,
-    backgroundColor: cores.fundoInferior,
-  },
+  areaSegura: { flex: 1, backgroundColor: cores.fundoTela },
   fundo: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: cores.fundoSuperior,
   },
-  conteudo: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 8,
-  },
-  barraProgresso: {
-    flexDirection: 'row',
-    gap: 8,
-  },
+  conteudo: { flex: 1, paddingHorizontal: 24, paddingTop: 8 },
+  barraProgresso: { flexDirection: 'row', gap: 8, marginBottom: 20 },
   segmento: {
     flex: 1,
     height: 4,
     borderRadius: 2,
     backgroundColor: 'rgba(255,255,255,0.12)',
   },
-  segmentoAtivo: {
-    backgroundColor: cores.roxoPrimario,
-  },
+  segmentoAtivo: { backgroundColor: cores.roxoPrimario },
   passo: {
-    marginTop: 20,
+    color: 'rgba(255,255,255,0.55)',
     fontSize: 12,
     fontWeight: '600',
     letterSpacing: 1.2,
-    color: 'rgba(255,255,255,0.55)',
   },
   titulo: {
-    marginTop: 8,
+    color: '#fff',
     fontSize: 28,
     fontWeight: '700',
-    color: '#FFFFFF',
+    marginTop: 8,
   },
   subtitulo: {
-    marginTop: 6,
-    fontSize: 16,
     color: 'rgba(255,255,255,0.55)',
+    fontSize: 15,
+    marginTop: 6,
+    marginBottom: 16,
   },
-  lista: {
-    flex: 1,
-    marginTop: 20,
-  },
-  listaConteudo: {
-    gap: 12,
-    paddingBottom: 16,
-  },
+  lista: { flex: 1 },
+  listaConteudo: { gap: 12, paddingBottom: 16 },
   card: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
     borderRadius: 18,
     padding: 16,
-    backgroundColor: 'rgba(255,255,255,0.06)',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.10)',
   },
   cardAtivo: {
-    borderWidth: 2.5,
     borderColor: cores.roxoPrimario,
+    borderWidth: 2.5,
   },
-  cardTopo: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 14,
-  },
-  emoji: {
-    fontSize: 36,
-    width: 48,
-    textAlign: 'center',
-  },
-  cardTextos: {
-    flex: 1,
-  },
-  cardTitulo: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
+  cardTopo: { flexDirection: 'row', gap: 14 },
+  emoji: { fontSize: 36, width: 48, textAlign: 'center' },
+  cardTextos: { flex: 1 },
+  cardTitulo: { color: '#fff', fontSize: 18, fontWeight: '700' },
   cardDescricao: {
-    marginTop: 4,
-    fontSize: 14,
     color: 'rgba(255,255,255,0.55)',
-    lineHeight: 20,
+    fontSize: 14,
+    marginTop: 4,
   },
-  bonusWrap: {
-    marginTop: 12,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
+  bonusWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 },
   bonusTag: {
     borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 6,
   },
-  bonusTexto: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
+  bonusTexto: { fontSize: 12, fontWeight: '600' },
   botaoContinuar: {
     backgroundColor: cores.roxoPrimario,
     borderRadius: 16,
     paddingVertical: 18,
     alignItems: 'center',
+    marginBottom: 12,
   },
-  textoContinuar: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: '600',
-  },
-  botaoVoltar: {
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  textoVoltar: {
-    color: 'rgba(255,255,255,0.55)',
-    fontSize: 16,
-    fontWeight: '500',
-  },
+  botaoDesabilitado: { opacity: 0.45 },
+  textoContinuar: { color: '#fff', fontWeight: '600', fontSize: 16 },
+  erroBox: { marginTop: 32, gap: 12 },
+  erroTexto: { color: 'rgba(255,255,255,0.65)' },
+  erroRetry: { color: cores.roxoPrimario, fontWeight: '600' },
 });

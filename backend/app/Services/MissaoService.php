@@ -12,8 +12,7 @@ class MissaoService
 {
     public function listHoje(User $user): \Illuminate\Database\Eloquent\Collection
     {
-        $this->ensureMissoesPadraoHoje($user);
-
+        $user->ensureDefaults();
         $hoje = now('America/Sao_Paulo')->toDateString();
 
         return Missao::query()
@@ -21,46 +20,6 @@ class MissaoService
             ->whereDate('data', $hoje)
             ->orderBy('ordem')
             ->get();
-    }
-
-    /**
-     * Garante 5 missões padrão aleatórias no dia (se ainda não houver nenhuma).
-     */
-    public function ensureMissoesPadraoHoje(User $user): void
-    {
-        $user->ensureDefaults();
-        $hoje = now('America/Sao_Paulo')->toDateString();
-
-        $existem = Missao::query()
-            ->where('user_id', $user->id)
-            ->whereDate('data', $hoje)
-            ->exists();
-
-        if ($existem) {
-            return;
-        }
-
-        /** @var Perfil $perfil */
-        $perfil = $user->perfil()->firstOrFail();
-        $sorteadas = MissaoXpCalculator::sortearPadrao();
-
-        foreach ($sorteadas as $indice => $item) {
-            Missao::query()->create([
-                'user_id' => $user->id,
-                'data' => $hoje,
-                'icone' => $item['icone'],
-                'titulo' => $item['titulo'],
-                'detalhe' => $item['detalhe'],
-                'xp' => MissaoXpCalculator::calcularXp(
-                    (int) $perfil->xp_proximo_nivel,
-                    $item['peso'],
-                    true,
-                ),
-                'concluida' => false,
-                'concluida_em' => null,
-                'ordem' => $indice + 1,
-            ]);
-        }
     }
 
     public function toggle(User $user, int $id): Missao
@@ -92,7 +51,6 @@ class MissaoService
      */
     public function criarHoje(User $user, array $dados): Missao
     {
-        $this->ensureMissoesPadraoHoje($user);
         $user->ensureDefaults();
 
         /** @var Perfil $perfil */

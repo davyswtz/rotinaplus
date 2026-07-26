@@ -2,12 +2,12 @@ import SwiftUI
 
 // MARK: - Cores (mesma paleta do welcome / login)
 private enum CoresCriePersonagem {
-    static let fundoSuperior = Color(red: 0.10, green: 0.06, blue: 0.18)
-    static let fundoInferior = Color(red: 0.05, green: 0.03, blue: 0.10)
-    static let roxoPrimario = Color(red: 0.48, green: 0.26, blue: 0.96)
+    static let fundoSuperior = Color(red: 0.094, green: 0.078, blue: 0.059)
+    static let fundoInferior = Color(red: 0.039, green: 0.031, blue: 0.024)
+    static let roxoPrimario = Color(red: 0.910, green: 0.471, blue: 0.188)
     static let textoSecundario = Color.white.opacity(0.65)
     static let indicadorInativo = Color.white.opacity(0.25)
-    static let laranjaMascote = Color(red: 1.0, green: 0.55, blue: 0.20)
+    static let laranjaMascote = Color(red: 1.0, green: 0.608, blue: 0.290)
 }
 
 /// Segunda etapa do onboarding — aparece depois de `TelaBemVindo`.

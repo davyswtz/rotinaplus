@@ -1,70 +1,37 @@
 import SwiftUI
 
-// MARK: - Catálogo de classes (espelha GET /api/v1/classes)
-enum ClasseHeroi: String, CaseIterable, Identifiable, Hashable {
-    case guerreiro
-    case estudioso
-    case investidor
-    case sabio
+// MARK: - Catálogo de classes (GET /api/v1/classes)
+struct ClasseHeroi: Identifiable, Hashable {
+    let key: String
+    let nome: String
+    let emoji: String
+    let descricao: String
+    let bonus: [String]
+    let tema: String
 
-    var id: String { rawValue }
+    var id: String { key }
 
-    var nome: String {
-        switch self {
-        case .guerreiro: return "Guerreiro"
-        case .estudioso: return "Estudioso"
-        case .investidor: return "Investidor"
-        case .sabio: return "Sábio"
-        }
-    }
-
-    var emoji: String {
-        switch self {
-        case .guerreiro: return "⚔️"
-        case .estudioso: return "📚"
-        case .investidor: return "💰"
-        case .sabio: return "🔮"
-        }
-    }
-
-    var descricao: String {
-        switch self {
-        case .guerreiro: return "Foco em treinos e disciplina física"
-        case .estudioso: return "Domina conhecimento e aprendizado"
-        case .investidor: return "Mestre das finanças e crescimento"
-        case .sabio: return "Equilibra todas as áreas da vida"
-        }
-    }
-
-    var bonus: [String] {
-        switch self {
-        case .guerreiro:
-            return ["+20% XP na academia", "Streak bônus x2", "Resistência lendária"]
-        case .estudioso:
-            return ["+20% XP nos estudos", "Memória aprimorada", "Foco sobrenatural"]
-        case .investidor:
-            return ["+20% XP em finanças", "Renda passiva bônus", "Visão de mercado"]
-        case .sabio:
-            return ["+10% XP em tudo", "Bônus de equilíbrio", "Sabedoria ancestral"]
-        }
-    }
-
-    /// Cor dos chips de bônus (mock).
     var corBonus: Color {
-        switch self {
-        case .guerreiro: return Color(red: 1.0, green: 0.48, blue: 0.28)
-        case .estudioso: return Color(red: 0.35, green: 0.85, blue: 0.92)
-        case .investidor: return Color(red: 0.35, green: 0.86, blue: 0.52)
-        case .sabio: return Color(red: 0.72, green: 0.55, blue: 0.98)
+        switch tema {
+        case "laranja":
+            return Color(red: 1.0, green: 0.48, blue: 0.28)
+        case "ciano":
+            return Color(red: 0.35, green: 0.85, blue: 0.92)
+        case "verde":
+            return Color(red: 0.35, green: 0.86, blue: 0.52)
+        case "ambar", "roxo":
+            return Color(red: 0.910, green: 0.722, blue: 0.416)
+        default:
+            return Color(red: 0.910, green: 0.471, blue: 0.188)
         }
     }
 }
 
 // MARK: - Cores
 private enum CoresEscolhaClasse {
-    static let fundoSuperior = Color(red: 0.10, green: 0.06, blue: 0.18)
-    static let fundoInferior = Color(red: 0.05, green: 0.03, blue: 0.10)
-    static let roxoPrimario = Color(red: 0.48, green: 0.26, blue: 0.96)
+    static let fundoSuperior = Color(red: 0.094, green: 0.078, blue: 0.059)
+    static let fundoInferior = Color(red: 0.039, green: 0.031, blue: 0.024)
+    static let roxoPrimario = Color(red: 0.910, green: 0.471, blue: 0.188)
     static let textoSecundario = Color.white.opacity(0.55)
     static let cardFundo = Color.white.opacity(0.06)
     static let cardBorda = Color.white.opacity(0.10)
@@ -76,7 +43,10 @@ struct TelaEscolhaClasse: View {
     var onContinuar: (ClasseHeroi) -> Void = { _ in }
     var onVoltar: () -> Void = {}
 
-    @State private var selecionada: ClasseHeroi = .guerreiro
+    @State private var classes: [ClasseHeroi] = []
+    @State private var selecionada: ClasseHeroi?
+    @State private var carregando = true
+    @State private var erro: String?
 
     var body: some View {
         ZStack {
@@ -112,43 +82,71 @@ struct TelaEscolhaClasse: View {
                     .padding(.top, 6)
                     .padding(.horizontal, 24)
 
-                ScrollView {
-                    VStack(spacing: 12) {
-                        ForEach(ClasseHeroi.allCases) { classe in
-                            cartaoClasse(classe)
-                        }
+                if carregando {
+                    ProgressView()
+                        .tint(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 40)
+                    Spacer()
+                } else if let erro {
+                    Text(erro)
+                        .foregroundStyle(.white.opacity(0.65))
+                        .padding(.horizontal, 24)
+                        .padding(.top, 24)
+                    Button("Tentar de novo") {
+                        Task { await carregarClasses() }
                     }
+                    .foregroundStyle(CoresEscolhaClasse.roxoPrimario)
                     .padding(.horizontal, 24)
-                    .padding(.top, 24)
-                    .padding(.bottom, 16)
-                }
+                    .padding(.top, 8)
+                    Spacer()
+                } else {
+                    ScrollView {
+                        VStack(spacing: 12) {
+                            ForEach(classes) { classe in
+                                cartaoClasse(classe)
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.top, 24)
+                        .padding(.bottom, 16)
+                    }
 
-                Button {
-                    onContinuar(selecionada)
-                } label: {
-                    Text("Continuar →")
-                        .fontWeight(.semibold)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 18)
-                        .background(CoresEscolhaClasse.roxoPrimario)
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                }
-                .padding(.horizontal, 24)
+                    Button {
+                        if let selecionada {
+                            onContinuar(selecionada)
+                        }
+                    } label: {
+                        Text("Continuar →")
+                            .fontWeight(.semibold)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 18)
+                            .background(
+                                selecionada == nil
+                                    ? CoresEscolhaClasse.roxoPrimario.opacity(0.45)
+                                    : CoresEscolhaClasse.roxoPrimario
+                            )
+                            .foregroundStyle(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                    }
+                    .disabled(selecionada == nil)
+                    .padding(.horizontal, 24)
 
-                Button {
-                    onVoltar()
-                } label: {
-                    Text("← Voltar")
-                        .font(.body.weight(.medium))
-                        .foregroundStyle(CoresEscolhaClasse.textoSecundario)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
+                    Button {
+                        onVoltar()
+                    } label: {
+                        Text("← Voltar")
+                            .font(.body.weight(.medium))
+                            .foregroundStyle(CoresEscolhaClasse.textoSecundario)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                    }
+                    .padding(.bottom, 8)
                 }
-                .padding(.bottom, 8)
             }
         }
         .preferredColorScheme(.dark)
+        .task { await carregarClasses() }
     }
 
     private var barraProgresso: some View {
@@ -208,6 +206,22 @@ struct TelaEscolhaClasse: View {
         .accessibilityLabel(classe.nome)
         .accessibilityAddTraits(ativo ? .isSelected : [])
     }
+
+    @MainActor
+    private func carregarClasses() async {
+        carregando = true
+        erro = nil
+        do {
+            let lista = try await RotinaPlusAPI.classes()
+            classes = lista
+            if selecionada == nil {
+                selecionada = lista.first
+            }
+        } catch {
+            self.erro = error.localizedDescription
+        }
+        carregando = false
+    }
 }
 
 /// Tags de bônus em linha com wrap simples.
@@ -216,7 +230,6 @@ private struct FlowBonusTags: View {
     let cor: Color
 
     var body: some View {
-        // Layout em wrap manual (2 linhas típicas no mock).
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
                 ForEach(Array(tags.prefix(2).enumerated()), id: \.offset) { _, tag in

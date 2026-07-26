@@ -41,13 +41,13 @@ const AVATAR_SOURCES: Record<string, ImageSourcePropType> = {
   selo: require('../assets/avatars/avatar_selo.png'),
 };
 
-/** Passo 3 de 3 — espelha TelaNomeHeroi.swift / mock. */
+/** Passo 3 de 3 — nome do herói. */
 export function NomeHeroiScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<Rota>();
   const avatarId = route.params?.avatarId ?? 'guara_serio';
-  const classeNome = route.params?.classeNome ?? 'Sábio';
-  const emojiClasse = route.params?.emojiClasse ?? '🔮';
+  const classeNome = route.params?.classeNome ?? '';
+  const emojiClasse = route.params?.emojiClasse ?? '';
   const [nome, setNome] = useState('');
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);

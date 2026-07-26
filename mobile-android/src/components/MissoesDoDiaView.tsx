@@ -11,49 +11,6 @@ export type MissaoDoDia = {
   concluida: boolean;
 };
 
-export const MISSOES_EXEMPLO: MissaoDoDia[] = [
-  {
-    id: 1,
-    icone: '💧',
-    titulo: 'Beber água',
-    detalhe: '2L ao longo do dia',
-    xp: 15,
-    concluida: true,
-  },
-  {
-    id: 2,
-    icone: '🏃',
-    titulo: 'Treinar',
-    detalhe: '30 min de movimento',
-    xp: 25,
-    concluida: true,
-  },
-  {
-    id: 3,
-    icone: '📚',
-    titulo: 'Estudar',
-    detalhe: '1 Pomodoro focado',
-    xp: 20,
-    concluida: false,
-  },
-  {
-    id: 4,
-    icone: '🧘',
-    titulo: 'Meditar',
-    detalhe: '10 min de respiração',
-    xp: 15,
-    concluida: false,
-  },
-  {
-    id: 5,
-    icone: '💰',
-    titulo: 'Registrar gastos',
-    detalhe: 'Anotar o dia no app',
-    xp: 10,
-    concluida: false,
-  },
-];
-
 type Props = {
   missoes: MissaoDoDia[];
   onToggle: (id: number) => void;

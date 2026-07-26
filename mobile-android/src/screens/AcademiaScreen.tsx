@@ -1,20 +1,35 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
   useWindowDimensions,
 } from 'react-native';
 import { getLayoutDashboard } from '../theme/layout';
 import {
+  excluirEsporteSessao,
   fetchAcademia,
+  registrarEsporte,
   toggleAcademiaDia,
 } from '../services/rotinaApi';
-import type { AcademiaTreino, AcademiaVolume } from '../types';
+import type {
+  AcademiaTreino,
+  AcademiaVolume,
+  EsporteCatalogo,
+  EsporteResumo,
+  EsporteSessao,
+} from '../types';
+import {
+  HistoricoTreinosModal,
+  IniciarTreinoModal,
+  NovoTreinoModal,
+} from './NovoTreinoScreen';
 
 // MARK: - Modelos
 
@@ -33,8 +48,8 @@ export type VolumeDia = {
 };
 
 const C = {
-  roxo: '#7A42F5',
-  laranja: '#FF8C33',
+  roxo: '#E87830',
+  laranja: '#FF9B4A',
   verde: '#4ADE80',
   card: 'rgba(255,255,255,0.055)',
   borda: 'rgba(255,255,255,0.07)',
@@ -42,10 +57,25 @@ const C = {
   labelMuted: 'rgba(255,255,255,0.32)',
   historicoFundo: '#4D1F1A',
   ctaMid: '#47171A',
-  diaAtivoFundo: 'rgba(122,66,245,0.28)',
-  diaAtivoBorda: 'rgba(122,66,245,0.55)',
+  diaAtivoFundo: 'rgba(232,120,48,0.28)',
+  diaAtivoBorda: 'rgba(232,120,48,0.55)',
   diaInativoBorda: 'rgba(255,255,255,0.12)',
 };
+
+const ESPORTES_FALLBACK: EsporteCatalogo[] = [
+  { chave: 'corrida', nome: 'Corrida', icone: '🏃', descricao: 'Corrida ao ar livre ou esteira', minutos_padrao: 30, usa_distancia: true },
+  { chave: 'natacao', nome: 'Natação', icone: '🏊', descricao: 'Piscina ou águas abertas', minutos_padrao: 40, usa_distancia: true },
+  { chave: 'volei', nome: 'Vôlei', icone: '🏐', descricao: 'Quadra ou praia', minutos_padrao: 60, usa_distancia: false },
+  { chave: 'futebol', nome: 'Futebol', icone: '⚽', descricao: 'Campo, society ou futsal', minutos_padrao: 60, usa_distancia: false },
+  { chave: 'basquete', nome: 'Basquete', icone: '🏀', descricao: 'Quadra ou streetball', minutos_padrao: 45, usa_distancia: false },
+  { chave: 'ciclismo', nome: 'Ciclismo', icone: '🚴', descricao: 'Bike de rua ou indoor', minutos_padrao: 45, usa_distancia: true },
+  { chave: 'tenis', nome: 'Tênis', icone: '🎾', descricao: 'Simples ou duplas', minutos_padrao: 60, usa_distancia: false },
+  { chave: 'caminhada', nome: 'Caminhada', icone: '🚶', descricao: 'Passeio ativo', minutos_padrao: 30, usa_distancia: true },
+  { chave: 'yoga', nome: 'Yoga', icone: '🧘', descricao: 'Mobilidade e respiração', minutos_padrao: 30, usa_distancia: false },
+  { chave: 'artes_marciais', nome: 'Artes marciais', icone: '🥋', descricao: 'Jiu-jitsu, judô, boxe…', minutos_padrao: 60, usa_distancia: false },
+  { chave: 'crossfit', nome: 'CrossFit', icone: '💥', descricao: 'WOD e condicionamento', minutos_padrao: 45, usa_distancia: false },
+  { chave: 'surf', nome: 'Surf', icone: '🏄', descricao: 'Mar ou piscina de ondas', minutos_padrao: 90, usa_distancia: false },
+];
 
 // MARK: - Stats Academia
 
@@ -157,17 +187,17 @@ function EstaSemanaTreino({
 // MARK: - CTA Treino de hoje
 
 function CardTreinoHoje({
-  foco = 'Ombros',
-  exercicios = 8,
-  minutos = 45,
-  xp = 140,
+  foco,
+  exercicios,
+  minutos,
+  xp,
   onIniciar,
   onBiblioteca,
 }: {
-  foco?: string;
-  exercicios?: number;
-  minutos?: number;
-  xp?: number;
+  foco: string;
+  exercicios: number;
+  minutos: number;
+  xp: number;
   onIniciar?: () => void;
   onBiblioteca?: () => void;
 }) {
@@ -248,7 +278,7 @@ function AtalhosAcademia({
   return (
     <View style={styles.atalhosRow}>
       <TouchableOpacity style={styles.atalhoCard} onPress={onNovo} activeOpacity={0.85}>
-        <View style={[styles.atalhoIcone, { backgroundColor: 'rgba(122,66,245,0.18)' }]}>
+        <View style={[styles.atalhoIcone, { backgroundColor: 'rgba(232,120,48,0.18)' }]}>
           <Text style={{ color: C.roxo, fontSize: 20, fontWeight: '700' }}>+</Text>
         </View>
         <Text style={styles.atalhoTitulo}>Novo treino</Text>
@@ -263,6 +293,172 @@ function AtalhosAcademia({
         </View>
         <Text style={styles.atalhoTitulo}>Histórico</Text>
       </TouchableOpacity>
+    </View>
+  );
+}
+
+// MARK: - Outros esportes
+
+function OutrosEsportesSection({
+  esportes,
+  resumo,
+  sessoes,
+  onSelecionar,
+  onExcluir,
+}: {
+  esportes: EsporteCatalogo[];
+  resumo: EsporteResumo;
+  sessoes: EsporteSessao[];
+  onSelecionar: (e: EsporteCatalogo) => void;
+  onExcluir: (s: EsporteSessao) => void;
+}) {
+  return (
+    <View style={styles.esporteCard}>
+      <Text style={styles.secaoLabel}>OUTROS ESPORTES</Text>
+      <Text style={styles.esporteHint}>
+        Registre corrida, natação, vôlei e mais
+      </Text>
+      <View style={styles.esporteStats}>
+        <View style={styles.esporteMini}>
+          <Text style={styles.esporteMiniValor}>{resumo.total_semana}</Text>
+          <Text style={styles.esporteMiniLabel}>SESSÕES</Text>
+        </View>
+        <View style={styles.esporteMini}>
+          <Text style={styles.esporteMiniValor}>{resumo.minutos_semana}m</Text>
+          <Text style={styles.esporteMiniLabel}>TEMPO</Text>
+        </View>
+        <View style={styles.esporteMini}>
+          <Text style={styles.esporteMiniValor}>+{resumo.xp_semana}</Text>
+          <Text style={styles.esporteMiniLabel}>XP</Text>
+        </View>
+      </View>
+
+      <View style={styles.esporteGrid}>
+        {esportes.map((esporte) => (
+          <TouchableOpacity
+            key={esporte.chave}
+            style={styles.esporteItem}
+            onPress={() => onSelecionar(esporte)}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.esporteIcone}>{esporte.icone}</Text>
+            <Text style={styles.esporteNome} numberOfLines={1}>
+              {esporte.nome}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {sessoes.length > 0 ? (
+        <>
+          <Text style={[styles.secaoLabel, { marginTop: 4 }]}>RECENTES</Text>
+          {sessoes.slice(0, 6).map((sessao) => {
+            const partes = [`${sessao.minutos} min`];
+            if (sessao.distancia_metros && sessao.distancia_metros > 0) {
+              partes.push(`${(sessao.distancia_metros / 1000).toFixed(1)} km`);
+            }
+            if (sessao.data) partes.push(sessao.data);
+            return (
+              <View key={sessao.id} style={styles.sessaoRow}>
+                <Text style={{ fontSize: 20 }}>{sessao.icone}</Text>
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text style={styles.sessaoNome}>{sessao.nome}</Text>
+                  <Text style={styles.sessaoSub}>{partes.join(' · ')}</Text>
+                </View>
+                <Text style={styles.sessaoXp}>+{sessao.xp} XP</Text>
+                <TouchableOpacity onPress={() => onExcluir(sessao)} hitSlop={8}>
+                  <Text style={styles.sessaoLixo}>⌫</Text>
+                </TouchableOpacity>
+              </View>
+            );
+          })}
+        </>
+      ) : null}
+    </View>
+  );
+}
+
+function RegistrarEsporteModal({
+  esporte,
+  onFechar,
+  onSalvar,
+}: {
+  esporte: EsporteCatalogo;
+  onFechar: () => void;
+  onSalvar: (p: {
+    minutos: number;
+    distancia_metros?: number | null;
+    nota?: string | null;
+  }) => Promise<void>;
+}) {
+  const [minutos, setMinutos] = useState(String(esporte.minutos_padrao));
+  const [distanciaKm, setDistanciaKm] = useState('');
+  const [nota, setNota] = useState('');
+  const [salvando, setSalvando] = useState(false);
+
+  return (
+    <View style={styles.modalWrap}>
+      <View style={styles.modalCard}>
+        <Text style={styles.modalTitulo}>
+          {esporte.icone} {esporte.nome}
+        </Text>
+        <Text style={styles.modalDesc}>{esporte.descricao}</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Minutos"
+          placeholderTextColor="rgba(255,255,255,0.35)"
+          keyboardType="number-pad"
+          value={minutos}
+          onChangeText={setMinutos}
+        />
+        {esporte.usa_distancia ? (
+          <TextInput
+            style={styles.input}
+            placeholder="Distância (km)"
+            placeholderTextColor="rgba(255,255,255,0.35)"
+            keyboardType="decimal-pad"
+            value={distanciaKm}
+            onChangeText={setDistanciaKm}
+          />
+        ) : null}
+        <TextInput
+          style={styles.input}
+          placeholder="Nota (opcional)"
+          placeholderTextColor="rgba(255,255,255,0.35)"
+          value={nota}
+          onChangeText={setNota}
+        />
+        <View style={styles.modalActions}>
+          <TouchableOpacity onPress={onFechar}>
+            <Text style={styles.link}>Cancelar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.botaoSalvar}
+            disabled={salvando}
+            onPress={() => {
+              void (async () => {
+                setSalvando(true);
+                const mins = Math.max(5, parseInt(minutos, 10) || esporte.minutos_padrao);
+                let distancia: number | null = null;
+                if (esporte.usa_distancia && distanciaKm.trim()) {
+                  const km = parseFloat(distanciaKm.replace(',', '.'));
+                  if (!Number.isNaN(km)) distancia = Math.round(km * 1000);
+                }
+                await onSalvar({
+                  minutos: mins,
+                  distancia_metros: distancia,
+                  nota: nota.trim() || null,
+                });
+                setSalvando(false);
+              })();
+            }}
+          >
+            <Text style={styles.botaoSalvarTexto}>
+              {salvando ? '...' : 'Salvar'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
   );
 }
@@ -292,6 +488,18 @@ export function AcademiaScreen({
   const [metaSemana, setMetaSemana] = useState(5);
   const [sequencia, setSequencia] = useState(0);
   const [treino, setTreino] = useState<AcademiaTreino | null>(null);
+  const [esportes, setEsportes] = useState<EsporteCatalogo[]>([]);
+  const [esporteSessoes, setEsporteSessoes] = useState<EsporteSessao[]>([]);
+  const [esporteResumo, setEsporteResumo] = useState<EsporteResumo>({
+    total_semana: 0,
+    minutos_semana: 0,
+    xp_semana: 0,
+  });
+  const [esporteSelecionado, setEsporteSelecionado] =
+    useState<EsporteCatalogo | null>(null);
+  const [mostrarNovo, setMostrarNovo] = useState(false);
+  const [mostrarHistorico, setMostrarHistorico] = useState(false);
+  const [mostrarIniciar, setMostrarIniciar] = useState(false);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
 
@@ -318,6 +526,15 @@ export function AcademiaScreen({
         })),
       );
       setTreino(data.treino_hoje);
+      setEsportes(data.esportes ?? []);
+      setEsporteSessoes(data.esporte_sessoes ?? []);
+      setEsporteResumo(
+        data.esporte_resumo ?? {
+          total_semana: 0,
+          minutos_semana: 0,
+          xp_semana: 0,
+        },
+      );
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Erro ao carregar academia.');
     } finally {
@@ -393,7 +610,10 @@ export function AcademiaScreen({
         <Text style={[styles.titulo, { fontSize: layout.fonte(30) }]}>Academia</Text>
         <TouchableOpacity
           style={styles.pillHistorico}
-          onPress={onHistorico}
+          onPress={() => {
+            setMostrarHistorico(true);
+            onHistorico?.();
+          }}
           activeOpacity={0.85}
         >
           <Text style={styles.pillHistoricoTexto}>Histórico</Text>
@@ -413,13 +633,57 @@ export function AcademiaScreen({
       </View>
 
       <View style={{ paddingHorizontal: pad, paddingTop: gap + 6 }}>
-        <CardTreinoHoje
-          foco={treino?.foco ?? 'Ombros'}
-          exercicios={treino?.exercicios ?? 8}
-          minutos={treino?.minutos ?? 45}
-          xp={treino?.xp ?? 140}
-          onIniciar={onIniciarTreino}
-          onBiblioteca={onBiblioteca}
+        {treino ? (
+          <CardTreinoHoje
+            foco={treino.foco}
+            exercicios={treino.exercicios}
+            minutos={treino.minutos}
+            xp={treino.xp}
+            onIniciar={() => {
+              setMostrarIniciar(true);
+              onIniciarTreino?.();
+            }}
+            onBiblioteca={() => {
+              setMostrarNovo(true);
+              onBiblioteca?.();
+            }}
+          />
+        ) : (
+          <TouchableOpacity
+            style={styles.ctaCard}
+            onPress={() => {
+              setMostrarNovo(true);
+              onNovoTreino?.();
+            }}
+            activeOpacity={0.85}
+          >
+            <View style={styles.ctaEmojiWrap}>
+              <Text style={{ color: C.laranja, fontSize: 24, fontWeight: '700' }}>+</Text>
+            </View>
+            <View style={styles.ctaTexto}>
+              <Text style={styles.ctaTitulo}>Montar treino do dia</Text>
+              <Text style={styles.ctaSub}>Escolha o foco e comece a registrar</Text>
+            </View>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      <View style={{ paddingHorizontal: pad, paddingTop: gap }}>
+        <OutrosEsportesSection
+          esportes={esportes.length ? esportes : ESPORTES_FALLBACK}
+          resumo={esporteResumo}
+          sessoes={esporteSessoes}
+          onSelecionar={setEsporteSelecionado}
+          onExcluir={(sessao) => {
+            void (async () => {
+              try {
+                await excluirEsporteSessao(sessao.id);
+                await carregar();
+              } catch {
+                /* ignore */
+              }
+            })();
+          }}
         />
       </View>
 
@@ -428,8 +692,60 @@ export function AcademiaScreen({
       </View>
 
       <View style={{ paddingHorizontal: pad, paddingTop: gap, paddingBottom: 24 }}>
-        <AtalhosAcademia onNovo={onNovoTreino} onHistorico={onHistorico} />
+        <AtalhosAcademia
+          onNovo={() => {
+            setMostrarNovo(true);
+            onNovoTreino?.();
+          }}
+          onHistorico={() => {
+            setMostrarHistorico(true);
+            onHistorico?.();
+          }}
+        />
       </View>
+
+      <NovoTreinoModal
+        visible={mostrarNovo}
+        treinoExistente={treino}
+        onClose={() => setMostrarNovo(false)}
+        onSaved={() => {
+          void carregar();
+        }}
+      />
+      <IniciarTreinoModal
+        visible={mostrarIniciar}
+        treinoId={treino?.id ?? null}
+        onClose={() => setMostrarIniciar(false)}
+        onDone={() => {
+          void carregar();
+        }}
+      />
+      <HistoricoTreinosModal
+        visible={mostrarHistorico}
+        onClose={() => setMostrarHistorico(false)}
+      />
+
+      <Modal
+        visible={!!esporteSelecionado}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setEsporteSelecionado(null)}
+      >
+        {esporteSelecionado ? (
+          <RegistrarEsporteModal
+            esporte={esporteSelecionado}
+            onFechar={() => setEsporteSelecionado(null)}
+            onSalvar={async (payload) => {
+              await registrarEsporte({
+                esporte_chave: esporteSelecionado.chave,
+                ...payload,
+              });
+              setEsporteSelecionado(null);
+              await carregar();
+            }}
+          />
+        ) : null}
+      </Modal>
     </ScrollView>
   );
 }
@@ -650,5 +966,147 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 13,
     fontWeight: '600',
+  },
+  esporteCard: {
+    backgroundColor: C.card,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: C.borda,
+    padding: 14,
+    gap: 14,
+  },
+  esporteHint: {
+    color: C.labelMuted,
+    fontSize: 13,
+    fontWeight: '500',
+    marginTop: -6,
+  },
+  esporteStats: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  esporteMini: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    gap: 4,
+  },
+  esporteMiniValor: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  esporteMiniLabel: {
+    color: C.label,
+    fontSize: 9,
+    fontWeight: '700',
+  },
+  esporteGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  esporteItem: {
+    width: '31%',
+    flexGrow: 1,
+    alignItems: 'center',
+    paddingVertical: 14,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderWidth: 1,
+    borderColor: C.borda,
+    gap: 8,
+  },
+  esporteIcone: { fontSize: 26 },
+  esporteNome: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  sessaoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 12,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.03)',
+  },
+  sessaoNome: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  sessaoSub: {
+    color: C.label,
+    fontSize: 12,
+  },
+  sessaoXp: {
+    color: C.roxo,
+    fontSize: 12,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+  },
+  sessaoLixo: {
+    color: 'rgba(255,255,255,0.35)',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  modalWrap: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.55)',
+  },
+  modalCard: {
+    backgroundColor: '#1A1410',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: C.borda,
+  },
+  modalTitulo: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  modalDesc: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 13,
+    marginBottom: 4,
+  },
+  input: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: C.borda,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    color: '#FFF',
+    fontSize: 15,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  link: {
+    color: 'rgba(255,255,255,0.55)',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  botaoSalvar: {
+    backgroundColor: C.roxo,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  botaoSalvarTexto: {
+    color: '#FFF',
+    fontWeight: '700',
+    fontSize: 15,
   },
 });

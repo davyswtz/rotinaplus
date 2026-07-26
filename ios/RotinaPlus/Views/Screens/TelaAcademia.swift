@@ -8,16 +8,6 @@ struct DiaSemanaTreino: Identifiable, Equatable {
     let foco: String
     var concluido: Bool
     let isRest: Bool
-
-    static let semanaExemplo: [DiaSemanaTreino] = [
-        .init(id: 1, label: "Seg", foco: "Peito", concluido: true, isRest: false),
-        .init(id: 2, label: "Ter", foco: "Costas", concluido: true, isRest: false),
-        .init(id: 3, label: "Qua", foco: "Ombros", concluido: false, isRest: false),
-        .init(id: 4, label: "Qui", foco: "Braços", concluido: false, isRest: false),
-        .init(id: 5, label: "Sex", foco: "Pernas", concluido: false, isRest: false),
-        .init(id: 6, label: "Sáb", foco: "Cardio", concluido: false, isRest: false),
-        .init(id: 7, label: "Dom", foco: "Rest", concluido: false, isRest: true),
-    ]
 }
 
 struct VolumeDia: Identifiable, Equatable {
@@ -29,10 +19,10 @@ struct VolumeDia: Identifiable, Equatable {
 // MARK: - Cores (Figma Academia)
 
 private enum CoresAcademia {
-    static let roxo = Color(red: 0.478, green: 0.259, blue: 0.961) // #7A42F5
-    static let laranja = Color(red: 1.0, green: 0.549, blue: 0.200) // #FF8C33
+    static let roxo = Color(red: 0.910, green: 0.471, blue: 0.188) // #E87830
+    static let laranja = Color(red: 1.0, green: 0.608, blue: 0.290) // #FF9B4A
     static let verde = Color(red: 0.29, green: 0.87, blue: 0.50)
-    static let card = Color(red: 0.10, green: 0.08, blue: 0.16).opacity(0.85)
+    static let card = Color(red: 0.10, green: 0.08, blue: 0.06).opacity(0.85)
     static let cardElevado = Color.white.opacity(0.055)
     static let borda = Color.white.opacity(0.10)
     static let bordaSuave = Color.white.opacity(0.07)
@@ -43,8 +33,8 @@ private enum CoresAcademia {
     static let ctaMid = Color(red: 0.28, green: 0.09, blue: 0.10)
     static let ctaBot = Color(red: 0.14, green: 0.05, blue: 0.08)
     static let diaInativoBorda = Color.white.opacity(0.12)
-    static let diaAtivoFundo = Color(red: 0.48, green: 0.26, blue: 0.96).opacity(0.28)
-    static let diaAtivoBorda = Color(red: 0.48, green: 0.26, blue: 0.96).opacity(0.55)
+    static let diaAtivoFundo = Color(red: 0.910, green: 0.471, blue: 0.188).opacity(0.28)
+    static let diaAtivoBorda = Color(red: 0.910, green: 0.471, blue: 0.188).opacity(0.55)
 }
 
 // MARK: - Stats Academia (3 cards)
@@ -105,17 +95,24 @@ struct EstaSemanaTreinoView: View {
                 .tracking(1.0)
                 .foregroundStyle(CoresAcademia.label)
 
-            HStack(spacing: 5) {
-                ForEach($dias) { $dia in
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.18)) {
-                            dia.concluido.toggle()
+            if dias.isEmpty {
+                Text("Carregando dias da semana…")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(CoresAcademia.labelMuted)
+                    .padding(.vertical, 12)
+            } else {
+                HStack(spacing: 5) {
+                    ForEach($dias) { $dia in
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.18)) {
+                                dia.concluido.toggle()
+                            }
+                            onToggle?(dia)
+                        } label: {
+                            CapsulaDiaSemana(dia: dia)
                         }
-                        onToggle?(dia)
-                    } label: {
-                        CapsulaDiaSemana(dia: dia)
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
             }
         }
@@ -185,10 +182,10 @@ private struct CapsulaDiaSemana: View {
 // MARK: - CTA Treino de hoje
 
 struct CardTreinoHoje: View {
-    var foco: String = "Ombros"
-    var exercicios: Int = 8
-    var minutos: Int = 45
-    var xp: Int = 140
+    var foco: String
+    var exercicios: Int
+    var minutos: Int
+    var xp: Int
     var onIniciar: () -> Void = {}
     var onBiblioteca: () -> Void = {}
 
@@ -257,15 +254,7 @@ struct CardTreinoHoje: View {
 // MARK: - Volume Semanal
 
 struct VolumeSemanalChart: View {
-    var volumes: [VolumeDia] = [
-        .init(id: "seg", label: "Seg", kg: 4200),
-        .init(id: "ter", label: "Ter", kg: 3100),
-        .init(id: "qua", label: "Qua", kg: 0),
-        .init(id: "qui", label: "Qui", kg: 0),
-        .init(id: "sex", label: "Sex", kg: 0),
-        .init(id: "sab", label: "Sáb", kg: 0),
-        .init(id: "dom", label: "Dom", kg: 0),
-    ]
+    var volumes: [VolumeDia] = []
 
     private var maxKg: Double {
         max(volumes.map(\.kg).max() ?? 1, 1)
@@ -278,22 +267,32 @@ struct VolumeSemanalChart: View {
                 .tracking(1.0)
                 .foregroundStyle(CoresAcademia.label)
 
-            HStack(alignment: .bottom, spacing: 8) {
-                ForEach(volumes) { dia in
-                    VStack(spacing: 8) {
-                        if dia.kg > 0 {
-                            RoundedRectangle(cornerRadius: 5, style: .continuous)
-                                .fill(CoresAcademia.roxo)
-                                .frame(height: CGFloat(dia.kg / maxKg) * 88)
-                        } else {
-                            Spacer(minLength: 0)
+            if volumes.isEmpty {
+                Text("O volume aparece aqui conforme você treina.")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(CoresAcademia.labelMuted)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 20)
+            } else {
+                HStack(alignment: .bottom, spacing: 8) {
+                    ForEach(volumes) { dia in
+                        VStack(spacing: 8) {
+                            if dia.kg > 0 {
+                                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                                    .fill(CoresAcademia.roxo)
+                                    .frame(height: CGFloat(dia.kg / maxKg) * 88)
+                            } else {
+                                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                                    .fill(Color.white.opacity(0.06))
+                                    .frame(height: 8)
+                            }
+                            Text(dia.label)
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundStyle(CoresAcademia.labelMuted)
                         }
-                        Text(dia.label)
-                            .font(.system(size: 10, weight: .medium))
-                            .foregroundStyle(CoresAcademia.labelMuted)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 110, alignment: .bottom)
                     }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 110, alignment: .bottom)
                 }
             }
         }
@@ -306,6 +305,57 @@ struct VolumeSemanalChart: View {
             RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .stroke(CoresAcademia.bordaSuave, lineWidth: 1)
         )
+    }
+}
+
+// MARK: - Empty treino CTA
+
+private struct CardTreinoVazio: View {
+    var onNovo: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Treino de hoje")
+                .font(.system(size: 17, weight: .bold))
+                .foregroundStyle(.white)
+
+            Button(action: onNovo) {
+                HStack(spacing: 12) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 28))
+                        .foregroundStyle(CoresAcademia.laranja)
+                        .frame(width: 50, height: 50)
+                        .background(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .fill(Color.black.opacity(0.28))
+                        )
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Montar treino do dia")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundStyle(.white)
+                        Text("Escolha o foco e comece a registrar")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(Color.white.opacity(0.52))
+                    }
+                    Spacer(minLength: 2)
+                }
+                .padding(14)
+                .background(
+                    LinearGradient(
+                        colors: [CoresAcademia.ctaTop, CoresAcademia.ctaMid, CoresAcademia.ctaBot],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .stroke(Color.white.opacity(0.06), lineWidth: 1)
+                )
+            }
+            .buttonStyle(.plain)
+        }
     }
 }
 
@@ -356,10 +406,14 @@ struct TelaAcademia: View {
     @State private var volumes: [VolumeDia] = []
     @State private var metaSemana = 5
     @State private var sequencia = 0
-    @State private var treinoFoco = "Ombros"
-    @State private var treinoExercicios = 8
-    @State private var treinoMinutos = 45
-    @State private var treinoXP = 140
+    @State private var treinoHoje: AcademiaTreinoAPI?
+    @State private var esportes: [EsporteCatalogoAPI] = []
+    @State private var esporteSessoes: [EsporteSessaoAPI] = []
+    @State private var esporteResumo = EsporteResumoAPI(totalSemana: 0, minutosSemana: 0, xpSemana: 0)
+    @State private var esporteSelecionado: EsporteCatalogoAPI?
+    @State private var mostrarNovoTreino = false
+    @State private var mostrarHistorico = false
+    @State private var mostrarIniciar = false
     @State private var carregando = true
     @State private var erro: String?
 
@@ -384,7 +438,10 @@ struct TelaAcademia: View {
                             .font(.system(size: 30, weight: .bold))
                             .foregroundStyle(.white)
                         Spacer()
-                        Button(action: onHistorico) {
+                        Button {
+                            mostrarHistorico = true
+                            onHistorico()
+                        } label: {
                             Text("Histórico")
                                 .font(.system(size: 13, weight: .semibold))
                                 .foregroundStyle(CoresAcademia.laranja)
@@ -425,33 +482,108 @@ struct TelaAcademia: View {
                         .padding(.horizontal, pad)
                         .padding(.top, gap)
 
-                        CardTreinoHoje(
-                            foco: treinoFoco,
-                            exercicios: treinoExercicios,
-                            minutos: treinoMinutos,
-                            xp: treinoXP,
-                            onIniciar: onIniciarTreino,
-                            onBiblioteca: onBiblioteca
+                        if let treino = treinoHoje {
+                            CardTreinoHoje(
+                                foco: treino.foco,
+                                exercicios: treino.exercicios,
+                                minutos: treino.minutos,
+                                xp: treino.xp,
+                                onIniciar: {
+                                    mostrarIniciar = true
+                                    onIniciarTreino()
+                                },
+                                onBiblioteca: {
+                                    mostrarNovoTreino = true
+                                    onBiblioteca()
+                                }
+                            )
+                            .padding(.horizontal, pad)
+                            .padding(.top, gap + 6)
+                        } else {
+                            CardTreinoVazio(onNovo: {
+                                mostrarNovoTreino = true
+                                onNovoTreino()
+                            })
+                                .padding(.horizontal, pad)
+                                .padding(.top, gap + 6)
+                        }
+
+                        OutrosEsportesSection(
+                            esportes: esportesVisiveis,
+                            resumo: esporteResumo,
+                            sessoes: esporteSessoes,
+                            onSelecionar: { esporteSelecionado = $0 },
+                            onExcluir: { sessao in
+                                Task { await excluirSessao(sessao) }
+                            }
                         )
                         .padding(.horizontal, pad)
-                        .padding(.top, gap + 6)
+                        .padding(.top, gap)
 
                         VolumeSemanalChart(volumes: volumes)
                             .padding(.horizontal, pad)
                             .padding(.top, gap)
 
                         AtalhosAcademiaView(
-                            onNovo: onNovoTreino,
-                            onHistorico: onHistorico
+                            onNovo: {
+                                mostrarNovoTreino = true
+                                onNovoTreino()
+                            },
+                            onHistorico: {
+                                mostrarHistorico = true
+                                onHistorico()
+                            }
                         )
                         .padding(.horizontal, pad)
                         .padding(.top, gap)
                         .padding(.bottom, 24)
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .frame(width: geo.size.width, height: geo.size.height, alignment: .top)
         }
         .task { await carregar() }
+        .fullScreenCover(isPresented: $mostrarNovoTreino) {
+            TelaNovoTreino(
+                treinoExistente: treinoHoje,
+                onFechar: { mostrarNovoTreino = false },
+                onSalvo: { Task { await carregar() } }
+            )
+        }
+        .fullScreenCover(isPresented: $mostrarHistorico) {
+            TelaHistoricoTreinos(onFechar: { mostrarHistorico = false })
+        }
+        .fullScreenCover(isPresented: $mostrarIniciar) {
+            if let id = treinoHoje?.id {
+                TelaIniciarTreino(
+                    treinoId: id,
+                    onFechar: { mostrarIniciar = false },
+                    onConcluido: { Task { await carregar() } }
+                )
+            }
+        }
+        .sheet(item: $esporteSelecionado) { esporte in
+            RegistrarEsporteSheet(esporte: esporte) { minutos, distancia, nota in
+                esporteSelecionado = nil
+                Task {
+                    _ = try? await RotinaPlusAPI.registrarEsporte(
+                        chave: esporte.chave,
+                        minutos: minutos,
+                        distanciaMetros: distancia,
+                        nota: nota
+                    )
+                    await carregar()
+                }
+            } onCancelar: {
+                esporteSelecionado = nil
+            }
+            .presentationDetents([.medium, .large])
+        }
+    }
+
+    private var esportesVisiveis: [EsporteCatalogoAPI] {
+        esportes.isEmpty ? EsporteCatalogoAPI.fallback : esportes
     }
 
     @MainActor
@@ -464,12 +596,10 @@ struct TelaAcademia: View {
             sequencia = data.sequenciaTreinos
             dias = data.dias.map { $0.asDiaSemana() }
             volumes = data.volumes.map { $0.asVolume() }
-            if let treino = data.treinoHoje {
-                treinoFoco = treino.foco
-                treinoExercicios = treino.exercicios
-                treinoMinutos = treino.minutos
-                treinoXP = treino.xp
-            }
+            treinoHoje = data.treinoHoje
+            esportes = data.esportes ?? []
+            esporteSessoes = data.esporteSessoes ?? []
+            esporteResumo = data.esporteResumo ?? EsporteResumoAPI(totalSemana: 0, minutosSemana: 0, xpSemana: 0)
         } catch {
             erro = error.localizedDescription
         }
@@ -487,14 +617,221 @@ struct TelaAcademia: View {
             }
         }
     }
+
+    @MainActor
+    private func excluirSessao(_ sessao: EsporteSessaoAPI) async {
+        try? await RotinaPlusAPI.excluirEsporteSessao(id: sessao.id)
+        await carregar()
+    }
+}
+
+// MARK: - Outros esportes
+
+private struct OutrosEsportesSection: View {
+    let esportes: [EsporteCatalogoAPI]
+    let resumo: EsporteResumoAPI
+    let sessoes: [EsporteSessaoAPI]
+    var onSelecionar: (EsporteCatalogoAPI) -> Void
+    var onExcluir: (EsporteSessaoAPI) -> Void
+
+    private var linhas: [[EsporteCatalogoAPI]] {
+        stride(from: 0, to: esportes.count, by: 3).map { inicio in
+            Array(esportes[inicio..<min(inicio + 3, esportes.count)])
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("OUTROS ESPORTES")
+                .font(.system(size: 11, weight: .bold))
+                .tracking(1.0)
+                .foregroundStyle(CoresAcademia.label)
+
+            Text("Registre corrida, natação, vôlei e mais")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(CoresAcademia.labelMuted)
+
+            HStack(spacing: 10) {
+                miniStat(valor: "\(resumo.totalSemana)", label: "SESSÕES")
+                miniStat(valor: "\(resumo.minutosSemana)m", label: "TEMPO")
+                miniStat(valor: "+\(resumo.xpSemana)", label: "XP")
+            }
+
+            VStack(spacing: 10) {
+                ForEach(Array(linhas.enumerated()), id: \.offset) { _, linha in
+                    HStack(spacing: 10) {
+                        ForEach(linha) { esporte in
+                            Button {
+                                onSelecionar(esporte)
+                            } label: {
+                                VStack(spacing: 8) {
+                                    Text(esporte.icone)
+                                        .font(.system(size: 26))
+                                    Text(esporte.nome)
+                                        .font(.system(size: 12, weight: .semibold))
+                                        .foregroundStyle(.white)
+                                        .lineLimit(1)
+                                        .minimumScaleFactor(0.7)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                        .fill(Color.white.opacity(0.04))
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                        .stroke(CoresAcademia.bordaSuave, lineWidth: 1)
+                                )
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        if linha.count < 3 {
+                            ForEach(0..<(3 - linha.count), id: \.self) { _ in
+                                Color.clear.frame(maxWidth: .infinity)
+                            }
+                        }
+                    }
+                }
+            }
+
+            if !sessoes.isEmpty {
+                Text("RECENTES")
+                    .font(.system(size: 11, weight: .bold))
+                    .tracking(1.0)
+                    .foregroundStyle(CoresAcademia.label)
+                    .padding(.top, 4)
+
+                VStack(spacing: 8) {
+                    ForEach(sessoes.prefix(6)) { sessao in
+                        HStack(spacing: 12) {
+                            Text(sessao.icone).font(.title3)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(sessao.nome)
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundStyle(.white)
+                                Text(subtitulo(sessao))
+                                    .font(.caption)
+                                    .foregroundStyle(CoresAcademia.label)
+                            }
+                            Spacer()
+                            Text("+\(sessao.xp) XP")
+                                .font(.system(size: 12, weight: .bold, design: .monospaced))
+                                .foregroundStyle(CoresAcademia.roxo)
+                            Button {
+                                onExcluir(sessao)
+                            } label: {
+                                Image(systemName: "trash")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundStyle(.white.opacity(0.35))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        .padding(12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .fill(Color.white.opacity(0.03))
+                        )
+                    }
+                }
+            }
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(CoresAcademia.cardElevado)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(CoresAcademia.bordaSuave, lineWidth: 1)
+        )
+    }
+
+    private func miniStat(valor: String, label: String) -> some View {
+        VStack(spacing: 4) {
+            Text(valor)
+                .font(.system(size: 16, weight: .bold))
+                .foregroundStyle(.white)
+            Text(label)
+                .font(.system(size: 9, weight: .bold))
+                .foregroundStyle(CoresAcademia.label)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color.white.opacity(0.04))
+        )
+    }
+
+    private func subtitulo(_ s: EsporteSessaoAPI) -> String {
+        var parts = ["\(s.minutos) min"]
+        if let m = s.distanciaMetros, m > 0 {
+            let km = Double(m) / 1000.0
+            parts.append(String(format: "%.1f km", km))
+        }
+        if let data = s.data { parts.append(data) }
+        return parts.joined(separator: " · ")
+    }
+}
+
+private struct RegistrarEsporteSheet: View {
+    let esporte: EsporteCatalogoAPI
+    var onSalvar: (Int, Int?, String?) -> Void
+    var onCancelar: () -> Void
+
+    @State private var minutosTexto = ""
+    @State private var distanciaKm = ""
+    @State private var nota = ""
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("\(esporte.icone) \(esporte.nome)") {
+                    Text(esporte.descricao)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    TextField("Minutos", text: $minutosTexto)
+                        .keyboardType(.numberPad)
+                    if esporte.usaDistancia {
+                        TextField("Distância (km)", text: $distanciaKm)
+                            .keyboardType(.decimalPad)
+                    }
+                    TextField("Nota (opcional)", text: $nota)
+                }
+            }
+            .navigationTitle("Registrar sessão")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancelar", action: onCancelar)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Salvar") {
+                        let minutos = Int(minutosTexto) ?? esporte.minutosPadrao
+                        var distancia: Int?
+                        if esporte.usaDistancia,
+                           let km = Double(distanciaKm.replacingOccurrences(of: ",", with: ".")) {
+                            distancia = Int((km * 1000).rounded())
+                        }
+                        let n = nota.trimmingCharacters(in: .whitespacesAndNewlines)
+                        onSalvar(max(5, minutos), distancia, n.isEmpty ? nil : n)
+                    }
+                }
+            }
+            .onAppear {
+                minutosTexto = "\(esporte.minutosPadrao)"
+            }
+        }
+    }
 }
 
 #Preview {
     ZStack {
         LinearGradient(
             colors: [
-                Color(red: 0.10, green: 0.06, blue: 0.18),
-                Color(red: 0.05, green: 0.03, blue: 0.10),
+                Color(red: 0.094, green: 0.078, blue: 0.059),
+                Color(red: 0.039, green: 0.031, blue: 0.024),
             ],
             startPoint: .top,
             endPoint: .bottom

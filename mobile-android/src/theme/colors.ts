@@ -1,14 +1,16 @@
-// MARK: - Cores do app (espelham TelaBemVindo.swift no iOS)
-// Altere aqui para propagar a paleta em todas as telas Android.
+// MARK: - Paleta Guará / Cerrado
+// Identidade visual: pelagem do Guará + terra quente do cerrado (sem roxo genérico).
+// Espelhada nos enums de cores do iOS.
 
 export const cores = {
-  // Fundo da tela de login (equivalente ao gradiente roxo escuro do iOS)
-  fundoSuperior: '#1A0F2E',
-  fundoInferior: '#0D081A',
-  fundoTela: '#0D081A',
+  // Fundo — noite quente de cerrado (não roxo)
+  fundoSuperior: '#18140F',
+  fundoInferior: '#0A0806',
+  fundoTela: '#0A0806',
 
-  // Roxo primário dos botões e destaques
-  roxoPrimario: '#7A42F5',
+  // Primário — laranja Guará (CTAs, tabs, fills)
+  roxoPrimario: '#E87830',
+  corPrimaria: '#E87830',
 
   // Textos
   textoPrimario: '#FFFFFF',
@@ -19,12 +21,20 @@ export const cores = {
   campoFundo: 'rgba(255, 255, 255, 0.08)',
   campoBorda: 'rgba(255, 255, 255, 0.18)',
 
-  // Mascote / destaque laranja
-  laranjaMascote: '#FF8C33',
+  // Destaque do mascote (mais claro que o primário)
+  laranjaMascote: '#FF9B4A',
+
+  // XP / destaques secundários
+  acentoXp: '#F0A859',
+  acentoOasis: '#3DB89A',
+
+  // Superfícies
+  footerFundo: '#161310',
+  cardFundo: '#241C14',
 
   // Estados
   erro: '#FF453A',
-  botaoDesabilitado: 'rgba(122, 66, 245, 0.45)',
+  botaoDesabilitado: 'rgba(232, 120, 48, 0.45)',
 
   // Botões sociais
   botaoSocialFundo: 'rgba(255, 255, 255, 0.10)',

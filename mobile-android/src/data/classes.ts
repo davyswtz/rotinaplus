@@ -1,4 +1,4 @@
-/** Catálogo de classes — espelha GET /api/v1/classes (ClassesCatalog.php). */
+/** Helpers de tema das classes — dados vêm de GET /api/v1/classes. */
 
 export type ClasseHeroi = {
   key: string;
@@ -6,44 +6,32 @@ export type ClasseHeroi = {
   emoji: string;
   descricao: string;
   bonus: string[];
+  tema: string;
   cor: string;
 };
 
-export const CLASSES_HEROI: ClasseHeroi[] = [
-  {
-    key: 'guerreiro',
-    nome: 'Guerreiro',
-    emoji: '⚔️',
-    descricao: 'Foco em treinos e disciplina física',
-    bonus: ['+20% XP na academia', 'Streak bônus x2', 'Resistência lendária'],
-    cor: '#FF7A47',
-  },
-  {
-    key: 'estudioso',
-    nome: 'Estudioso',
-    emoji: '📚',
-    descricao: 'Domina conhecimento e aprendizado',
-    bonus: ['+20% XP nos estudos', 'Memória aprimorada', 'Foco sobrenatural'],
-    cor: '#59D9EB',
-  },
-  {
-    key: 'investidor',
-    nome: 'Investidor',
-    emoji: '💰',
-    descricao: 'Mestre das finanças e crescimento',
-    bonus: ['+20% XP em finanças', 'Renda passiva bônus', 'Visão de mercado'],
-    cor: '#59DB85',
-  },
-  {
-    key: 'sabio',
-    nome: 'Sábio',
-    emoji: '🔮',
-    descricao: 'Equilibra todas as áreas da vida',
-    bonus: ['+10% XP em tudo', 'Bônus de equilíbrio', 'Sabedoria ancestral'],
-    cor: '#B88CF9',
-  },
-];
+const TEMA_COR: Record<string, string> = {
+  laranja: '#FF7A47',
+  ciano: '#59D9EB',
+  verde: '#59DB85',
+  ambar: '#E8B86A',
+  roxo: '#E8B86A',
+};
 
-export function findClasseByKey(key: string): ClasseHeroi {
-  return CLASSES_HEROI.find((c) => c.key === key) ?? CLASSES_HEROI[3];
+export function corDoTema(tema: string): string {
+  return TEMA_COR[tema] ?? '#E87830';
+}
+
+export function mapClasseApi(item: {
+  key: string;
+  nome: string;
+  emoji: string;
+  descricao: string;
+  bonus: string[];
+  tema: string;
+}): ClasseHeroi {
+  return {
+    ...item,
+    cor: corDoTema(item.tema),
+  };
 }

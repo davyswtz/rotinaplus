@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D1A7B001HABITOS000000002 /* TelaDiarioHabitos.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A7B001HABITOS000000001 /* TelaDiarioHabitos.swift */; };
 		00A59C7ED74CD2CAD4468186 /* TelaLoading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DC5E216D08AE7B9B009E435 /* TelaLoading.swift */; };
 		14087EF27A99C5D6F7E1DA69 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 304E05A076A85F6859B184EF /* AuthManager.swift */; };
 		145A93EA80CDA7F458E56F80 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9368C816DE1CA6CD890F75B0 /* HomeView.swift */; };
@@ -52,11 +53,13 @@
 		EBB6BE2DEF5081E4667171DD /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = AFB03256A6FF8F73D5B75DF5 /* Localizable.strings */; };
 		EBB998C9D191356BC7E64787 /* _cell0.png in Resources */ = {isa = PBXBuildFile; fileRef = 08632F606ABDBCAA510C10C7 /* _cell0.png */; };
 		F4A8B1C2D3E4F5061728394A /* TelaAcademia.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A8B1C2D3E4F5061728394B /* TelaAcademia.swift */; };
+		D1A7B001NOVOTREINO000002 /* TelaNovoTreino.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A7B001NOVOTREINO000001 /* TelaNovoTreino.swift */; };
+		D1A7B001PERFIL0000000002 /* TelaPerfil.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A7B001PERFIL0000000001 /* TelaPerfil.swift */; };
 		F1N4NC45A8D00000000002 /* TelaFinancas.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1N4NC45A8D00000000001 /* TelaFinancas.swift */; };
-		PLUGGYCONN5A8D000000002 /* PluggyConnectSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = PLUGGYCONN5A8D000000001 /* PluggyConnectSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D1A7B001HABITOS000000001 /* TelaDiarioHabitos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaDiarioHabitos.swift; sourceTree = "<group>"; };
 		08632F606ABDBCAA510C10C7 /* _cell0.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = _cell0.png; sourceTree = "<group>"; };
 		0ECAD16E703F8F6FA38184E7 /* TelaBemVindo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaBemVindo.swift; sourceTree = "<group>"; };
 		125980BFC9B0A546484E270F /* Rotina.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rotina.swift; sourceTree = "<group>"; };
@@ -101,8 +104,9 @@
 		E0C4B9BC4F827F0F0C2D2CE1 /* MissoesDoDiaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissoesDoDiaView.swift; sourceTree = "<group>"; };
 		D2ADDM155A8D0000000001 /* AdicionarMissaoSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdicionarMissaoSheet.swift; sourceTree = "<group>"; };
 		E4A8B1C2D3E4F5061728394B /* TelaAcademia.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaAcademia.swift; sourceTree = "<group>"; };
+		D1A7B001NOVOTREINO000001 /* TelaNovoTreino.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaNovoTreino.swift; sourceTree = "<group>"; };
+		D1A7B001PERFIL0000000001 /* TelaPerfil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaPerfil.swift; sourceTree = "<group>"; };
 		F1N4NC45A8D00000000001 /* TelaFinancas.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaFinancas.swift; sourceTree = "<group>"; };
-		PLUGGYCONN5A8D000000001 /* PluggyConnectSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluggyConnectSheet.swift; sourceTree = "<group>"; };
 		E6078EF931F7249D1FABF5EF /* LayoutDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutDashboard.swift; sourceTree = "<group>"; };
 		F2865C182562E82CFAD74364 /* _icon0_check.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = _icon0_check.png; sourceTree = "<group>"; };
 		F6660249C15BA031E5D46016 /* RotinaPlus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RotinaPlus.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -189,8 +193,10 @@
 				3DC5E216D08AE7B9B009E435 /* TelaLoading.swift */,
 				AEB298F80086AB3BA2B83FFB /* TelaNomeHeroi.swift */,
 				E4A8B1C2D3E4F5061728394B /* TelaAcademia.swift */,
+				D1A7B001NOVOTREINO000001 /* TelaNovoTreino.swift */,
+				D1A7B001PERFIL0000000001 /* TelaPerfil.swift */,
+				D1A7B001HABITOS000000001 /* TelaDiarioHabitos.swift */,
 				F1N4NC45A8D00000000001 /* TelaFinancas.swift */,
-				PLUGGYCONN5A8D000000001 /* PluggyConnectSheet.swift */,
 				713AFC38548F20CEB7E8C927 /* TelaNotificacoes.swift */,
 			);
 			path = Screens;
@@ -383,8 +389,10 @@
 				00A59C7ED74CD2CAD4468186 /* TelaLoading.swift in Sources */,
 				8EEDE49A57999BCBAE0EC531 /* TelaNomeHeroi.swift in Sources */,
 				F4A8B1C2D3E4F5061728394A /* TelaAcademia.swift in Sources */,
+				D1A7B001NOVOTREINO000002 /* TelaNovoTreino.swift in Sources */,
+				D1A7B001PERFIL0000000002 /* TelaPerfil.swift in Sources */,
+				D1A7B001HABITOS000000002 /* TelaDiarioHabitos.swift in Sources */,
 				F1N4NC45A8D00000000002 /* TelaFinancas.swift in Sources */,
-				PLUGGYCONN5A8D000000002 /* PluggyConnectSheet.swift in Sources */,
 				CDC583457884B50EC4F9D614 /* TelaNotificacoes.swift in Sources */,
 				1C379C0B1D009404FD32089F /* User.swift in Sources */,
 				A11D45B0A8D00000000002 /* DashboardModels.swift in Sources */,
@@ -406,7 +414,6 @@
 				INFOPLIST_FILE = RotinaPlus/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = RotinaPlus;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -487,7 +494,6 @@
 				INFOPLIST_FILE = RotinaPlus/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = RotinaPlus;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

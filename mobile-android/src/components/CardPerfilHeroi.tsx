@@ -63,7 +63,7 @@ export function CardPerfilHeroi({ dados }: Props) {
           </Text>
           <View style={styles.chip}>
             <Text style={styles.chipTexto}>
-              {dados.emojiClasse ?? '🔮'} {dados.classe ?? 'Sábio'}
+                    {dados.emojiClasse} {dados.classe}
             </Text>
           </View>
         </View>
@@ -120,9 +120,9 @@ export function CardPerfilHeroi({ dados }: Props) {
 const styles = StyleSheet.create({
   card: {
     borderRadius: 22,
-    backgroundColor: '#24173D',
+    backgroundColor: '#241C14',
     borderWidth: 1,
-    borderColor: 'rgba(122, 66, 245, 0.35)',
+    borderColor: 'rgba(232, 120, 48, 0.35)',
   },
   topo: {
     flexDirection: 'row',
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.08)',
   },
   chipTexto: {
-    color: '#B894FF',
+    color: '#FFC78C',
     fontSize: 13,
     fontWeight: '600',
   },
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   },
   glow: {
     position: 'absolute',
-    backgroundColor: 'rgba(122, 66, 245, 0.22)',
+    backgroundColor: 'rgba(232, 120, 48, 0.22)',
   },
   mascote: {
     position: 'absolute',

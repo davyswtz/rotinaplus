@@ -13,8 +13,8 @@ import { AbaFooter } from './FooterNavegacao';
 export type AtalhoRapidoId =
   | 'treino'
   | 'financas'
+  | 'diario'
   | 'estudar'
-  | 'ranking'
   | 'loja'
   | 'conquistas';
 
@@ -26,8 +26,8 @@ const ATALHOS: {
 }[] = [
   { id: 'treino', icone: '🏋️', titulo: 'Treino', aba: 'academia' },
   { id: 'financas', icone: '📊', titulo: 'Finanças', aba: 'financas' },
-  { id: 'estudar', icone: '📚', titulo: 'Estudar', aba: 'estudos' },
-  { id: 'ranking', icone: '🏆', titulo: 'Ranking' },
+  { id: 'estudar', icone: '📚', titulo: 'Estudos', aba: 'estudos' },
+  { id: 'diario', icone: '📓', titulo: 'Diário', aba: 'diario' },
   { id: 'loja', icone: '🛒', titulo: 'Loja' },
   { id: 'conquistas', icone: '🎯', titulo: 'Conquistas' },
 ];
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: 'rgba(255,255,255,0.04)',
     borderWidth: 1,
-    borderColor: 'rgba(122, 66, 245, 0.28)',
+    borderColor: 'rgba(232, 120, 48, 0.28)',
     gap: 8,
   },
   label: {
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: 'rgba(255,255,255,0.04)',
     borderWidth: 1,
-    borderColor: 'rgba(122, 66, 245, 0.28)',
+    borderColor: 'rgba(232, 120, 48, 0.28)',
   },
   foxTexto: {
     flex: 1,

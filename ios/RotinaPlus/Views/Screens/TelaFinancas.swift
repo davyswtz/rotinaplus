@@ -43,7 +43,7 @@ enum MoedaBR {
 }
 
 private enum CoresFinancas {
-    static let roxo = Color(red: 0.478, green: 0.259, blue: 0.961)
+    static let roxo = Color(red: 0.910, green: 0.471, blue: 0.188)
     static let verde = Color(red: 0.29, green: 0.87, blue: 0.50)
     static let vermelho = Color(red: 0.95, green: 0.35, blue: 0.45)
     static let card = Color.white.opacity(0.055)
@@ -63,10 +63,6 @@ struct TelaFinancas: View {
     @State private var mostrarAdicionar = false
     @State private var mostrarTransacoes = false
     @State private var mostrarMetas = false
-    @State private var mostrarPluggy = false
-    @State private var pluggyToken: String?
-    @State private var syncMensagem: String?
-    @State private var syncando = false
 
     var body: some View {
         GeometryReader { geo in
@@ -121,16 +117,6 @@ struct TelaFinancas: View {
                             saldo: dados.saldoCentavos,
                             receita: dados.receitaCentavos,
                             gastos: dados.gastosCentavos
-                        )
-                        .padding(.horizontal, pad)
-                        .padding(.top, gap)
-
-                        BancoConnectCard(
-                            pluggy: dados.pluggy,
-                            syncando: syncando,
-                            mensagem: syncMensagem,
-                            onConectar: { Task { await conectarBanco() } },
-                            onSincronizar: { Task { await sincronizarBanco() } }
                         )
                         .padding(.horizontal, pad)
                         .padding(.top, gap)
@@ -214,18 +200,6 @@ struct TelaFinancas: View {
                 )
             }
         }
-        .sheet(isPresented: $mostrarPluggy) {
-            if let token = pluggyToken {
-                PluggyConnectSheet(
-                    accessToken: token,
-                    onSuccess: { itemId in
-                        mostrarPluggy = false
-                        Task { await vincularItem(itemId) }
-                    },
-                    onCancel: { mostrarPluggy = false }
-                )
-            }
-        }
     }
 
     @MainActor
@@ -240,133 +214,6 @@ struct TelaFinancas: View {
             erro = error.localizedDescription
         }
         carregando = false
-    }
-
-    @MainActor
-    private func conectarBanco() async {
-        syncMensagem = nil
-        syncando = true
-        do {
-            let token = try await RotinaPlusAPI.pluggyConnectToken()
-            if token.mode == "local" {
-                await vincularItem("local-sandbox")
-            } else {
-                pluggyToken = token.accessToken
-                mostrarPluggy = true
-            }
-        } catch {
-            syncMensagem = error.localizedDescription
-        }
-        syncando = false
-    }
-
-    @MainActor
-    private func vincularItem(_ itemId: String) async {
-        syncando = true
-        do {
-            let result = try await RotinaPlusAPI.pluggyVincular(itemId: itemId)
-            syncMensagem = "Importadas \(result.importadas) · atualizadas \(result.atualizadas)"
-            await carregar(mes: mesSelecionado ?? dados?.anoMes)
-        } catch {
-            syncMensagem = error.localizedDescription
-        }
-        syncando = false
-    }
-
-    @MainActor
-    private func sincronizarBanco() async {
-        syncando = true
-        syncMensagem = nil
-        do {
-            let result = try await RotinaPlusAPI.pluggySincronizar()
-            syncMensagem = "Importadas \(result.importadas) · atualizadas \(result.atualizadas)"
-            await carregar(mes: mesSelecionado ?? dados?.anoMes)
-        } catch {
-            syncMensagem = error.localizedDescription
-        }
-        syncando = false
-    }
-}
-
-// MARK: - Banco / Pluggy
-
-private struct BancoConnectCard: View {
-    let pluggy: FinancasPluggyAPI?
-    var syncando: Bool
-    var mensagem: String?
-    var onConectar: () -> Void
-    var onSincronizar: () -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("BANCO (SANDBOX)")
-                .font(.system(size: 11, weight: .bold))
-                .tracking(1.0)
-                .foregroundStyle(CoresFinancas.label)
-
-            if let nome = pluggy?.conexoes.first?.connectorName {
-                Text(nome)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(.white)
-                Text("Conectado · sync automático via Pluggy")
-                    .font(.system(size: 12))
-                    .foregroundStyle(CoresFinancas.label)
-            } else {
-                Text("Conecte o sandbox para importar transações automaticamente.")
-                    .font(.system(size: 13))
-                    .foregroundStyle(CoresFinancas.label)
-            }
-
-            HStack(spacing: 10) {
-                Button(action: onConectar) {
-                    Text(pluggy?.temConexao == true ? "Reconectar" : "Conectar sandbox")
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(RoundedRectangle(cornerRadius: 12).fill(CoresFinancas.roxo))
-                }
-                .buttonStyle(.plain)
-                .disabled(syncando)
-
-                if pluggy?.temConexao == true {
-                    Button(action: onSincronizar) {
-                        Text(syncando ? "…" : "Sincronizar")
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundStyle(CoresFinancas.roxo)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(CoresFinancas.roxo, lineWidth: 1)
-                            )
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(syncando)
-                }
-            }
-
-            if let mensagem {
-                Text(mensagem)
-                    .font(.system(size: 12))
-                    .foregroundStyle(CoresFinancas.verde)
-            }
-
-            if pluggy?.configured != true && pluggy?.localSandbox == true {
-                Text("Modo local: sem chaves Pluggy ainda. Toque em Conectar para importar o sandbox de teste.")
-                    .font(.system(size: 11))
-                    .foregroundStyle(CoresFinancas.label)
-            }
-        }
-        .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(CoresFinancas.card)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(CoresFinancas.borda, lineWidth: 1)
-        )
     }
 }
 
@@ -1011,8 +858,8 @@ private struct MetasFinancasSheet: View {
     ZStack {
         LinearGradient(
             colors: [
-                Color(red: 0.10, green: 0.06, blue: 0.18),
-                Color(red: 0.05, green: 0.03, blue: 0.10),
+                Color(red: 0.094, green: 0.078, blue: 0.059),
+                Color(red: 0.039, green: 0.031, blue: 0.024),
             ],
             startPoint: .top,
             endPoint: .bottom

@@ -7,6 +7,7 @@ struct HomeView: View {
     @State private var notificacoesNaoLidas = 0
     @State private var missoes: [MissaoDoDia] = []
     @State private var perfil: PerfilAPI?
+    @State private var habitosResumo: HabitosResumoAPI?
     @State private var xpHojeAPI = 0
     @State private var abaSelecionada: AbaFooter = .inicio
     @State private var carregando = true
@@ -49,8 +50,8 @@ struct HomeView: View {
             ZStack {
                 LinearGradient(
                     colors: [
-                        Color(red: 0.10, green: 0.06, blue: 0.18),
-                        Color(red: 0.05, green: 0.03, blue: 0.10),
+                        Color(red: 0.094, green: 0.078, blue: 0.059),
+                        Color(red: 0.039, green: 0.031, blue: 0.024),
                     ],
                     startPoint: .top,
                     endPoint: .bottom
@@ -72,24 +73,21 @@ struct HomeView: View {
                             TelaAcademia()
                         case .financas:
                             TelaFinancas()
-                        case .perfil:
-                            conteudoPlaceholder(
-                                titulo: "Perfil",
-                                descricao: "Em breve: editar herói, classe e preferências."
-                            ) {
-                                Button("Sair") { authManager.logout() }
-                                    .fontWeight(.semibold)
-                                    .padding(.horizontal, 24)
-                                    .padding(.vertical, 12)
-                                    .background(Color(red: 0.48, green: 0.26, blue: 0.96))
-                                    .foregroundStyle(.white)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                                    .padding(.top, 16)
+                        case .diario:
+                            TelaDiarioHabitos { aba in
+                                abaSelecionada = aba
                             }
-                        default:
+                        case .estudos:
                             conteudoPlaceholder(
-                                titulo: abaSelecionada.titulo,
+                                titulo: "Estudos",
                                 descricao: "Esta área chega nas próximas etapas."
+                            )
+                        case .perfil:
+                            TelaPerfil(
+                                onPerfilAtualizado: { p in
+                                    perfil = p
+                                },
+                                onSair: { authManager.logout() }
                             )
                         }
                     }
@@ -141,17 +139,17 @@ struct HomeView: View {
                     Button("Tentar de novo") {
                         Task { await carregarDashboard() }
                     }
-                    .foregroundStyle(Color(red: 0.48, green: 0.26, blue: 0.96))
+                    .foregroundStyle(Color(red: 0.910, green: 0.471, blue: 0.188))
                     .padding(.top, 8)
                 } else {
                     CardPerfilHeroi(
                         dados: DadosCardPerfil(
                             nomeUsuario: dadosHeader.nomeUsuario,
-                            classe: perfil?.classe ?? "Sábio",
-                            emojiClasse: perfil?.emojiClasse ?? "🔮",
+                            classe: perfil?.classe ?? "",
+                            emojiClasse: perfil?.emojiClasse ?? "",
                             nivel: dadosHeader.nivel,
                             xpAtual: perfil?.xpAtual ?? 0,
-                            xpProximoNivel: perfil?.xpProximoNivel ?? 500,
+                            xpProximoNivel: perfil?.xpProximoNivel ?? 0,
                             avatarAsset: dadosHeader.avatarAsset
                         )
                     )
@@ -160,9 +158,9 @@ struct HomeView: View {
 
                     GradeStatsDashboard(
                         dados: DadosGradeStats(
-                            streakDias: dadosHeader.streakDias,
-                            habitosHojeConcluidos: missoesConcluidas,
-                            habitosHojeTotal: max(missoes.count, 1),
+                            streakDias: max(dadosHeader.streakDias, habitosResumo?.streakGeral ?? 0),
+                            habitosHojeConcluidos: habitosResumo?.concluidos ?? missoesConcluidas,
+                            habitosHojeTotal: habitosResumo?.total ?? missoes.count,
                             xpHoje: xpHoje,
                             moedas: dadosHeader.moedas
                         )
@@ -172,8 +170,8 @@ struct HomeView: View {
 
                     ProgressoDiarioCard(
                         dados: DadosProgressoDiario(
-                            concluidos: missoesConcluidas,
-                            total: max(missoes.count, 1)
+                            concluidos: habitosResumo?.concluidos ?? missoesConcluidas,
+                            total: habitosResumo?.total ?? missoes.count
                         )
                     )
                     .padding(.horizontal, pad)
@@ -234,6 +232,7 @@ struct HomeView: View {
             missoes = data.missoes.map { $0.asMissaoDoDia() }
             notificacoesNaoLidas = data.notificacoesNaoLidas
             xpHojeAPI = data.xpHoje
+            habitosResumo = data.habitosResumo
 
             if let nome = data.perfil.nomeHeroi, !nome.isEmpty {
                 UserDefaults.standard.set(nome, forKey: "nome_heroi")
@@ -254,6 +253,7 @@ struct HomeView: View {
             let data = try await RotinaPlusAPI.dashboard()
             perfil = data.perfil
             notificacoesNaoLidas = data.notificacoesNaoLidas
+            habitosResumo = data.habitosResumo
         } catch {
             if let i = missoes.firstIndex(where: { $0.id == missao.id }) {
                 missoes[i].concluida.toggle()

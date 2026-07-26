@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -81,7 +82,11 @@ export function RegisterScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.cabecalho}>
-            <Text style={styles.mascote}>🐾</Text>
+            <Image
+              source={require('../assets/splash_guara.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
             <Text style={styles.titulo}>Criar conta no RotinaPlus</Text>
             <Text style={styles.subtitulo}>
               Comece sua aventura RPG e transforme hábitos em XP.
@@ -207,8 +212,9 @@ const styles = StyleSheet.create({
     marginBottom: 32,
     marginTop: 16,
   },
-  mascote: {
-    fontSize: 56,
+  logo: {
+    width: 140,
+    height: 160,
     marginBottom: 16,
   },
   titulo: {

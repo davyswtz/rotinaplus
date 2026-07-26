@@ -20,9 +20,6 @@ class DashboardService
         $hoje = now('America/Sao_Paulo')->toDateString();
         $semana = SemanaHelper::inicioAtual()->toDateString();
 
-        app(MissaoService::class)->ensureMissoesPadraoHoje($user);
-        app(AcademiaService::class)->ensureSemanaAtual($user);
-
         $missoes = Missao::query()
             ->where('user_id', $user->id)
             ->whereDate('data', $hoje)
@@ -42,13 +39,13 @@ class DashboardService
             'xp_hoje' => $missoes->where('concluida', true)->sum('xp'),
             'notificacoes_nao_lidas' => $notificacoesNaoLidas,
             'academia_resumo' => $this->academiaResumo($user, $semana),
+            'habitos_resumo' => app(HabitoService::class)->resumoHoje($user),
         ];
     }
 
     public function academia(User $user): array
     {
         $user->ensureDefaults();
-        app(AcademiaService::class)->ensureSemanaAtual($user);
 
         $semana = SemanaHelper::inicioAtual()->toDateString();
         $config = $user->academiaConfig()->first();
@@ -68,6 +65,7 @@ class DashboardService
         $treinoHoje = AcademiaTreino::query()
             ->where('user_id', $user->id)
             ->where('ativo', true)
+            ->whereNull('concluido_em')
             ->first();
 
         $feitos = $dias->where('concluido', true)->count();

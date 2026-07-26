@@ -26,16 +26,16 @@ struct DadosCardPerfil: Equatable {
 }
 
 private enum CoresCardPerfil {
-    static let fundo = Color(red: 0.14, green: 0.09, blue: 0.26)
-    static let borda = Color(red: 0.48, green: 0.26, blue: 0.96).opacity(0.35)
+    static let fundo = Color(red: 0.141, green: 0.110, blue: 0.078)
+    static let borda = Color(red: 0.910, green: 0.471, blue: 0.188).opacity(0.35)
     static let saudacao = Color.white.opacity(0.55)
     static let classeFundo = Color.white.opacity(0.08)
-    static let classeTexto = Color(red: 0.72, green: 0.58, blue: 1.0)
+    static let classeTexto = Color(red: 1.0, green: 0.78, blue: 0.55)
     static let xpTrack = Color.black.opacity(0.35)
-    static let xpFill = Color(red: 0.48, green: 0.26, blue: 0.96)
+    static let xpFill = Color(red: 0.910, green: 0.471, blue: 0.188)
     static let xpTexto = Color.white.opacity(0.45)
-    static let nivelCircle = Color(red: 0.48, green: 0.26, blue: 0.96)
-    static let glow = Color(red: 0.48, green: 0.26, blue: 0.96).opacity(0.22)
+    static let nivelCircle = Color(red: 0.910, green: 0.471, blue: 0.188)
+    static let glow = Color(red: 0.910, green: 0.471, blue: 0.188).opacity(0.22)
 }
 
 /// Card de resumo do herói (abaixo do header no dashboard).
@@ -144,7 +144,7 @@ struct CardPerfilHeroi: View {
 
 #Preview {
     ZStack {
-        Color(red: 0.05, green: 0.03, blue: 0.10).ignoresSafeArea()
+        Color(red: 0.039, green: 0.031, blue: 0.024).ignoresSafeArea()
         CardPerfilHeroi(dados: .preview)
             .padding()
     }

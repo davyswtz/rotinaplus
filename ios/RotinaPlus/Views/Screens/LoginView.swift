@@ -3,14 +3,14 @@ import SwiftUI
 // MARK: - Cores da tela de login
 // Paleta espelhada de TelaBemVindo.swift e do theme/colors.ts (Android).
 private enum CoresLogin {
-    static let fundoSuperior = Color(red: 0.10, green: 0.06, blue: 0.18)
-    static let fundoInferior = Color(red: 0.05, green: 0.03, blue: 0.10)
-    static let roxoPrimario = Color(red: 0.48, green: 0.26, blue: 0.96)
+    static let fundoSuperior = Color(red: 0.094, green: 0.078, blue: 0.059)
+    static let fundoInferior = Color(red: 0.039, green: 0.031, blue: 0.024)
+    static let roxoPrimario = Color(red: 0.910, green: 0.471, blue: 0.188)
     static let textoSecundario = Color.white.opacity(0.65)
     static let textoPlaceholder = Color.white.opacity(0.40)
     static let campoFundo = Color.white.opacity(0.08)
     static let campoBorda = Color.white.opacity(0.18)
-    static let laranjaMascote = Color(red: 1.0, green: 0.55, blue: 0.20)
+    static let laranjaMascote = Color(red: 1.0, green: 0.608, blue: 0.290)
     static let erro = Color(red: 1.0, green: 0.27, blue: 0.23)
     static let botaoSocialFundo = Color.white.opacity(0.10)
     static let botaoSocialBorda = Color.white.opacity(0.15)
@@ -88,10 +88,10 @@ struct LoginView: View {
     // MARK: Cabeçalho
     private var cabecalho: some View {
         VStack(spacing: 16) {
-            // TODO: substituir por Image("guara") quando o asset estiver no projeto.
-            Image(systemName: "pawprint.fill")
-                .font(.system(size: 56))
-                .foregroundStyle(CoresLogin.laranjaMascote)
+            Image("splash_guara")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 140, height: 160)
 
             Text("Entrar no RotinaPlus")
                 .font(.title2)

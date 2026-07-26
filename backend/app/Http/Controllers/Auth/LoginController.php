@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
@@ -13,13 +14,15 @@ class LoginController extends Controller
     public function login(LoginRequest $request)
     {
         $validated = $request->validated();
+        $email = Str::lower(trim($validated['email']));
+        $password = $validated['password'];
 
-        $user = User::where('email', $validated['email'])->first();
+        $user = User::query()->where('email', $email)->first();
 
         if (
             ! $user
-            || empty($user->password)
-            || ! Hash::check($validated['password'], $user->password)
+            || empty($user->getRawOriginal('password'))
+            || ! Hash::check($password, $user->getAuthPassword())
         ) {
             throw ValidationException::withMessages([
                 'email' => ['As credenciais fornecidas são inválidas.'],

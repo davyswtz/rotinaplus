@@ -204,8 +204,8 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   cardNaoLida: {
-    backgroundColor: '#24173D',
-    borderColor: 'rgba(122, 66, 245, 0.55)',
+    backgroundColor: '#241C14',
+    borderColor: 'rgba(232, 120, 48, 0.55)',
   },
   ponto: {
     position: 'absolute',

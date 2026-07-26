@@ -30,15 +30,23 @@ final class AuthManager: ObservableObject {
         }
 
         struct AuthResponse: Decodable {
+            let success: Bool?
             let user: AuthUser
             let token: String
         }
 
+        let emailNorm = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let passwordNorm = password
+
         let response: AuthResponse = try await APIClient.shared.request(
             endpoint: .login,
             method: .post,
-            body: LoginRequest(email: email, password: password)
+            body: LoginRequest(email: emailNorm, password: passwordNorm)
         )
+
+        guard !response.token.isEmpty else {
+            throw APIError.invalidResponse
+        }
 
         forceOnboarding = false
         persistSession(token: response.token)
@@ -63,20 +71,27 @@ final class AuthManager: ObservableObject {
         }
 
         struct AuthResponse: Decodable {
+            let success: Bool?
             let user: AuthUser
             let token: String
         }
+
+        let emailNorm = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
 
         let response: AuthResponse = try await APIClient.shared.request(
             endpoint: .register,
             method: .post,
             body: RegisterRequest(
-                name: name,
-                email: email,
+                name: name.trimmingCharacters(in: .whitespacesAndNewlines),
+                email: emailNorm,
                 password: password,
                 passwordConfirmation: passwordConfirmation
             )
         )
+
+        guard !response.token.isEmpty else {
+            throw APIError.invalidResponse
+        }
 
         clearOnboardingLocalState()
         forceOnboarding = true

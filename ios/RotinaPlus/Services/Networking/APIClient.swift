@@ -26,6 +26,13 @@ enum APIError: LocalizedError {
             return "Erro ao processar resposta."
         }
     }
+
+    var isUnauthorized: Bool {
+        if case .httpError(let statusCode, _) = self {
+            return statusCode == 401 || statusCode == 403
+        }
+        return false
+    }
 }
 
 struct APIResponse<T: Decodable>: Decodable {
@@ -41,8 +48,8 @@ class APIClient {
     private let baseURL = AppConfig.apiBaseURL
     private let session: URLSession
 
-    private init(session: URLSession = .shared) {
-        self.session = session
+    private init() {
+        session = .shared
     }
 
     func request<T: Decodable>(

@@ -13,23 +13,78 @@ enum RotinaPlusAPI {
         return data
     }
 
+    static func classes() async throws -> [ClasseHeroi] {
+        struct Item: Decodable {
+            let key: String
+            let nome: String
+            let emoji: String
+            let descricao: String
+            let bonus: [String]
+            let tema: String
+        }
+
+        let response: APIResponse<[Item]> = try await APIClient.shared.request(
+            endpoint: .classes,
+            requiresAuth: false
+        )
+        guard let data = response.data else {
+            throw APIError.invalidResponse
+        }
+        return data.map {
+            ClasseHeroi(
+                key: $0.key,
+                nome: $0.nome,
+                emoji: $0.emoji,
+                descricao: $0.descricao,
+                bonus: $0.bonus,
+                tema: $0.tema
+            )
+        }
+    }
+
     static func updatePerfil(
         nomeHeroi: String,
         avatarKey: String,
         classe: String,
         emojiClasse: String
     ) async throws -> PerfilAPI {
+        try await atualizarPerfilCampos(
+            nomeHeroi: nomeHeroi,
+            avatarKey: avatarKey,
+            classe: classe,
+            emojiClasse: emojiClasse
+        )
+    }
+
+    static func atualizarPerfilCampos(
+        nomeHeroi: String? = nil,
+        nick: String? = nil,
+        avatarKey: String? = nil,
+        classe: String? = nil,
+        emojiClasse: String? = nil
+    ) async throws -> PerfilAPI {
         struct Body: Encodable {
-            let nomeHeroi: String
-            let avatarKey: String
-            let classe: String
-            let emojiClasse: String
+            var nomeHeroi: String?
+            var nick: String?
+            var avatarKey: String?
+            var classe: String?
+            var emojiClasse: String?
 
             enum CodingKeys: String, CodingKey {
                 case nomeHeroi = "nome_heroi"
+                case nick
                 case avatarKey = "avatar_key"
                 case classe
                 case emojiClasse = "emoji_classe"
+            }
+
+            func encode(to encoder: Encoder) throws {
+                var c = encoder.container(keyedBy: CodingKeys.self)
+                if let nomeHeroi { try c.encode(nomeHeroi, forKey: .nomeHeroi) }
+                if let nick { try c.encode(nick, forKey: .nick) }
+                if let avatarKey { try c.encode(avatarKey, forKey: .avatarKey) }
+                if let classe { try c.encode(classe, forKey: .classe) }
+                if let emojiClasse { try c.encode(emojiClasse, forKey: .emojiClasse) }
             }
         }
 
@@ -38,10 +93,58 @@ enum RotinaPlusAPI {
             method: .put,
             body: Body(
                 nomeHeroi: nomeHeroi,
+                nick: nick,
                 avatarKey: avatarKey,
                 classe: classe,
                 emojiClasse: emojiClasse
             ),
+            requiresAuth: true
+        )
+        guard let data = response.data else {
+            throw APIError.invalidResponse
+        }
+        return data
+    }
+
+    static func listarAmigos() async throws -> AmigosListaAPI {
+        let response: APIResponse<AmigosListaAPI> = try await APIClient.shared.request(
+            endpoint: .amigos,
+            method: .get,
+            requiresAuth: true
+        )
+        guard let data = response.data else {
+            throw APIError.invalidResponse
+        }
+        return data
+    }
+
+    static func adicionarAmigo(nick: String) async throws -> AmigoAPI {
+        struct Body: Encodable { let nick: String }
+        let response: APIResponse<AmigoAPI> = try await APIClient.shared.request(
+            endpoint: .adicionarAmigo,
+            method: .post,
+            body: Body(nick: nick),
+            requiresAuth: true
+        )
+        guard let data = response.data else {
+            throw APIError.invalidResponse
+        }
+        return data
+    }
+
+    static func removerAmigo(id: Int) async throws {
+        struct Empty: Decodable {}
+        let _: APIResponse<Empty> = try await APIClient.shared.request(
+            endpoint: .removerAmigo(id: id),
+            method: .delete,
+            requiresAuth: true
+        )
+    }
+
+    static func perfilStats(periodo: String = "semana") async throws -> PerfilStatsAPI {
+        let response: APIResponse<PerfilStatsAPI> = try await APIClient.shared.request(
+            endpoint: .perfilStats(periodo: periodo),
+            method: .get,
             requiresAuth: true
         )
         guard let data = response.data else {
@@ -131,6 +234,214 @@ enum RotinaPlusAPI {
         let _: APIResponse<DiaToggle> = try await APIClient.shared.request(
             endpoint: .toggleAcademiaDia(id: id),
             method: .patch,
+            requiresAuth: true
+        )
+    }
+
+    static func registrarEsporte(
+        chave: String,
+        minutos: Int,
+        distanciaMetros: Int?,
+        nota: String?
+    ) async throws -> EsporteSessaoAPI {
+        struct Body: Encodable {
+            let esporteChave: String
+            let minutos: Int
+            let distanciaMetros: Int?
+            let nota: String?
+
+            enum CodingKeys: String, CodingKey {
+                case minutos, nota
+                case esporteChave = "esporte_chave"
+                case distanciaMetros = "distancia_metros"
+            }
+        }
+        let response: APIResponse<EsporteSessaoAPI> = try await APIClient.shared.request(
+            endpoint: .registrarEsporte,
+            method: .post,
+            body: Body(
+                esporteChave: chave,
+                minutos: minutos,
+                distanciaMetros: distanciaMetros,
+                nota: nota
+            ),
+            requiresAuth: true
+        )
+        guard let data = response.data else {
+            throw APIError.invalidResponse
+        }
+        return data
+    }
+
+    static func excluirEsporteSessao(id: Int) async throws {
+        struct Empty: Decodable {}
+        let _: APIResponse<Empty> = try await APIClient.shared.request(
+            endpoint: .excluirEsporteSessao(id: id),
+            method: .delete,
+            requiresAuth: true
+        )
+    }
+
+    static func catalogoExercicios(grupo: String?) async throws -> ExercicioCatalogoDataAPI {
+        let response: APIResponse<ExercicioCatalogoDataAPI> = try await APIClient.shared.request(
+            endpoint: .academiaExercicios(grupo: grupo),
+            method: .get,
+            requiresAuth: true
+        )
+        guard let data = response.data else { throw APIError.invalidResponse }
+        return data
+    }
+
+    static func criarTreino(
+        foco: String,
+        titulo: String?,
+        minutos: Int,
+        exercicios: [TreinoExercicioPayload]
+    ) async throws -> AcademiaTreinoAPI {
+        struct Body: Encodable {
+            let foco: String
+            let titulo: String?
+            let minutos: Int
+            let exercicios: [TreinoExercicioPayload]
+        }
+
+        let response: APIResponse<AcademiaTreinoAPI> = try await APIClient.shared.request(
+            endpoint: .criarTreino,
+            method: .post,
+            body: Body(foco: foco, titulo: titulo, minutos: minutos, exercicios: exercicios),
+            requiresAuth: true
+        )
+        guard let data = response.data else { throw APIError.invalidResponse }
+        return data
+    }
+
+    static func historicoTreinos() async throws -> [AcademiaTreinoAPI] {
+        let response: APIResponse<[AcademiaTreinoAPI]> = try await APIClient.shared.request(
+            endpoint: .academiaHistorico,
+            method: .get,
+            requiresAuth: true
+        )
+        return response.data ?? []
+    }
+
+    static func detalheTreino(id: Int) async throws -> AcademiaTreinoAPI {
+        let response: APIResponse<AcademiaTreinoAPI> = try await APIClient.shared.request(
+            endpoint: .treino(id: id),
+            method: .get,
+            requiresAuth: true
+        )
+        guard let data = response.data else { throw APIError.invalidResponse }
+        return data
+    }
+
+    static func toggleTreinoExercicio(treinoId: Int, exercicioId: Int) async throws {
+        struct Payload: Decodable {
+            let id: Int
+            let concluido: Bool
+        }
+        let _: APIResponse<Payload> = try await APIClient.shared.request(
+            endpoint: .toggleTreinoExercicio(treinoId: treinoId, exercicioId: exercicioId),
+            method: .patch,
+            requiresAuth: true
+        )
+    }
+
+    static func concluirTreino(id: Int) async throws -> AcademiaTreinoAPI {
+        let response: APIResponse<AcademiaTreinoAPI> = try await APIClient.shared.request(
+            endpoint: .concluirTreino(id: id),
+            method: .post,
+            requiresAuth: true
+        )
+        guard let data = response.data else { throw APIError.invalidResponse }
+        return data
+    }
+
+    static func habitos(data: String? = nil) async throws -> HabitoJournalAPI {
+        let response: APIResponse<HabitoJournalAPI> = try await APIClient.shared.request(
+            endpoint: .habitos(data: data),
+            requiresAuth: true
+        )
+        guard let data = response.data else {
+            throw APIError.invalidResponse
+        }
+        return data
+    }
+
+    static func criarHabito(
+        titulo: String,
+        detalhe: String?,
+        icone: String,
+        area: String
+    ) async throws -> HabitoAPI {
+        struct Body: Encodable {
+            let titulo: String
+            let detalhe: String?
+            let icone: String
+            let area: String
+        }
+        let response: APIResponse<HabitoAPI> = try await APIClient.shared.request(
+            endpoint: .criarHabito,
+            method: .post,
+            body: Body(titulo: titulo, detalhe: detalhe, icone: icone, area: area),
+            requiresAuth: true
+        )
+        guard let data = response.data else {
+            throw APIError.invalidResponse
+        }
+        return data
+    }
+
+    static func toggleHabitoCheckin(
+        id: Int,
+        data: String?,
+        humor: Int?,
+        nota: String?
+    ) async throws -> HabitoToggleResultAPI {
+        struct Body: Encodable {
+            let data: String?
+            let humor: Int?
+            let nota: String?
+        }
+        let response: APIResponse<HabitoToggleResultAPI> = try await APIClient.shared.request(
+            endpoint: .toggleHabitoCheckin(id: id),
+            method: .patch,
+            body: Body(data: data, humor: humor, nota: nota),
+            requiresAuth: true
+        )
+        guard let data = response.data else {
+            throw APIError.invalidResponse
+        }
+        return data
+    }
+
+    static func atualizarHabitoNota(
+        id: Int,
+        data: String?,
+        nota: String?,
+        humor: Int?
+    ) async throws -> HabitoCheckinAPI {
+        struct Body: Encodable {
+            let data: String?
+            let nota: String?
+            let humor: Int?
+        }
+        let response: APIResponse<HabitoCheckinAPI> = try await APIClient.shared.request(
+            endpoint: .atualizarHabitoNota(id: id),
+            method: .patch,
+            body: Body(data: data, nota: nota, humor: humor),
+            requiresAuth: true
+        )
+        guard let data = response.data else {
+            throw APIError.invalidResponse
+        }
+        return data
+    }
+
+    static func excluirHabito(id: Int) async throws {
+        struct Empty: Decodable {}
+        let _: APIResponse<Empty> = try await APIClient.shared.request(
+            endpoint: .excluirHabito(id: id),
+            method: .delete,
             requiresAuth: true
         )
     }

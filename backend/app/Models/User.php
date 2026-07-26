@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\UserFactory;
+use App\Support\NickHelper;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -75,13 +76,24 @@ class User extends Authenticatable
         return $this->hasMany(AcademiaTreino::class);
     }
 
+    public function habitos(): HasMany
+    {
+        return $this->hasMany(Habito::class);
+    }
+
+    public function habitoCheckins(): HasMany
+    {
+        return $this->hasMany(HabitoCheckin::class);
+    }
+
     /** Garante perfil + config academia mínimos. */
     public function ensureDefaults(): void
     {
-        $this->perfil()->firstOrCreate(
+        $perfil = $this->perfil()->firstOrCreate(
             ['user_id' => $this->id],
             [
                 'nome_heroi' => $this->name,
+                'nick' => NickHelper::gerarUnico($this->name),
                 'avatar_key' => 'guara_serio',
                 'classe' => 'Sábio',
                 'emoji_classe' => '🔮',
@@ -93,6 +105,12 @@ class User extends Authenticatable
             ],
         );
 
+        if (blank($perfil->nick)) {
+            $perfil->update([
+                'nick' => NickHelper::gerarUnico($perfil->nome_heroi ?: $this->name, $perfil->id),
+            ]);
+        }
+
         $this->academiaConfig()->firstOrCreate(
             ['user_id' => $this->id],
             [
@@ -100,5 +118,10 @@ class User extends Authenticatable
                 'sequencia_treinos' => 0,
             ],
         );
+    }
+
+    public function amizades(): HasMany
+    {
+        return $this->hasMany(Amizade::class, 'user_id');
     }
 }

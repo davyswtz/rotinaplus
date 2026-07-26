@@ -16,7 +16,14 @@ struct RootView: View {
     @ObservedObject private var authManager = AuthManager.shared
     @State private var onboarding: OnboardingFase = Self.faseInicial
     @State private var guestPath = NavigationPath()
-    @State private var classeSelecionada: ClasseHeroi = .guerreiro
+    @State private var classeSelecionada = ClasseHeroi(
+        key: "",
+        nome: "",
+        emoji: "",
+        descricao: "",
+        bonus: [],
+        tema: ""
+    )
     @State private var avatarSelecionado: AvatarExplorador = .guaraSerio
     @State private var mostrandoLoading = true
 
@@ -42,7 +49,7 @@ struct RootView: View {
                     TelaEscolhaClasse(
                         onContinuar: { classe in
                             classeSelecionada = classe
-                            UserDefaults.standard.set(classe.rawValue, forKey: "classe_selecionada")
+                            UserDefaults.standard.set(classe.key, forKey: "classe_selecionada")
                             UserDefaults.standard.set(classe.nome, forKey: "classe_nome")
                             UserDefaults.standard.set(classe.emoji, forKey: "emoji_classe")
                             withAnimation(.easeInOut(duration: 0.25)) {
@@ -137,7 +144,14 @@ struct RootView: View {
         .onChange(of: authManager.isAuthenticated) { autenticado in
             if autenticado {
                 onboarding = authManager.forceOnboarding ? .bemVindo : Self.faseInicial
-                classeSelecionada = .guerreiro
+                classeSelecionada = ClasseHeroi(
+                    key: "",
+                    nome: "",
+                    emoji: "",
+                    descricao: "",
+                    bonus: [],
+                    tema: ""
+                )
                 avatarSelecionado = .guaraSerio
                 guestPath = NavigationPath()
             }

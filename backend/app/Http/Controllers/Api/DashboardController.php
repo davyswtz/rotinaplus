@@ -29,6 +29,7 @@ class DashboardController extends Controller
                 'xp_hoje' => $data['xp_hoje'],
                 'notificacoes_nao_lidas' => $data['notificacoes_nao_lidas'],
                 'academia_resumo' => $data['academia_resumo'],
+                'habitos_resumo' => $data['habitos_resumo'],
             ],
         ]);
     }

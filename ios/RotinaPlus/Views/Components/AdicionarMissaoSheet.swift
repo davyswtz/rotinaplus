@@ -20,7 +20,7 @@ struct AdicionarMissaoSheet: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(red: 0.05, green: 0.03, blue: 0.10).ignoresSafeArea()
+                Color(red: 0.039, green: 0.031, blue: 0.024).ignoresSafeArea()
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
@@ -48,7 +48,7 @@ struct AdicionarMissaoSheet: View {
                                             RoundedRectangle(cornerRadius: 12)
                                                 .stroke(
                                                     icone == emoji
-                                                        ? Color(red: 0.48, green: 0.26, blue: 0.96)
+                                                        ? Color(red: 0.910, green: 0.471, blue: 0.188)
                                                         : Color.white.opacity(0.1),
                                                     lineWidth: icone == emoji ? 2 : 1
                                                 )
@@ -91,8 +91,8 @@ struct AdicionarMissaoSheet: View {
                             .padding(.vertical, 16)
                             .background(
                                 podeSalvar
-                                    ? Color(red: 0.48, green: 0.26, blue: 0.96)
-                                    : Color(red: 0.48, green: 0.26, blue: 0.96).opacity(0.45)
+                                    ? Color(red: 0.910, green: 0.471, blue: 0.188)
+                                    : Color(red: 0.910, green: 0.471, blue: 0.188).opacity(0.45)
                             )
                             .foregroundStyle(.white)
                             .clipShape(RoundedRectangle(cornerRadius: 14))

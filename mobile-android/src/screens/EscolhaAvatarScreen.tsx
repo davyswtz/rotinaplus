@@ -36,7 +36,7 @@ const AVATARES: { id: string; source: ImageSourcePropType }[] = [
   { id: 'selo', source: require('../assets/avatars/avatar_selo.png') },
 ];
 
-/** Passo 2 de 3 — espelha TelaEscolhaAvatar.swift / mock. */
+/** Passo 2 de 3 — seleção de avatar. */
 export function EscolhaAvatarScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<Rota>();
@@ -45,8 +45,8 @@ export function EscolhaAvatarScreen() {
     AVATARES.find((avatar) => avatar.id === selecionado) ?? AVATARES[0];
 
   const classeKey = route.params?.classeKey ?? 'sabio';
-  const classeNome = route.params?.classeNome ?? 'Sábio';
-  const emojiClasse = route.params?.emojiClasse ?? '🔮';
+  const classeNome = route.params?.classeNome ?? '';
+  const emojiClasse = route.params?.emojiClasse ?? '';
 
   return (
     <SafeAreaView style={styles.areaSegura}>
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     backgroundColor: 'rgba(255,255,255,0.06)',
     borderWidth: 2,
-    borderColor: 'rgba(122, 66, 245, 0.55)',
+    borderColor: 'rgba(232, 120, 48, 0.55)',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 16,

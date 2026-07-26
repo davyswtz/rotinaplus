@@ -4,6 +4,7 @@ enum AbaFooter: String, CaseIterable, Identifiable {
     case inicio
     case academia
     case financas
+    case diario
     case estudos
     case perfil
 
@@ -14,6 +15,7 @@ enum AbaFooter: String, CaseIterable, Identifiable {
         case .inicio: return "Início"
         case .academia: return "Academia"
         case .financas: return "Finanças"
+        case .diario: return "Diário"
         case .estudos: return "Estudos"
         case .perfil: return "Perfil"
         }
@@ -24,6 +26,7 @@ enum AbaFooter: String, CaseIterable, Identifiable {
         case .inicio: return "house"
         case .academia: return "figure.strengthtraining.traditional"
         case .financas: return "creditcard"
+        case .diario: return "square.and.pencil"
         case .estudos: return "book"
         case .perfil: return "person"
         }
@@ -34,6 +37,7 @@ enum AbaFooter: String, CaseIterable, Identifiable {
         case .inicio: return "house.fill"
         case .academia: return "figure.strengthtraining.traditional"
         case .financas: return "creditcard.fill"
+        case .diario: return "square.and.pencil"
         case .estudos: return "book.fill"
         case .perfil: return "person.fill"
         }
@@ -78,12 +82,12 @@ struct FooterNavegacao: View {
                     .frame(width: 16, height: 3)
 
                 Image(systemName: ativo ? aba.iconeAtivo : aba.icone)
-                    .font(.system(size: compacto ? 14 : 16, weight: .semibold))
+                    .font(.system(size: compacto ? 12 : 14, weight: .semibold))
 
                 Text(aba.titulo)
-                    .font(.system(size: compacto ? 9 : 10, weight: .medium, design: .monospaced))
+                    .font(.system(size: compacto ? 8 : 9, weight: .medium, design: .monospaced))
                     .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                    .minimumScaleFactor(0.65)
             }
             .foregroundStyle(ativo ? CoresFooter.ativo : CoresFooter.inativo)
             .frame(maxWidth: .infinity)
@@ -100,9 +104,9 @@ struct FooterNavegacao: View {
 }
 
 private enum CoresFooter {
-    static let fundo = Color(red: 0.10, green: 0.07, blue: 0.16)
-    static let borda = Color(red: 0.48, green: 0.26, blue: 0.96).opacity(0.35)
-    static let ativo = Color(red: 0.48, green: 0.26, blue: 0.96)
+    static let fundo = Color(red: 0.086, green: 0.075, blue: 0.063)
+    static let borda = Color(red: 0.910, green: 0.471, blue: 0.188).opacity(0.35)
+    static let ativo = Color(red: 0.910, green: 0.471, blue: 0.188)
     static let inativo = Color.white.opacity(0.40)
     static let pillAtivo = Color.white.opacity(0.08)
 }

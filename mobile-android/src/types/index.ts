@@ -28,6 +28,7 @@ export interface ApiErrorResponse {
 
 export interface Perfil {
   nome_heroi: string | null;
+  nick: string | null;
   avatar_key: string;
   classe: string;
   emoji_classe: string;
@@ -36,6 +37,69 @@ export interface Perfil {
   xp_proximo_nivel: number;
   moedas: number;
   streak_dias: number;
+}
+
+export interface Amigo {
+  id: number;
+  nick: string | null;
+  nome_heroi: string | null;
+  avatar_key: string;
+  classe: string;
+  emoji_classe: string;
+  nivel: number;
+}
+
+export interface AmigosLista {
+  amigos: Amigo[];
+  total: number;
+}
+
+export interface PerfilSerieDia {
+  data: string;
+  label: string;
+  acertos: number;
+  falhas: number;
+  taxa: number;
+  xp: number;
+}
+
+export interface PerfilAreaStats {
+  acertos?: number;
+  falhas?: number;
+  taxa?: number;
+  sessoes?: number;
+  minutos?: number;
+  xp?: number;
+}
+
+export interface PerfilStats {
+  periodo: string;
+  inicio: string;
+  fim: string;
+  perfil: Perfil;
+  totais: {
+    acertos: number;
+    falhas: number;
+    taxa_sucesso: number;
+    xp_ganho: number;
+    dias_completos: number;
+    streak_atual: number;
+    sequencia_treinos: number;
+  };
+  serie: PerfilSerieDia[];
+  por_area: {
+    missoes: PerfilAreaStats;
+    habitos: PerfilAreaStats;
+    academia: PerfilAreaStats;
+    esportes: PerfilAreaStats;
+  };
+  nivel: {
+    atual: number;
+    xp_atual: number;
+    xp_proximo: number;
+    progresso: number;
+    moedas: number;
+  };
 }
 
 export interface Missao {
@@ -55,6 +119,13 @@ export interface AcademiaResumo {
   sequencia_treinos: number;
 }
 
+export interface HabitosResumo {
+  concluidos: number;
+  total: number;
+  streak_geral: number;
+  percentual: number;
+}
+
 export interface DashboardData {
   perfil: Perfil;
   missoes: Missao[];
@@ -63,6 +134,80 @@ export interface DashboardData {
   xp_hoje: number;
   notificacoes_nao_lidas: number;
   academia_resumo: AcademiaResumo;
+  habitos_resumo?: HabitosResumo;
+}
+
+export interface Habito {
+  id: number;
+  icone: string;
+  titulo: string;
+  detalhe: string | null;
+  area: string;
+  frequencia: string;
+  dias_semana?: number[] | null;
+  xp: number;
+  ativo?: boolean;
+  ordem?: number;
+}
+
+export interface HabitoCheckin {
+  id: number;
+  habito_id: number;
+  data?: string;
+  concluida: boolean;
+  concluida_em?: string | null;
+  humor?: number | null;
+  nota?: string | null;
+}
+
+export interface HabitoSemanaDia {
+  data: string;
+  label: string;
+  concluidos: number;
+  total: number;
+  percentual: number;
+}
+
+export interface HabitoSugestao {
+  icone: string;
+  titulo: string;
+  detalhe: string;
+  area: string;
+}
+
+export interface HabitoItemJournal {
+  habito: Habito;
+  checkin: HabitoCheckin | null;
+  concluida: boolean;
+  streak: number;
+}
+
+export interface HabitoJournal {
+  data: string;
+  hoje: string;
+  resumo: {
+    concluidos: number;
+    total: number;
+    percentual: number;
+    streak_geral: number;
+    xp_hoje: number;
+  };
+  semana: HabitoSemanaDia[];
+  itens: HabitoItemJournal[];
+  sugestoes: HabitoSugestao[];
+  areas: string[];
+}
+
+export interface HabitoToggleResult {
+  habito: Habito;
+  checkin: HabitoCheckin;
+  concluida: boolean;
+  streak: number;
+  bonus_dia?: {
+    completo: boolean;
+    moedas: number;
+    streak_dias: number;
+  } | null;
 }
 
 export interface Notificacao {
@@ -92,6 +237,19 @@ export interface AcademiaVolume {
   kg: number;
 }
 
+export interface AcademiaTreinoExercicio {
+  id?: number;
+  exercicio_chave: string;
+  nome: string;
+  icone: string;
+  grupo: string;
+  series: number;
+  reps: number;
+  carga_kg: number;
+  ordem?: number;
+  concluido?: boolean;
+}
+
 export interface AcademiaTreino {
   id: number;
   foco: string;
@@ -100,6 +258,52 @@ export interface AcademiaTreino {
   minutos: number;
   xp: number;
   dia_chave?: string | null;
+  ativo?: boolean;
+  concluido_em?: string | null;
+  volume_kg?: number;
+  itens?: AcademiaTreinoExercicio[];
+}
+
+export interface ExercicioCatalogo {
+  chave: string;
+  nome: string;
+  icone: string;
+  grupo: string;
+  series_padrao: number;
+  reps_padrao: number;
+  carga_padrao: number;
+}
+
+export interface ExercicioCatalogoData {
+  focos: string[];
+  exercicios: ExercicioCatalogo[];
+}
+
+export interface EsporteCatalogo {
+  chave: string;
+  nome: string;
+  icone: string;
+  descricao: string;
+  minutos_padrao: number;
+  usa_distancia: boolean;
+}
+
+export interface EsporteResumo {
+  total_semana: number;
+  minutos_semana: number;
+  xp_semana: number;
+}
+
+export interface EsporteSessao {
+  id: number;
+  esporte_chave: string;
+  icone: string;
+  nome: string;
+  minutos: number;
+  distancia_metros: number | null;
+  xp: number;
+  data: string | null;
+  nota: string | null;
 }
 
 export interface AcademiaData {
@@ -110,6 +314,9 @@ export interface AcademiaData {
   dias: AcademiaDia[];
   volumes: AcademiaVolume[];
   treino_hoje: AcademiaTreino | null;
+  esportes?: EsporteCatalogo[];
+  esporte_resumo?: EsporteResumo;
+  esporte_sessoes?: EsporteSessao[];
 }
 
 export interface FinancasMes {

@@ -69,7 +69,7 @@ export function GradeStatsDashboard({ dados }: Props) {
     },
     {
       icone: '⭐',
-      cor: '#9E6BFA',
+      cor: '#F0A859',
       valor: `+${dados.xpHoje}`,
       label: 'XP HOJE',
     },

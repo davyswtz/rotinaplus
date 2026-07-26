@@ -22,7 +22,7 @@ struct DadosHeaderApp: Equatable {
 
 private enum CoresHeader {
     static let titulo = Color.white.opacity(0.88)
-    static let subtitulo = Color(red: 0.62, green: 0.42, blue: 0.98)
+    static let subtitulo = Color(red: 0.941, green: 0.659, blue: 0.349)
     static let streakFundo = Color(red: 0.28, green: 0.12, blue: 0.10)
     static let streakTexto = Color(red: 1.0, green: 0.55, blue: 0.28)
     static let moedaFundo = Color(red: 0.28, green: 0.22, blue: 0.10)
@@ -154,7 +154,7 @@ struct HeaderApp: View {
 
 #Preview {
     ZStack {
-        Color(red: 0.05, green: 0.03, blue: 0.10).ignoresSafeArea()
+        Color(red: 0.039, green: 0.031, blue: 0.024).ignoresSafeArea()
         VStack {
             HeaderApp(dados: .preview)
             Spacer()

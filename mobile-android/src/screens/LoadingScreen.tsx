@@ -101,11 +101,6 @@ export function LoadingScreen() {
           resizeMode="contain"
         />
 
-        <Text style={styles.titulo}>
-          <Text style={styles.tituloRotina}>Rotina </Text>
-          <Text style={styles.tituloPlus}>Plus</Text>
-        </Text>
-
         <Text style={styles.tagline}>GAMIFIQUE SUA VIDA REAL</Text>
 
         <View style={styles.indicador}>
@@ -134,7 +129,7 @@ export function LoadingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0D0817',
+    backgroundColor: '#0A0806',
   },
   conteudo: {
     flex: 1,
@@ -143,20 +138,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   mascote: {
-    width: 160,
-    height: 160,
-    marginBottom: 28,
-  },
-  titulo: {
-    fontSize: 34,
-    fontWeight: '700',
-    marginBottom: 10,
-  },
-  tituloRotina: {
-    color: '#AB7EFF',
-  },
-  tituloPlus: {
-    color: '#49E8A7',
+    width: 200,
+    height: 230,
+    marginBottom: 20,
   },
   tagline: {
     fontSize: 12,
@@ -181,6 +165,6 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#9E73F2',
+    backgroundColor: '#E87830',
   },
 });

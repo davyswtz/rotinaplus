@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -35,7 +36,11 @@ export function WelcomeScreen() {
       <View style={styles.conteudo}>
         <View style={styles.espacador} />
 
-        <Text style={styles.mascote}>🐾</Text>
+        <Image
+          source={require('../assets/splash_guara.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
 
         <Text style={styles.titulo}>Bem-vindo ao Rotina Plus!</Text>
 
@@ -93,10 +98,11 @@ const styles = StyleSheet.create({
   espacador: {
     flex: 1,
   },
-  mascote: {
-    fontSize: 88,
-    textAlign: 'center',
-    marginBottom: 40,
+  logo: {
+    width: 180,
+    height: 206,
+    alignSelf: 'center',
+    marginBottom: 32,
   },
   titulo: {
     fontSize: 28,
