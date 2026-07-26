@@ -40,9 +40,9 @@ private enum CoresAcademia {
 // MARK: - Stats Academia (3 cards)
 
 struct StatsAcademiaView: View {
-    var metaSemana: Int = 5
+    var metaSemana: Int = 0
     var feitos: Int
-    var sequencia: Int = 12
+    var sequencia: Int = 0
 
     var body: some View {
         HStack(spacing: 10) {
@@ -404,7 +404,7 @@ struct AtalhosAcademiaView: View {
 struct TelaAcademia: View {
     @State private var dias: [DiaSemanaTreino] = []
     @State private var volumes: [VolumeDia] = []
-    @State private var metaSemana = 5
+    @State private var metaSemana = 0
     @State private var sequencia = 0
     @State private var treinoHoje: AcademiaTreinoAPI?
     @State private var esportes: [EsporteCatalogoAPI] = []
@@ -509,7 +509,7 @@ struct TelaAcademia: View {
                         }
 
                         OutrosEsportesSection(
-                            esportes: esportesVisiveis,
+                            esportes: esportes,
                             resumo: esporteResumo,
                             sessoes: esporteSessoes,
                             onSelecionar: { esporteSelecionado = $0 },
@@ -580,10 +580,6 @@ struct TelaAcademia: View {
             }
             .presentationDetents([.medium, .large])
         }
-    }
-
-    private var esportesVisiveis: [EsporteCatalogoAPI] {
-        esportes.isEmpty ? EsporteCatalogoAPI.fallback : esportes
     }
 
     @MainActor

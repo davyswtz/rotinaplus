@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AmigoResource;
+use App\Http\Resources\PerfilResource;
 use App\Services\AmigoService;
+use App\Services\PerfilStatsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -12,6 +14,7 @@ class AmigoController extends Controller
 {
     public function __construct(
         private readonly AmigoService $amigoService,
+        private readonly PerfilStatsService $perfilStatsService,
     ) {}
 
     public function index(Request $request): JsonResponse
@@ -23,6 +26,32 @@ class AmigoController extends Controller
             'data' => [
                 'amigos' => AmigoResource::collection($amigos)->resolve(),
                 'total' => $amigos->count(),
+            ],
+        ]);
+    }
+
+    public function stats(Request $request, int $id): JsonResponse
+    {
+        $periodo = $request->query('periodo', 'semana');
+        if (! in_array($periodo, ['semana', 'mes'], true)) {
+            $periodo = 'semana';
+        }
+
+        $amigo = $this->amigoService->obterAmigoAceito($request->user(), $id);
+        $data = $this->perfilStatsService->forUser($amigo, $periodo);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'amigo' => new AmigoResource($amigo),
+                'periodo' => $data['periodo'],
+                'inicio' => $data['inicio'],
+                'fim' => $data['fim'],
+                'perfil' => new PerfilResource($data['perfil']),
+                'totais' => $data['totais'],
+                'serie' => $data['serie'],
+                'por_area' => $data['por_area'],
+                'nivel' => $data['nivel'],
             ],
         ]);
     }

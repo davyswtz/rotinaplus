@@ -296,6 +296,18 @@ export async function fetchAmigos(): Promise<import('../types').AmigosLista> {
   return data.data;
 }
 
+export async function fetchAmigoStats(
+  id: number,
+  periodo: 'semana' | 'mes' = 'semana',
+): Promise<import('../types').AmigoStats> {
+  const { data } = await api.get<ApiResponse<import('../types').AmigoStats>>(
+    `/api/v1/amigos/${id}/stats`,
+    { params: { periodo } },
+  );
+  if (!data.data) throw new Error('Falha ao carregar stats do amigo.');
+  return data.data;
+}
+
 export async function convidarAmigo(
   codigo: string,
 ): Promise<import('../types').ConviteAmigoResposta> {

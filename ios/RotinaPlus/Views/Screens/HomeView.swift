@@ -26,7 +26,7 @@ struct HomeView: View {
 
         return DadosHeaderApp(
             nomeUsuario: nome,
-            nivel: p?.nivel ?? 1,
+            nivel: p?.nivel ?? 0,
             streakDias: p?.streakDias ?? 0,
             moedas: p?.moedas ?? 0,
             notificacoes: notificacoesNaoLidas,

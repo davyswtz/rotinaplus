@@ -16,6 +16,7 @@ struct TelaPerfil: View {
     @State private var mostrarAvatar = false
     @State private var mostrarClasse = false
     @State private var mostrarAddAmigo = false
+    @State private var amigoStatsSelecionado: AmigoAPI?
     @State private var nomeEdit = ""
     @State private var codigoAmigo = ""
     @State private var amigos: [AmigoAPI] = []
@@ -170,6 +171,9 @@ struct TelaPerfil: View {
         }
         .sheet(isPresented: $mostrarAddAmigo) {
             adicionarAmigoSheet
+        }
+        .sheet(item: $amigoStatsSelecionado) { amigo in
+            AmigoStatsSheet(amigo: amigo)
         }
         .sheet(isPresented: $mostrarAvatar) {
             editarAvatarSheet
@@ -458,21 +462,32 @@ struct TelaPerfil: View {
             } else {
                 ForEach(amigos) { amigo in
                     HStack(spacing: 12) {
-                        Image(amigo.avatarAsset)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 44, height: 44)
-                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        Button {
+                            amigoStatsSelecionado = amigo
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(amigo.avatarAsset)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 44, height: 44)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
 
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(amigo.nomeExibicao)
-                                .font(.system(size: 15, weight: .semibold))
-                                .foregroundStyle(.white)
-                            Text("\(amigo.codigoAmigo ?? "—") · Nv. \(amigo.nivel) · \(amigo.emojiClasse) \(amigo.classe)")
-                                .font(.caption)
-                                .foregroundStyle(.white.opacity(0.45))
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(amigo.nomeExibicao)
+                                        .font(.system(size: 15, weight: .semibold))
+                                        .foregroundStyle(.white)
+                                    Text("\(amigo.codigoAmigo ?? "—") · Nv. \(amigo.nivel) · \(amigo.emojiClasse) \(amigo.classe)")
+                                        .font(.caption)
+                                        .foregroundStyle(.white.opacity(0.45))
+                                }
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(.white.opacity(0.3))
+                            }
                         }
-                        Spacer()
+                        .buttonStyle(.plain)
+
                         Button {
                             Task { await removerAmigo(amigo) }
                         } label: {
@@ -849,6 +864,182 @@ private struct EditarClasseSheet: View {
             }
         }
         .preferredColorScheme(.dark)
+    }
+}
+
+private struct AmigoStatsSheet: View {
+    let amigo: AmigoAPI
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var stats: AmigoStatsAPI?
+    @State private var periodo = "semana"
+    @State private var carregando = true
+    @State private var erro: String?
+
+    private let c = CoresPerfil.self
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack(spacing: 14) {
+                        Image(amigo.avatarAsset)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 64, height: 64)
+                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(amigo.nomeExibicao)
+                                .font(.system(size: 22, weight: .bold))
+                                .foregroundStyle(.white)
+                            Text("\(amigo.codigoAmigo ?? "—") · \(amigo.emojiClasse) \(amigo.classe)")
+                                .font(.subheadline)
+                                .foregroundStyle(c.laranja)
+                        }
+                        Spacer()
+                    }
+
+                    HStack(spacing: 8) {
+                        ForEach(["semana", "mes"], id: \.self) { p in
+                            Button {
+                                periodo = p
+                                Task { await carregar() }
+                            } label: {
+                                Text(p == "semana" ? "7 dias" : "30 dias")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 8)
+                                    .background(
+                                        Capsule().fill(
+                                            periodo == p
+                                                ? c.primario.opacity(0.85)
+                                                : Color.white.opacity(0.08)
+                                        )
+                                    )
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+
+                    if carregando && stats == nil {
+                        ProgressView().tint(.white).frame(maxWidth: .infinity).padding(.top, 24)
+                    } else if let erro, stats == nil {
+                        Text(erro)
+                            .foregroundStyle(.white.opacity(0.6))
+                            .frame(maxWidth: .infinity)
+                    } else if let stats {
+                        let n = stats.nivel
+                        let t = stats.totais
+
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("NÍVEL")
+                                .font(.system(size: 11, weight: .bold))
+                                .tracking(1)
+                                .foregroundStyle(c.label)
+                            Text("Nv. \(n.atual) · \(n.xpAtual)/\(n.xpProximo) XP · \(n.moedas) 🪙")
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundStyle(.white)
+                            GeometryReader { g in
+                                ZStack(alignment: .leading) {
+                                    Capsule().fill(Color.white.opacity(0.08))
+                                    Capsule()
+                                        .fill(c.primario)
+                                        .frame(width: max(8, g.size.width * CGFloat(n.progresso)))
+                                }
+                            }
+                            .frame(height: 10)
+                        }
+                        .padding(16)
+                        .background(card)
+
+                        HStack(spacing: 8) {
+                            miniStat("\(t.acertos)", "ACERTOS", c.verde)
+                            miniStat("\(t.falhas)", "FALHAS", c.falha)
+                            miniStat("\(t.taxaSucesso)%", "TAXA", c.laranja)
+                            miniStat("+\(t.xpGanho)", "XP", c.primario)
+                        }
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("POR ÁREA")
+                                .font(.system(size: 11, weight: .bold))
+                                .tracking(1)
+                                .foregroundStyle(c.label)
+                            areaLinha("🎯 Missões", stats.porArea.missoes)
+                            areaLinha("📓 Hábitos", stats.porArea.habitos)
+                            areaLinha("🏋️ Academia", stats.porArea.academia)
+                            Text("🏃 Esportes · \(stats.porArea.esportes.sessoes ?? 0) sessões · \(stats.porArea.esportes.minutos ?? 0) min")
+                                .font(.caption)
+                                .foregroundStyle(.white.opacity(0.5))
+                        }
+                        .padding(16)
+                        .background(card)
+
+                        Text("Streak \(t.streakAtual)d · \(t.diasCompletos) dias completos · \(t.sequenciaTreinos) treinos em sequência")
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.45))
+                    }
+                }
+                .padding(16)
+            }
+            .background(Color(red: 0.06, green: 0.05, blue: 0.04).ignoresSafeArea())
+            .navigationTitle("Stats do amigo")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Fechar") { dismiss() }
+                }
+            }
+        }
+        .preferredColorScheme(.dark)
+        .task { await carregar() }
+    }
+
+    private var card: some View {
+        RoundedRectangle(cornerRadius: 16, style: .continuous)
+            .fill(Color.white.opacity(0.055))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(Color.white.opacity(0.07), lineWidth: 1)
+            )
+    }
+
+    private func miniStat(_ valor: String, _ label: String, _ cor: Color) -> some View {
+        VStack(spacing: 4) {
+            Text(valor)
+                .font(.system(size: 16, weight: .bold, design: .monospaced))
+                .foregroundStyle(cor)
+            Text(label)
+                .font(.system(size: 9, weight: .bold))
+                .foregroundStyle(.white.opacity(0.4))
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
+        .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.04)))
+    }
+
+    private func areaLinha(_ titulo: String, _ s: PerfilAreaStatsAPI) -> some View {
+        HStack {
+            Text(titulo)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(.white)
+            Spacer()
+            Text("\(s.acertos ?? 0)✓  \(s.falhas ?? 0)✗  \(s.taxa ?? 0)%")
+                .font(.system(size: 12, weight: .bold, design: .monospaced))
+                .foregroundStyle(.white.opacity(0.55))
+        }
+    }
+
+    @MainActor
+    private func carregar() async {
+        if stats == nil { carregando = true }
+        erro = nil
+        do {
+            stats = try await RotinaPlusAPI.statsAmigo(id: amigo.id, periodo: periodo)
+        } catch {
+            erro = error.localizedDescription
+        }
+        carregando = false
     }
 }
 

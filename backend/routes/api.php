@@ -30,6 +30,7 @@ Route::prefix('v1')->group(function () {
 
         Route::get('/amigos', [AmigoController::class, 'index']);
         Route::post('/amigos', [AmigoController::class, 'store']);
+        Route::get('/amigos/{id}/stats', [AmigoController::class, 'stats']);
         Route::post('/amigos/{id}/aceitar', [AmigoController::class, 'aceitar']);
         Route::post('/amigos/{id}/recusar', [AmigoController::class, 'recusar']);
         Route::delete('/amigos/{id}', [AmigoController::class, 'destroy']);

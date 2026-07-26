@@ -62,27 +62,12 @@ const C = {
   diaInativoBorda: 'rgba(255,255,255,0.12)',
 };
 
-const ESPORTES_FALLBACK: EsporteCatalogo[] = [
-  { chave: 'corrida', nome: 'Corrida', icone: '🏃', descricao: 'Corrida ao ar livre ou esteira', minutos_padrao: 30, usa_distancia: true },
-  { chave: 'natacao', nome: 'Natação', icone: '🏊', descricao: 'Piscina ou águas abertas', minutos_padrao: 40, usa_distancia: true },
-  { chave: 'volei', nome: 'Vôlei', icone: '🏐', descricao: 'Quadra ou praia', minutos_padrao: 60, usa_distancia: false },
-  { chave: 'futebol', nome: 'Futebol', icone: '⚽', descricao: 'Campo, society ou futsal', minutos_padrao: 60, usa_distancia: false },
-  { chave: 'basquete', nome: 'Basquete', icone: '🏀', descricao: 'Quadra ou streetball', minutos_padrao: 45, usa_distancia: false },
-  { chave: 'ciclismo', nome: 'Ciclismo', icone: '🚴', descricao: 'Bike de rua ou indoor', minutos_padrao: 45, usa_distancia: true },
-  { chave: 'tenis', nome: 'Tênis', icone: '🎾', descricao: 'Simples ou duplas', minutos_padrao: 60, usa_distancia: false },
-  { chave: 'caminhada', nome: 'Caminhada', icone: '🚶', descricao: 'Passeio ativo', minutos_padrao: 30, usa_distancia: true },
-  { chave: 'yoga', nome: 'Yoga', icone: '🧘', descricao: 'Mobilidade e respiração', minutos_padrao: 30, usa_distancia: false },
-  { chave: 'artes_marciais', nome: 'Artes marciais', icone: '🥋', descricao: 'Jiu-jitsu, judô, boxe…', minutos_padrao: 60, usa_distancia: false },
-  { chave: 'crossfit', nome: 'CrossFit', icone: '💥', descricao: 'WOD e condicionamento', minutos_padrao: 45, usa_distancia: false },
-  { chave: 'surf', nome: 'Surf', icone: '🏄', descricao: 'Mar ou piscina de ondas', minutos_padrao: 90, usa_distancia: false },
-];
-
 // MARK: - Stats Academia
 
 function StatsAcademia({
-  metaSemana = 5,
+  metaSemana = 0,
   feitos,
-  sequencia = 12,
+  sequencia = 0,
 }: {
   metaSemana?: number;
   feitos: number;
@@ -485,7 +470,7 @@ export function AcademiaScreen({
   const gap = layout.gapSecao;
   const [dias, setDias] = useState<DiaSemanaTreino[]>([]);
   const [volumes, setVolumes] = useState<VolumeDia[]>([]);
-  const [metaSemana, setMetaSemana] = useState(5);
+  const [metaSemana, setMetaSemana] = useState(0);
   const [sequencia, setSequencia] = useState(0);
   const [treino, setTreino] = useState<AcademiaTreino | null>(null);
   const [esportes, setEsportes] = useState<EsporteCatalogo[]>([]);
@@ -670,7 +655,7 @@ export function AcademiaScreen({
 
       <View style={{ paddingHorizontal: pad, paddingTop: gap }}>
         <OutrosEsportesSection
-          esportes={esportes.length ? esportes : ESPORTES_FALLBACK}
+          esportes={esportes}
           resumo={esporteResumo}
           sessoes={esporteSessoes}
           onSelecionar={setEsporteSelecionado}

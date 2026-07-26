@@ -127,6 +127,18 @@ enum RotinaPlusAPI {
         return data
     }
 
+    static func statsAmigo(id: Int, periodo: String = "semana") async throws -> AmigoStatsAPI {
+        let response: APIResponse<AmigoStatsAPI> = try await APIClient.shared.request(
+            endpoint: .statsAmigo(id: id, periodo: periodo),
+            method: .get,
+            requiresAuth: true
+        )
+        guard let data = response.data else {
+            throw APIError.invalidResponse
+        }
+        return data
+    }
+
     static func aceitarAmigo(amizadeId: Int) async throws -> AmigoAPI {
         let response: APIResponse<AmigoAPI> = try await APIClient.shared.request(
             endpoint: .aceitarAmigo(id: amizadeId),

@@ -20,9 +20,6 @@ import { useAuth } from '../hooks/useAuth';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { cores } from '../theme/colors';
 
-const TEST_EMAIL = __DEV__ ? 'davy@teste.com' : '';
-const TEST_PASSWORD = __DEV__ ? 'senha123' : '';
-
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
 // MARK: - Tela de Login (Android / React Native)
@@ -33,8 +30,8 @@ export function LoginScreen() {
   const navigation = useNavigation<NavigationProp>();
 
   // MARK: - Estado local dos campos
-  const [email, setEmail] = useState(TEST_EMAIL);
-  const [password, setPassword] = useState(TEST_PASSWORD);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   // MARK: - Autenticação (e-mail/senha via API)
   const { login, isLoading, error } = useAuth();

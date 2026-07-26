@@ -46,6 +46,29 @@ class AmigoService
             ->each(fn (User $u) => $u->ensureDefaults());
     }
 
+    /** Retorna o amigo aceito ou lança validação. */
+    public function obterAmigoAceito(User $user, int $amigoId): User
+    {
+        $user->ensureDefaults();
+
+        if (! $this->temAmizadeAceita($user->id, $amigoId)) {
+            throw ValidationException::withMessages([
+                'amigo' => ['Vocês não são amigos.'],
+            ]);
+        }
+
+        $amigo = User::query()->with('perfil')->find($amigoId);
+        if (! $amigo) {
+            throw ValidationException::withMessages([
+                'amigo' => ['Amigo não encontrado.'],
+            ]);
+        }
+
+        $amigo->ensureDefaults();
+
+        return $amigo;
+    }
+
     /**
      * Envia solicitação de amizade pelo código.
      *

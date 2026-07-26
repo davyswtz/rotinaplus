@@ -107,6 +107,18 @@ export interface PerfilStats {
   };
 }
 
+export interface AmigoStats {
+  amigo: Amigo;
+  periodo: string;
+  inicio: string;
+  fim: string;
+  perfil: Perfil;
+  totais: PerfilStats['totais'];
+  serie: PerfilSerieDia[];
+  por_area: PerfilStats['por_area'];
+  nivel: PerfilStats['nivel'];
+}
+
 export interface Missao {
   id: number;
   icone: string;
@@ -394,7 +406,6 @@ export interface FinancasConexao {
 
 export interface FinancasPluggy {
   configured: boolean;
-  local_sandbox: boolean;
   conexoes: FinancasConexao[];
 }
 
@@ -417,7 +428,6 @@ export interface FinancasData {
 export interface PluggyConnectToken {
   mode: string;
   access_token: string;
-  include_sandbox?: boolean;
 }
 
 export interface PluggySyncResult {

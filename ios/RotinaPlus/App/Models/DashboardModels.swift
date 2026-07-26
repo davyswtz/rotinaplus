@@ -84,6 +84,23 @@ struct ConviteAmigoRespostaAPI: Codable, Equatable {
     }
 }
 
+struct AmigoStatsAPI: Codable, Equatable {
+    var amigo: AmigoAPI
+    var periodo: String
+    var inicio: String
+    var fim: String
+    var perfil: PerfilAPI
+    var totais: PerfilTotaisAPI
+    var serie: [PerfilSerieDiaAPI]
+    var porArea: PerfilAreasAPI
+    var nivel: PerfilNivelAPI
+
+    enum CodingKeys: String, CodingKey {
+        case amigo, periodo, inicio, fim, perfil, totais, serie, nivel
+        case porArea = "por_area"
+    }
+}
+
 struct AcademiaResumoAPI: Codable, Equatable {
     var metaSemana: Int
     var feitos: Int
@@ -402,21 +419,6 @@ struct EsporteCatalogoAPI: Codable, Equatable, Identifiable {
         case minutosPadrao = "minutos_padrao"
         case usaDistancia = "usa_distancia"
     }
-
-    static let fallback: [EsporteCatalogoAPI] = [
-        .init(chave: "corrida", nome: "Corrida", icone: "🏃", descricao: "Corrida ao ar livre ou esteira", minutosPadrao: 30, usaDistancia: true),
-        .init(chave: "natacao", nome: "Natação", icone: "🏊", descricao: "Piscina ou águas abertas", minutosPadrao: 40, usaDistancia: true),
-        .init(chave: "volei", nome: "Vôlei", icone: "🏐", descricao: "Quadra ou praia", minutosPadrao: 60, usaDistancia: false),
-        .init(chave: "futebol", nome: "Futebol", icone: "⚽", descricao: "Campo, society ou futsal", minutosPadrao: 60, usaDistancia: false),
-        .init(chave: "basquete", nome: "Basquete", icone: "🏀", descricao: "Quadra ou streetball", minutosPadrao: 45, usaDistancia: false),
-        .init(chave: "ciclismo", nome: "Ciclismo", icone: "🚴", descricao: "Bike de rua ou indoor", minutosPadrao: 45, usaDistancia: true),
-        .init(chave: "tenis", nome: "Tênis", icone: "🎾", descricao: "Simples ou duplas", minutosPadrao: 60, usaDistancia: false),
-        .init(chave: "caminhada", nome: "Caminhada", icone: "🚶", descricao: "Passeio ativo", minutosPadrao: 30, usaDistancia: true),
-        .init(chave: "yoga", nome: "Yoga", icone: "🧘", descricao: "Mobilidade e respiração", minutosPadrao: 30, usaDistancia: false),
-        .init(chave: "artes_marciais", nome: "Artes marciais", icone: "🥋", descricao: "Jiu-jitsu, judô, boxe…", minutosPadrao: 60, usaDistancia: false),
-        .init(chave: "crossfit", nome: "CrossFit", icone: "💥", descricao: "WOD e condicionamento", minutosPadrao: 45, usaDistancia: false),
-        .init(chave: "surf", nome: "Surf", icone: "🏄", descricao: "Mar ou piscina de ondas", minutosPadrao: 90, usaDistancia: false),
-    ]
 }
 
 struct EsporteResumoAPI: Codable, Equatable {
@@ -568,13 +570,7 @@ struct FinancasConexaoAPI: Codable, Equatable, Identifiable {
 
 struct FinancasPluggyAPI: Codable, Equatable {
     var configured: Bool
-    var localSandbox: Bool
     var conexoes: [FinancasConexaoAPI]
-
-    enum CodingKeys: String, CodingKey {
-        case configured, conexoes
-        case localSandbox = "local_sandbox"
-    }
 
     var temConexao: Bool { !conexoes.isEmpty }
 }
@@ -582,12 +578,10 @@ struct FinancasPluggyAPI: Codable, Equatable {
 struct PluggyConnectTokenAPI: Codable, Equatable {
     var mode: String
     var accessToken: String
-    var includeSandbox: Bool?
 
     enum CodingKeys: String, CodingKey {
         case mode
         case accessToken = "access_token"
-        case includeSandbox = "include_sandbox"
     }
 }
 

@@ -46,7 +46,6 @@ return [
     'pluggy' => [
         'client_id' => env('PLUGGY_CLIENT_ID'),
         'client_secret' => env('PLUGGY_CLIENT_SECRET'),
-        'local_sandbox' => env('PLUGGY_LOCAL_SANDBOX', false),
     ],
 
 ];

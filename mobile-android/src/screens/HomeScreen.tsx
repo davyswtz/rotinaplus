@@ -146,7 +146,7 @@ export function HomeScreen() {
   const dados = useMemo(
     () => ({
       nomeUsuario: nome,
-      nivel: perfil?.nivel ?? 1,
+      nivel: perfil?.nivel ?? 0,
       streakDias: perfil?.streak_dias ?? 0,
       moedas: perfil?.moedas ?? 0,
       notificacoes: notificacoesNaoLidas,
@@ -226,7 +226,7 @@ export function HomeScreen() {
                     nomeUsuario: nome,
                     classe: perfil?.classe ?? '',
                     emojiClasse: perfil?.emoji_classe ?? '',
-                    nivel: perfil?.nivel ?? 1,
+                    nivel: perfil?.nivel ?? 0,
                     xpAtual: perfil?.xp_atual ?? 0,
                     xpProximoNivel: perfil?.xp_proximo_nivel ?? 0,
                     avatarSource: AVATARES[avatarId] ?? AVATARES.guara_serio,

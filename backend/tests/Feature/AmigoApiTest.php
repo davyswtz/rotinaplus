@@ -81,6 +81,40 @@ class AmigoApiTest extends TestCase
             ->assertStatus(422);
     }
 
+    public function test_stats_do_amigo_aceito(): void
+    {
+        $eu = User::factory()->create();
+        $amigo = User::factory()->create();
+        $eu->ensureDefaults();
+        $amigo->ensureDefaults();
+
+        Sanctum::actingAs($eu);
+        $amizadeId = (int) $this->postJson('/api/v1/amigos', [
+            'codigo' => $amigo->perfil->codigo_amigo,
+        ])->json('data.amizade_id');
+
+        Sanctum::actingAs($amigo);
+        $this->postJson("/api/v1/amigos/{$amizadeId}/aceitar")->assertOk();
+
+        Sanctum::actingAs($eu);
+        $stats = $this->getJson('/api/v1/amigos/'.$amigo->id.'/stats?periodo=semana');
+        $stats->assertOk();
+        $this->assertSame($amigo->id, (int) $stats->json('data.amigo.id'));
+        $this->assertArrayHasKey('totais', $stats->json('data'));
+        $this->assertArrayHasKey('nivel', $stats->json('data'));
+    }
+
+    public function test_stats_bloqueia_nao_amigo(): void
+    {
+        $eu = User::factory()->create();
+        $outro = User::factory()->create();
+        $eu->ensureDefaults();
+        $outro->ensureDefaults();
+
+        Sanctum::actingAs($eu);
+        $this->getJson('/api/v1/amigos/'.$outro->id.'/stats')->assertStatus(422);
+    }
+
     public function test_perfil_expoe_codigo_amigo(): void
     {
         $eu = User::factory()->create();

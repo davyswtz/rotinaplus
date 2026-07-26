@@ -35,7 +35,6 @@ class PluggySyncService
 
         return [
             'configured' => $this->client->isConfigured(),
-            'local_sandbox' => false,
             'conexoes' => $conexoes,
         ];
     }
@@ -53,7 +52,6 @@ class PluggySyncService
         return [
             'mode' => 'pluggy',
             'access_token' => $token,
-            'include_sandbox' => false,
         ];
     }
 
