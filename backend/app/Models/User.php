@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\UserFactory;
-use App\Support\NickHelper;
+use App\Support\CodigoAmigoHelper;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -93,7 +93,7 @@ class User extends Authenticatable
             ['user_id' => $this->id],
             [
                 'nome_heroi' => $this->name,
-                'nick' => NickHelper::gerarUnico($this->name),
+                'codigo_amigo' => CodigoAmigoHelper::gerarUnico(),
                 'avatar_key' => 'guara_serio',
                 'classe' => 'Sábio',
                 'emoji_classe' => '🔮',
@@ -105,9 +105,9 @@ class User extends Authenticatable
             ],
         );
 
-        if (blank($perfil->nick)) {
+        if (blank($perfil->codigo_amigo)) {
             $perfil->update([
-                'nick' => NickHelper::gerarUnico($perfil->nome_heroi ?: $this->name, $perfil->id),
+                'codigo_amigo' => CodigoAmigoHelper::gerarUnico(),
             ]);
         }
 

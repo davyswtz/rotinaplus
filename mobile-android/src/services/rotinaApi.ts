@@ -280,7 +280,7 @@ export async function pluggySincronizar(): Promise<
 
 export async function updatePerfil(
   payload: Partial<
-    Pick<Perfil, 'nome_heroi' | 'nick' | 'avatar_key' | 'classe' | 'emoji_classe'>
+    Pick<Perfil, 'nome_heroi' | 'avatar_key' | 'classe' | 'emoji_classe'>
   >,
 ): Promise<Perfil> {
   const { data } = await api.put<ApiResponse<Perfil>>('/api/v1/perfil', payload);
@@ -296,13 +296,29 @@ export async function fetchAmigos(): Promise<import('../types').AmigosLista> {
   return data.data;
 }
 
-export async function adicionarAmigo(nick: string): Promise<import('../types').Amigo> {
-  const { data } = await api.post<ApiResponse<import('../types').Amigo>>(
+export async function convidarAmigo(
+  codigo: string,
+): Promise<import('../types').ConviteAmigoResposta> {
+  const { data } = await api.post<ApiResponse<import('../types').ConviteAmigoResposta>>(
     '/api/v1/amigos',
-    { nick },
+    { codigo },
   );
-  if (!data.data) throw new Error(data.message || 'Falha ao adicionar amigo.');
+  if (!data.data) throw new Error(data.message || 'Falha ao enviar solicitação.');
   return data.data;
+}
+
+export async function aceitarAmigo(
+  amizadeId: number,
+): Promise<import('../types').Amigo> {
+  const { data } = await api.post<ApiResponse<import('../types').Amigo>>(
+    `/api/v1/amigos/${amizadeId}/aceitar`,
+  );
+  if (!data.data) throw new Error(data.message || 'Falha ao aceitar.');
+  return data.data;
+}
+
+export async function recusarAmigo(amizadeId: number): Promise<void> {
+  await api.post(`/api/v1/amigos/${amizadeId}/recusar`);
 }
 
 export async function removerAmigo(id: number): Promise<void> {

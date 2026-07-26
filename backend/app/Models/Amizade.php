@@ -12,6 +12,7 @@ class Amizade extends Model
     protected $fillable = [
         'user_id',
         'amigo_id',
+        'status',
     ];
 
     public function user(): BelongsTo

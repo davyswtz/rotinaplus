@@ -7,6 +7,8 @@ struct NotificacaoItem: Identifiable, Equatable {
     var mensagem: String
     var quando: String
     var lida: Bool
+    var tipo: String?
+    var referenciaId: Int?
 
     init(
         id: Int,
@@ -14,7 +16,9 @@ struct NotificacaoItem: Identifiable, Equatable {
         titulo: String,
         mensagem: String,
         quando: String,
-        lida: Bool
+        lida: Bool,
+        tipo: String? = nil,
+        referenciaId: Int? = nil
     ) {
         self.id = id
         self.icone = icone
@@ -22,7 +26,11 @@ struct NotificacaoItem: Identifiable, Equatable {
         self.mensagem = mensagem
         self.quando = quando
         self.lida = lida
+        self.tipo = tipo
+        self.referenciaId = referenciaId
     }
+
+    var isConviteAmigo: Bool { tipo == "convite_amigo" && referenciaId != nil }
 }
 
 private enum CoresNotificacoes {
@@ -125,12 +133,51 @@ struct TelaNotificacoes: View {
     }
 
     private func botaoCard(_ item: NotificacaoItem) -> some View {
-        Button {
-            Task { await marcarComoLida(item.id) }
-        } label: {
-            card(item)
+        VStack(alignment: .leading, spacing: 0) {
+            Button {
+                if !item.isConviteAmigo {
+                    Task { await marcarComoLida(item.id) }
+                }
+            } label: {
+                card(item)
+            }
+            .buttonStyle(.plain)
+
+            if item.isConviteAmigo, let amizadeId = item.referenciaId, !item.lida {
+                HStack(spacing: 10) {
+                    Button {
+                        Task { await recusarConvite(item: item, amizadeId: amizadeId) }
+                    } label: {
+                        Text("Recusar")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(.white.opacity(0.8))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.08)))
+                    }
+                    .buttonStyle(.plain)
+
+                    Button {
+                        Task { await aceitarConvite(item: item, amizadeId: amizadeId) }
+                    } label: {
+                        Text("Aceitar")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(RoundedRectangle(cornerRadius: 12).fill(CoresNotificacoes.roxoPrimario))
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 14)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(item.lida ? CoresNotificacoes.cardLida : CoresNotificacoes.cardNaoLida)
+                )
+                .padding(.top, -8)
+            }
         }
-        .buttonStyle(.plain)
     }
 
     private func card(_ item: NotificacaoItem) -> some View {
@@ -193,6 +240,30 @@ struct TelaNotificacoes: View {
             erro = error.localizedDescription
         }
         carregando = false
+    }
+
+    @MainActor
+    private func aceitarConvite(item: NotificacaoItem, amizadeId: Int) async {
+        do {
+            _ = try await RotinaPlusAPI.aceitarAmigo(amizadeId: amizadeId)
+            if let indice = itens.firstIndex(where: { $0.id == item.id }) {
+                withAnimation { itens[indice].lida = true }
+            }
+        } catch {
+            // mantém botões
+        }
+    }
+
+    @MainActor
+    private func recusarConvite(item: NotificacaoItem, amizadeId: Int) async {
+        do {
+            try await RotinaPlusAPI.recusarAmigo(amizadeId: amizadeId)
+            if let indice = itens.firstIndex(where: { $0.id == item.id }) {
+                withAnimation { itens[indice].lida = true }
+            }
+        } catch {
+            // mantém botões
+        }
     }
 
     @MainActor

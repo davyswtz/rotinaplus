@@ -11,7 +11,7 @@ class PerfilResource extends JsonResource
     {
         return [
             'nome_heroi' => $this->nome_heroi,
-            'nick' => $this->nick,
+            'codigo_amigo' => $this->codigo_amigo,
             'avatar_key' => $this->avatar_key,
             'classe' => $this->classe,
             'emoji_classe' => $this->emoji_classe,

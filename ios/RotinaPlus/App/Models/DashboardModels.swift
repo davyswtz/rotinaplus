@@ -4,7 +4,7 @@ import Foundation
 
 struct PerfilAPI: Codable, Equatable {
     var nomeHeroi: String?
-    var nick: String?
+    var codigoAmigo: String?
     var avatarKey: String
     var classe: String
     var emojiClasse: String
@@ -16,7 +16,7 @@ struct PerfilAPI: Codable, Equatable {
 
     enum CodingKeys: String, CodingKey {
         case nomeHeroi = "nome_heroi"
-        case nick
+        case codigoAmigo = "codigo_amigo"
         case avatarKey = "avatar_key"
         case classe
         case emojiClasse = "emoji_classe"
@@ -36,15 +36,15 @@ struct PerfilAPI: Codable, Equatable {
         return nome.isEmpty ? "herói" : nome.lowercased()
     }
 
-    var nickExibicao: String {
-        let n = (nick ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-        return n.isEmpty ? "—" : "@\(n)"
+    var codigoExibicao: String {
+        let c = (codigoAmigo ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        return c.isEmpty ? "—" : c.uppercased()
     }
 }
 
 struct AmigoAPI: Codable, Equatable, Identifiable {
     let id: Int
-    var nick: String?
+    var codigoAmigo: String?
     var nomeHeroi: String?
     var avatarKey: String
     var classe: String
@@ -52,7 +52,8 @@ struct AmigoAPI: Codable, Equatable, Identifiable {
     var nivel: Int
 
     enum CodingKeys: String, CodingKey {
-        case id, nick, classe, nivel
+        case id, classe, nivel
+        case codigoAmigo = "codigo_amigo"
         case nomeHeroi = "nome_heroi"
         case avatarKey = "avatar_key"
         case emojiClasse = "emoji_classe"
@@ -64,13 +65,23 @@ struct AmigoAPI: Codable, Equatable, Identifiable {
 
     var nomeExibicao: String {
         let nome = (nomeHeroi ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-        return nome.isEmpty ? (nick ?? "herói") : nome.lowercased()
+        return nome.isEmpty ? (codigoAmigo ?? "herói") : nome.lowercased()
     }
 }
 
 struct AmigosListaAPI: Codable, Equatable {
     var amigos: [AmigoAPI]
     var total: Int
+}
+
+struct ConviteAmigoRespostaAPI: Codable, Equatable {
+    var amizadeId: Int
+    var status: String
+
+    enum CodingKeys: String, CodingKey {
+        case amizadeId = "amizade_id"
+        case status
+    }
 }
 
 struct AcademiaResumoAPI: Codable, Equatable {
@@ -145,14 +156,45 @@ struct NotificacaoAPI: Codable, Equatable, Identifiable {
     var icone: String
     var titulo: String
     var mensagem: String
+    var tipo: String?
+    var referenciaId: Int?
+    var payload: [String: String]?
     var lida: Bool
     var quando: String
     var createdAt: String?
 
     enum CodingKeys: String, CodingKey {
-        case id, icone, titulo, mensagem, lida, quando
+        case id, icone, titulo, mensagem, tipo, lida, quando, payload
+        case referenciaId = "referencia_id"
         case createdAt = "created_at"
     }
+
+    /// Payload da API pode ter números; decodifica de forma flexível.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(Int.self, forKey: .id)
+        icone = try c.decode(String.self, forKey: .icone)
+        titulo = try c.decode(String.self, forKey: .titulo)
+        mensagem = try c.decode(String.self, forKey: .mensagem)
+        tipo = try c.decodeIfPresent(String.self, forKey: .tipo)
+        referenciaId = try c.decodeIfPresent(Int.self, forKey: .referenciaId)
+        lida = try c.decode(Bool.self, forKey: .lida)
+        quando = try c.decode(String.self, forKey: .quando)
+        createdAt = try c.decodeIfPresent(String.self, forKey: .createdAt)
+
+        if let dict = try? c.decode([String: FlexibleJSONValue].self, forKey: .payload) {
+            var flat: [String: String] = [:]
+            dict.forEach { key, value in
+                flat[key] = value.stringValue
+            }
+            payload = flat
+        } else {
+            payload = nil
+        }
+    }
+
+    var isConviteAmigo: Bool { tipo == "convite_amigo" }
+    var amizadeId: Int? { referenciaId }
 
     func asItem() -> NotificacaoItem {
         NotificacaoItem(
@@ -161,8 +203,38 @@ struct NotificacaoAPI: Codable, Equatable, Identifiable {
             titulo: titulo,
             mensagem: mensagem,
             quando: quando,
-            lida: lida
+            lida: lida,
+            tipo: tipo,
+            referenciaId: referenciaId
         )
+    }
+}
+
+private enum FlexibleJSONValue: Decodable {
+    case string(String)
+    case int(Int)
+    case double(Double)
+    case bool(Bool)
+    case null
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.singleValueContainer()
+        if c.decodeNil() { self = .null; return }
+        if let v = try? c.decode(String.self) { self = .string(v); return }
+        if let v = try? c.decode(Int.self) { self = .int(v); return }
+        if let v = try? c.decode(Double.self) { self = .double(v); return }
+        if let v = try? c.decode(Bool.self) { self = .bool(v); return }
+        self = .null
+    }
+
+    var stringValue: String {
+        switch self {
+        case .string(let s): return s
+        case .int(let i): return String(i)
+        case .double(let d): return String(Int(d))
+        case .bool(let b): return b ? "1" : "0"
+        case .null: return ""
+        }
     }
 }
 

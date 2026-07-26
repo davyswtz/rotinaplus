@@ -58,21 +58,18 @@ enum RotinaPlusAPI {
 
     static func atualizarPerfilCampos(
         nomeHeroi: String? = nil,
-        nick: String? = nil,
         avatarKey: String? = nil,
         classe: String? = nil,
         emojiClasse: String? = nil
     ) async throws -> PerfilAPI {
         struct Body: Encodable {
             var nomeHeroi: String?
-            var nick: String?
             var avatarKey: String?
             var classe: String?
             var emojiClasse: String?
 
             enum CodingKeys: String, CodingKey {
                 case nomeHeroi = "nome_heroi"
-                case nick
                 case avatarKey = "avatar_key"
                 case classe
                 case emojiClasse = "emoji_classe"
@@ -81,7 +78,6 @@ enum RotinaPlusAPI {
             func encode(to encoder: Encoder) throws {
                 var c = encoder.container(keyedBy: CodingKeys.self)
                 if let nomeHeroi { try c.encode(nomeHeroi, forKey: .nomeHeroi) }
-                if let nick { try c.encode(nick, forKey: .nick) }
                 if let avatarKey { try c.encode(avatarKey, forKey: .avatarKey) }
                 if let classe { try c.encode(classe, forKey: .classe) }
                 if let emojiClasse { try c.encode(emojiClasse, forKey: .emojiClasse) }
@@ -93,7 +89,6 @@ enum RotinaPlusAPI {
             method: .put,
             body: Body(
                 nomeHeroi: nomeHeroi,
-                nick: nick,
                 avatarKey: avatarKey,
                 classe: classe,
                 emojiClasse: emojiClasse
@@ -118,18 +113,39 @@ enum RotinaPlusAPI {
         return data
     }
 
-    static func adicionarAmigo(nick: String) async throws -> AmigoAPI {
-        struct Body: Encodable { let nick: String }
-        let response: APIResponse<AmigoAPI> = try await APIClient.shared.request(
+    static func convidarAmigo(codigo: String) async throws -> ConviteAmigoRespostaAPI {
+        struct Body: Encodable { let codigo: String }
+        let response: APIResponse<ConviteAmigoRespostaAPI> = try await APIClient.shared.request(
             endpoint: .adicionarAmigo,
             method: .post,
-            body: Body(nick: nick),
+            body: Body(codigo: codigo),
             requiresAuth: true
         )
         guard let data = response.data else {
             throw APIError.invalidResponse
         }
         return data
+    }
+
+    static func aceitarAmigo(amizadeId: Int) async throws -> AmigoAPI {
+        let response: APIResponse<AmigoAPI> = try await APIClient.shared.request(
+            endpoint: .aceitarAmigo(id: amizadeId),
+            method: .post,
+            requiresAuth: true
+        )
+        guard let data = response.data else {
+            throw APIError.invalidResponse
+        }
+        return data
+    }
+
+    static func recusarAmigo(amizadeId: Int) async throws {
+        struct Empty: Decodable {}
+        let _: APIResponse<Empty> = try await APIClient.shared.request(
+            endpoint: .recusarAmigo(id: amizadeId),
+            method: .post,
+            requiresAuth: true
+        )
     }
 
     static func removerAmigo(id: Int) async throws {

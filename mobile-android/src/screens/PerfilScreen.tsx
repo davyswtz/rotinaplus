@@ -18,7 +18,7 @@ import {
   fetchAmigos,
   fetchClasses,
   fetchPerfilStats,
-  adicionarAmigo,
+  convidarAmigo,
   removerAmigo,
   updatePerfil,
   type ClasseCatalogItem,
@@ -72,16 +72,15 @@ export function PerfilScreen({ onPerfilAtualizado, onSair }: Props) {
   const [erro, setErro] = useState<string | null>(null);
   const [precisaLogin, setPrecisaLogin] = useState(false);
   const [mostrarNome, setMostrarNome] = useState(false);
-  const [mostrarNick, setMostrarNick] = useState(false);
   const [mostrarAvatar, setMostrarAvatar] = useState(false);
   const [mostrarClasse, setMostrarClasse] = useState(false);
   const [mostrarAddAmigo, setMostrarAddAmigo] = useState(false);
   const [nomeEdit, setNomeEdit] = useState('');
-  const [nickEdit, setNickEdit] = useState('');
-  const [nickAmigo, setNickAmigo] = useState('');
+  const [codigoAmigo, setCodigoAmigo] = useState('');
   const [amigos, setAmigos] = useState<Amigo[]>([]);
   const [erroAmigo, setErroAmigo] = useState<string | null>(null);
   const [adicionandoAmigo, setAdicionandoAmigo] = useState(false);
+  const [conviteEnviado, setConviteEnviado] = useState(false);
 
   const carregar = useCallback(async () => {
     setErro(null);
@@ -190,7 +189,7 @@ export function PerfilScreen({ onPerfilAtualizado, onSair }: Props) {
               {(perfil.nome_heroi || 'herói').toLowerCase()}
             </Text>
             <Text style={styles.nick}>
-              {perfil.nick ? `@${perfil.nick}` : '—'}
+              Código: {perfil.codigo_amigo || '—'}
             </Text>
             <Text style={styles.classe}>
               {perfil.emoji_classe} {perfil.classe}
@@ -289,7 +288,9 @@ export function PerfilScreen({ onPerfilAtualizado, onSair }: Props) {
         </View>
 
         {amigos.length === 0 ? (
-          <Text style={styles.sub}>Nenhum amigo ainda. Adicione pelo nick.</Text>
+          <Text style={styles.sub}>
+            Nenhum amigo ainda. Envie um pedido pelo código.
+          </Text>
         ) : (
           amigos.map((amigo) => {
             const src =
@@ -299,11 +300,11 @@ export function PerfilScreen({ onPerfilAtualizado, onSair }: Props) {
                 <Image source={src} style={styles.amigoAvatar} />
                 <View style={{ flex: 1 }}>
                   <Text style={styles.amigoNome}>
-                    {(amigo.nome_heroi || amigo.nick || 'herói').toLowerCase()}
+                    {(amigo.nome_heroi || amigo.codigo_amigo || 'herói').toLowerCase()}
                   </Text>
                   <Text style={styles.sub}>
-                    @{amigo.nick || '—'} · Nv. {amigo.nivel} · {amigo.emoji_classe}{' '}
-                    {amigo.classe}
+                    {amigo.codigo_amigo || '—'} · Nv. {amigo.nivel} ·{' '}
+                    {amigo.emoji_classe} {amigo.classe}
                   </Text>
                 </View>
                 <TouchableOpacity
@@ -328,8 +329,9 @@ export function PerfilScreen({ onPerfilAtualizado, onSair }: Props) {
         <TouchableOpacity
           style={styles.botaoAmigo}
           onPress={() => {
-            setNickAmigo('');
+            setCodigoAmigo('');
             setErroAmigo(null);
+            setConviteEnviado(false);
             setMostrarAddAmigo(true);
           }}
         >
@@ -345,14 +347,6 @@ export function PerfilScreen({ onPerfilAtualizado, onSair }: Props) {
           onPress={() => {
             setNomeEdit(perfil.nome_heroi || '');
             setMostrarNome(true);
-          }}
-        />
-        <EditBtn
-          titulo="Nick"
-          valor={perfil.nick ? `@${perfil.nick}` : 'Definir nick'}
-          onPress={() => {
-            setNickEdit(perfil.nick || '');
-            setMostrarNick(true);
           }}
         />
         <EditBtn
@@ -410,92 +404,50 @@ export function PerfilScreen({ onPerfilAtualizado, onSair }: Props) {
         </View>
       </Modal>
 
-      <Modal visible={mostrarNick} animationType="slide" transparent>
-        <View style={styles.modalWrap}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitulo}>Editar nick</Text>
-            <TextInput
-              style={styles.input}
-              value={nickEdit}
-              onChangeText={setNickEdit}
-              placeholder="seu_nick"
-              autoCapitalize="none"
-              autoCorrect={false}
-              placeholderTextColor="rgba(255,255,255,0.35)"
-            />
-            <Text style={[styles.sub, { marginBottom: 8 }]}>
-              3–32 caracteres: letras, números ou _. Outros heróis usam esse nick
-              para te adicionar.
-            </Text>
-            <View style={styles.modalActions}>
-              <TouchableOpacity onPress={() => setMostrarNick(false)}>
-                <Text style={styles.link}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.botaoSalvar}
-                onPress={() => {
-                  void (async () => {
-                    const nick = nickEdit.trim();
-                    if (!nick) return;
-                    try {
-                      const p = await updatePerfil({ nick });
-                      onPerfilAtualizado?.(p);
-                      setMostrarNick(false);
-                      await carregar();
-                    } catch {
-                      // mantém modal aberto
-                    }
-                  })();
-                }}
-              >
-                <Text style={styles.botaoSalvarTexto}>Salvar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
       <Modal visible={mostrarAddAmigo} animationType="slide" transparent>
         <View style={styles.modalWrap}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitulo}>Adicionar amigo</Text>
             <TextInput
               style={styles.input}
-              value={nickAmigo}
-              onChangeText={setNickAmigo}
-              placeholder="nick_do_amigo"
-              autoCapitalize="none"
+              value={codigoAmigo}
+              onChangeText={setCodigoAmigo}
+              placeholder="ABC123"
+              autoCapitalize="characters"
               autoCorrect={false}
               placeholderTextColor="rgba(255,255,255,0.35)"
             />
             {erroAmigo ? (
               <Text style={{ color: C.falha, marginBottom: 8 }}>{erroAmigo}</Text>
+            ) : conviteEnviado ? (
+              <Text style={{ color: C.verde, marginBottom: 8 }}>
+                Solicitação enviada! Seu amigo precisa aceitar nas notificações.
+              </Text>
             ) : (
               <Text style={[styles.sub, { marginBottom: 8 }]}>
-                Digite o nick exato do herói.
+                Digite o código do herói (aparece no perfil dele).
               </Text>
             )}
             <View style={styles.modalActions}>
               <TouchableOpacity onPress={() => setMostrarAddAmigo(false)}>
-                <Text style={styles.link}>Cancelar</Text>
+                <Text style={styles.link}>Fechar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.botaoSalvar, adicionandoAmigo && { opacity: 0.6 }]}
                 disabled={adicionandoAmigo}
                 onPress={() => {
                   void (async () => {
-                    const nick = nickAmigo.trim();
-                    if (!nick) return;
+                    const codigo = codigoAmigo.trim();
+                    if (!codigo) return;
                     setAdicionandoAmigo(true);
                     setErroAmigo(null);
+                    setConviteEnviado(false);
                     try {
-                      await adicionarAmigo(nick);
-                      setMostrarAddAmigo(false);
-                      const lista = await fetchAmigos();
-                      setAmigos(lista.amigos);
+                      await convidarAmigo(codigo);
+                      setConviteEnviado(true);
                     } catch (e) {
                       setErroAmigo(
-                        e instanceof Error ? e.message : 'Não foi possível adicionar.',
+                        e instanceof Error ? e.message : 'Não foi possível enviar.',
                       );
                     } finally {
                       setAdicionandoAmigo(false);
@@ -504,7 +456,7 @@ export function PerfilScreen({ onPerfilAtualizado, onSair }: Props) {
                 }}
               >
                 <Text style={styles.botaoSalvarTexto}>
-                  {adicionandoAmigo ? '...' : 'Adicionar'}
+                  {adicionandoAmigo ? '...' : 'Enviar'}
                 </Text>
               </TouchableOpacity>
             </View>

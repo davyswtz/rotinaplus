@@ -14,7 +14,7 @@ class AmigoResource extends JsonResource
 
         return [
             'id' => $this->id,
-            'nick' => $perfil?->nick,
+            'codigo_amigo' => $perfil?->codigo_amigo,
             'nome_heroi' => $perfil?->nome_heroi,
             'avatar_key' => $perfil?->avatar_key ?? 'guara_serio',
             'classe' => $perfil?->classe ?? 'Sábio',

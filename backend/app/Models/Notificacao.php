@@ -14,6 +14,9 @@ class Notificacao extends Model
         'icone',
         'titulo',
         'mensagem',
+        'tipo',
+        'referencia_id',
+        'payload',
         'lida',
         'lida_em',
     ];
@@ -23,6 +26,7 @@ class Notificacao extends Model
         return [
             'lida' => 'boolean',
             'lida_em' => 'datetime',
+            'payload' => 'array',
         ];
     }
 

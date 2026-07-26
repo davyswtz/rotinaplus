@@ -12,7 +12,7 @@ class Perfil extends Model
     protected $fillable = [
         'user_id',
         'nome_heroi',
-        'nick',
+        'codigo_amigo',
         'avatar_key',
         'classe',
         'emoji_classe',

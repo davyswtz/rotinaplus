@@ -30,16 +30,45 @@ class AmigoController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'nick' => ['required', 'string', 'min:3', 'max:32'],
+            'codigo' => ['required_without:codigo_amigo', 'string', 'min:6', 'max:12'],
+            'codigo_amigo' => ['required_without:codigo', 'string', 'min:6', 'max:12'],
         ]);
 
-        $amigo = $this->amigoService->adicionarPorNick($request->user(), $validated['nick']);
+        $codigo = $validated['codigo'] ?? $validated['codigo_amigo'];
+        $resultado = $this->amigoService->convidarPorCodigo($request->user(), $codigo);
 
         return response()->json([
             'success' => true,
-            'message' => 'Amigo adicionado.',
-            'data' => new AmigoResource($amigo),
+            'message' => 'Solicitação enviada.',
+            'data' => [
+                'amizade_id' => $resultado['amizade']->id,
+                'status' => $resultado['amizade']->status,
+            ],
         ], 201);
+    }
+
+    public function aceitar(Request $request, int $id): JsonResponse
+    {
+        $amizade = $this->amigoService->aceitar($request->user(), $id);
+        $amigo = $amizade->user_id === $request->user()->id
+            ? $amizade->amigo()->with('perfil')->first()
+            : $amizade->user()->with('perfil')->first();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Amizade aceita.',
+            'data' => $amigo ? new AmigoResource($amigo) : null,
+        ]);
+    }
+
+    public function recusar(Request $request, int $id): JsonResponse
+    {
+        $this->amigoService->recusar($request->user(), $id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Solicitação recusada.',
+        ]);
     }
 
     public function destroy(Request $request, int $id): JsonResponse

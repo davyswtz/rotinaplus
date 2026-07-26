@@ -28,7 +28,7 @@ export interface ApiErrorResponse {
 
 export interface Perfil {
   nome_heroi: string | null;
-  nick: string | null;
+  codigo_amigo: string | null;
   avatar_key: string;
   classe: string;
   emoji_classe: string;
@@ -41,7 +41,7 @@ export interface Perfil {
 
 export interface Amigo {
   id: number;
-  nick: string | null;
+  codigo_amigo: string | null;
   nome_heroi: string | null;
   avatar_key: string;
   classe: string;
@@ -52,6 +52,11 @@ export interface Amigo {
 export interface AmigosLista {
   amigos: Amigo[];
   total: number;
+}
+
+export interface ConviteAmigoResposta {
+  amizade_id: number;
+  status: string;
 }
 
 export interface PerfilSerieDia {
@@ -215,6 +220,9 @@ export interface Notificacao {
   icone: string;
   titulo: string;
   mensagem: string;
+  tipo?: string | null;
+  referencia_id?: number | null;
+  payload?: Record<string, unknown> | null;
   lida: boolean;
   quando: string;
   created_at?: string;

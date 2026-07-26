@@ -7,7 +7,6 @@ use App\Http\Resources\PerfilResource;
 use App\Services\AcademiaService;
 use App\Services\PerfilStatsService;
 use App\Support\ClassesCatalog;
-use App\Support\NickHelper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -68,30 +67,10 @@ class PerfilController extends Controller
 
         $validated = $request->validate([
             'nome_heroi' => ['sometimes', 'string', 'max:40'],
-            'nick' => [
-                'sometimes',
-                'string',
-                'min:3',
-                'max:32',
-                'regex:/^[a-zA-Z0-9_]+$/',
-                Rule::unique('perfis', 'nick')->ignore($user->perfil?->id),
-            ],
             'avatar_key' => ['sometimes', 'string', 'max:64'],
             'classe' => ['sometimes', 'string', 'max:40', Rule::in(ClassesCatalog::nomes())],
             'emoji_classe' => ['sometimes', 'string', 'max:16'],
         ]);
-
-        if (isset($validated['nick'])) {
-            $nick = NickHelper::normalizar($validated['nick']);
-            if (! NickHelper::validarFormato($nick)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Nick inválido.',
-                    'errors' => ['nick' => ['Use 3–32 caracteres: letras, números ou _.']],
-                ], 422);
-            }
-            $validated['nick'] = $nick;
-        }
 
         if (isset($validated['classe']) && ! isset($validated['emoji_classe'])) {
             $catalogo = ClassesCatalog::findByNome($validated['classe']);

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Notificacao;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
@@ -11,63 +12,83 @@ class AmigoApiTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_adiciona_lista_e_remove_amigo_por_nick(): void
+    public function test_convite_por_codigo_notifica_e_aceite_vira_amigo(): void
     {
         $eu = User::factory()->create(['name' => 'Davy']);
         $amigo = User::factory()->create(['name' => 'Ana']);
         $eu->ensureDefaults();
         $amigo->ensureDefaults();
 
-        $nickAmigo = $amigo->perfil->nick;
-        $this->assertNotEmpty($nickAmigo);
+        $codigo = $amigo->perfil->codigo_amigo;
+        $this->assertNotEmpty($codigo);
 
         Sanctum::actingAs($eu);
+        $convite = $this->postJson('/api/v1/amigos', ['codigo' => $codigo]);
+        $convite->assertCreated();
+        $amizadeId = (int) $convite->json('data.amizade_id');
+        $this->assertSame('pendente', $convite->json('data.status'));
 
-        $add = $this->postJson('/api/v1/amigos', ['nick' => $nickAmigo]);
-        $add->assertCreated();
-        $this->assertSame($amigo->id, (int) $add->json('data.id'));
-        $this->assertSame($nickAmigo, $add->json('data.nick'));
+        // Ainda não são amigos
+        $this->assertSame(0, $this->getJson('/api/v1/amigos')->json('data.total'));
 
-        $lista = $this->getJson('/api/v1/amigos');
-        $lista->assertOk();
-        $this->assertSame(1, $lista->json('data.total'));
-        $this->assertSame($nickAmigo, $lista->json('data.amigos.0.nick'));
-
-        // Amigo também vê a amizade
+        // Destino recebe notificação
         Sanctum::actingAs($amigo);
-        $listaAmigo = $this->getJson('/api/v1/amigos');
-        $listaAmigo->assertOk();
-        $this->assertSame(1, $listaAmigo->json('data.total'));
-        $this->assertSame($eu->perfil->nick, $listaAmigo->json('data.amigos.0.nick'));
+        $notifs = $this->getJson('/api/v1/notificacoes');
+        $notifs->assertOk();
+        $this->assertSame('convite_amigo', $notifs->json('data.0.tipo'));
+        $this->assertSame($amizadeId, (int) $notifs->json('data.0.referencia_id'));
+
+        $aceitar = $this->postJson("/api/v1/amigos/{$amizadeId}/aceitar");
+        $aceitar->assertOk();
+        $this->assertSame($eu->perfil->codigo_amigo, $aceitar->json('data.codigo_amigo'));
+
+        $this->assertSame(1, $this->getJson('/api/v1/amigos')->json('data.total'));
 
         Sanctum::actingAs($eu);
-        $this->deleteJson('/api/v1/amigos/'.$amigo->id)->assertOk();
-
-        $lista2 = $this->getJson('/api/v1/amigos');
-        $this->assertSame(0, $lista2->json('data.total'));
+        $this->assertSame(1, $this->getJson('/api/v1/amigos')->json('data.total'));
+        $this->assertTrue(
+            Notificacao::query()->where('user_id', $eu->id)->where('tipo', 'amigo_aceito')->exists()
+        );
     }
 
-    public function test_nao_adiciona_nick_inexistente_nem_a_si_mesmo(): void
+    public function test_recusar_convite_nao_vira_amigo(): void
+    {
+        $eu = User::factory()->create();
+        $amigo = User::factory()->create();
+        $eu->ensureDefaults();
+        $amigo->ensureDefaults();
+
+        Sanctum::actingAs($eu);
+        $amizadeId = (int) $this->postJson('/api/v1/amigos', [
+            'codigo' => $amigo->perfil->codigo_amigo,
+        ])->json('data.amizade_id');
+
+        Sanctum::actingAs($amigo);
+        $this->postJson("/api/v1/amigos/{$amizadeId}/recusar")->assertOk();
+        $this->assertSame(0, $this->getJson('/api/v1/amigos')->json('data.total'));
+    }
+
+    public function test_nao_convida_codigo_inexistente_nem_a_si_mesmo(): void
     {
         $eu = User::factory()->create();
         $eu->ensureDefaults();
         Sanctum::actingAs($eu);
 
-        $this->postJson('/api/v1/amigos', ['nick' => 'naoexiste123'])
+        $this->postJson('/api/v1/amigos', ['codigo' => 'ZZZZZZ'])
             ->assertStatus(422);
 
-        $this->postJson('/api/v1/amigos', ['nick' => $eu->perfil->nick])
+        $this->postJson('/api/v1/amigos', ['codigo' => $eu->perfil->codigo_amigo])
             ->assertStatus(422);
     }
 
-    public function test_atualiza_nick_no_perfil(): void
+    public function test_perfil_expoe_codigo_amigo(): void
     {
         $eu = User::factory()->create();
         $eu->ensureDefaults();
         Sanctum::actingAs($eu);
 
-        $res = $this->putJson('/api/v1/perfil', ['nick' => 'Guara_Dev']);
-        $res->assertOk();
-        $this->assertSame('guara_dev', $res->json('data.nick'));
+        $stats = $this->getJson('/api/v1/perfil/stats');
+        $stats->assertOk();
+        $this->assertNotEmpty($stats->json('data.perfil.codigo_amigo'));
     }
 }

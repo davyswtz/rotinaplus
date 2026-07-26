@@ -13,16 +13,15 @@ struct TelaPerfil: View {
     @State private var precisaLogin = false
 
     @State private var mostrarNome = false
-    @State private var mostrarNick = false
     @State private var mostrarAvatar = false
     @State private var mostrarClasse = false
     @State private var mostrarAddAmigo = false
     @State private var nomeEdit = ""
-    @State private var nickEdit = ""
-    @State private var nickAmigo = ""
+    @State private var codigoAmigo = ""
     @State private var amigos: [AmigoAPI] = []
     @State private var erroAmigo: String?
     @State private var adicionandoAmigo = false
+    @State private var conviteEnviado = false
 
     private let c = CoresPerfil.self
 
@@ -169,9 +168,6 @@ struct TelaPerfil: View {
         .sheet(isPresented: $mostrarNome) {
             editarNomeSheet
         }
-        .sheet(isPresented: $mostrarNick) {
-            editarNickSheet
-        }
         .sheet(isPresented: $mostrarAddAmigo) {
             adicionarAmigoSheet
         }
@@ -201,9 +197,9 @@ struct TelaPerfil: View {
                 Text(p.nomeExibicao)
                     .font(.system(size: 24, weight: .bold))
                     .foregroundStyle(.white)
-                Text(p.nickExibicao)
-                    .font(.system(size: 13, weight: .semibold, design: .monospaced))
-                    .foregroundStyle(c.laranja.opacity(0.9))
+                Text("Código: \(p.codigoExibicao)")
+                    .font(.system(size: 13, weight: .bold, design: .monospaced))
+                    .foregroundStyle(c.laranja.opacity(0.95))
                 HStack(spacing: 6) {
                     Text(p.emojiClasse)
                     Text(p.classe)
@@ -455,7 +451,7 @@ struct TelaPerfil: View {
             }
 
             if amigos.isEmpty {
-                Text("Nenhum amigo ainda. Adicione pelo nick.")
+                Text("Nenhum amigo ainda. Envie um pedido pelo código.")
                     .font(.subheadline)
                     .foregroundStyle(.white.opacity(0.45))
                     .padding(.vertical, 4)
@@ -472,7 +468,7 @@ struct TelaPerfil: View {
                             Text(amigo.nomeExibicao)
                                 .font(.system(size: 15, weight: .semibold))
                                 .foregroundStyle(.white)
-                            Text("@\(amigo.nick ?? "—") · Nv. \(amigo.nivel) · \(amigo.emojiClasse) \(amigo.classe)")
+                            Text("\(amigo.codigoAmigo ?? "—") · Nv. \(amigo.nivel) · \(amigo.emojiClasse) \(amigo.classe)")
                                 .font(.caption)
                                 .foregroundStyle(.white.opacity(0.45))
                         }
@@ -492,8 +488,9 @@ struct TelaPerfil: View {
             }
 
             Button {
-                nickAmigo = ""
+                codigoAmigo = ""
                 erroAmigo = nil
+                conviteEnviado = false
                 mostrarAddAmigo = true
             } label: {
                 HStack {
@@ -528,10 +525,6 @@ struct TelaPerfil: View {
             botaoEdicao(titulo: "Nome", valor: p.nomeExibicao, icone: "pencil") {
                 nomeEdit = p.nomeHeroi ?? ""
                 mostrarNome = true
-            }
-            botaoEdicao(titulo: "Nick", valor: p.nickExibicao, icone: "at") {
-                nickEdit = p.nick ?? ""
-                mostrarNick = true
             }
             botaoEdicao(titulo: "Foto / avatar", valor: "Trocar imagem", icone: "person.crop.circle") {
                 mostrarAvatar = true
@@ -599,66 +592,37 @@ struct TelaPerfil: View {
     }
 
     private var editarNickSheet: some View {
-        NavigationStack {
-            Form {
-                Section {
-                    TextField("seu_nick", text: $nickEdit)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                } footer: {
-                    Text("3–32 caracteres: letras, números ou _. Outros heróis usam esse nick para te adicionar.")
-                }
-            }
-            .navigationTitle("Editar nick")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancelar") { mostrarNick = false }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Salvar") {
-                        Task {
-                            let nick = nickEdit.trimmingCharacters(in: .whitespacesAndNewlines)
-                            guard !nick.isEmpty else { return }
-                            do {
-                                let p = try await RotinaPlusAPI.atualizarPerfilCampos(nick: nick)
-                                onPerfilAtualizado(p)
-                                mostrarNick = false
-                                await carregar()
-                            } catch {
-                                // mantém sheet aberto; erro vem do servidor
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        .presentationDetents([.medium])
+        EmptyView()
     }
 
     private var adicionarAmigoSheet: some View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("nick_do_amigo", text: $nickAmigo)
-                        .textInputAutocapitalization(.never)
+                    TextField("ABC123", text: $codigoAmigo)
+                        .textInputAutocapitalization(.characters)
                         .autocorrectionDisabled()
                 } footer: {
-                    Text(erroAmigo ?? "Digite o nick exato do herói que deseja adicionar.")
-                        .foregroundStyle(erroAmigo == nil ? Color.secondary : Color.red)
+                    Text(erroAmigo ?? (conviteEnviado
+                        ? "Solicitação enviada! Seu amigo precisa aceitar nas notificações."
+                        : "Digite o código do herói (aparece no perfil dele)."))
+                        .foregroundStyle(
+                            erroAmigo != nil ? Color.red
+                                : (conviteEnviado ? Color.green : Color.secondary)
+                        )
                 }
             }
             .navigationTitle("Adicionar amigo")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancelar") { mostrarAddAmigo = false }
+                    Button("Fechar") { mostrarAddAmigo = false }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Adicionar") {
+                    Button("Enviar") {
                         Task { await adicionarAmigo() }
                     }
-                    .disabled(adicionandoAmigo || nickAmigo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .disabled(adicionandoAmigo || codigoAmigo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
         }
@@ -788,17 +752,15 @@ struct TelaPerfil: View {
 
     @MainActor
     private func adicionarAmigo() async {
-        let nick = nickAmigo.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !nick.isEmpty else { return }
+        let codigo = codigoAmigo.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !codigo.isEmpty else { return }
         adicionandoAmigo = true
         erroAmigo = nil
+        conviteEnviado = false
         defer { adicionandoAmigo = false }
         do {
-            _ = try await RotinaPlusAPI.adicionarAmigo(nick: nick)
-            mostrarAddAmigo = false
-            if let lista = try? await RotinaPlusAPI.listarAmigos() {
-                amigos = lista.amigos
-            }
+            _ = try await RotinaPlusAPI.convidarAmigo(codigo: codigo)
+            conviteEnviado = true
         } catch {
             erroAmigo = error.localizedDescription
         }

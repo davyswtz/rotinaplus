@@ -8,6 +8,8 @@ enum Endpoints {
     case perfilStats(periodo: String)
     case amigos
     case adicionarAmigo
+    case aceitarAmigo(id: Int)
+    case recusarAmigo(id: Int)
     case removerAmigo(id: Int)
     case dashboard
     case classes
@@ -59,6 +61,10 @@ enum Endpoints {
             return "/api/v1/perfil/stats?periodo=\(periodo)"
         case .amigos, .adicionarAmigo:
             return "/api/v1/amigos"
+        case .aceitarAmigo(let id):
+            return "/api/v1/amigos/\(id)/aceitar"
+        case .recusarAmigo(let id):
+            return "/api/v1/amigos/\(id)/recusar"
         case .removerAmigo(let id):
             return "/api/v1/amigos/\(id)"
         case .dashboard:

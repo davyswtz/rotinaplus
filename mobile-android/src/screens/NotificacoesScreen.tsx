@@ -13,9 +13,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { cores } from '../theme/colors';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import {
+  aceitarAmigo,
   fetchNotificacoes,
   lerTodasNotificacoes,
   marcarNotificacaoLida,
+  recusarAmigo,
 } from '../services/rotinaApi';
 import type { Notificacao } from '../types';
 
@@ -118,21 +120,73 @@ export function NotificacoesScreen() {
           keyExtractor={(item) => String(item.id)}
           contentContainerStyle={styles.lista}
           showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[styles.card, !item.lida && styles.cardNaoLida]}
-              onPress={() => void marcarLida(item.id)}
-              activeOpacity={0.85}
-            >
-              {!item.lida ? <View style={styles.ponto} /> : null}
-              <Text style={styles.icone}>{item.icone}</Text>
-              <View style={styles.textoColuna}>
-                <Text style={styles.cardTitulo}>{item.titulo}</Text>
-                <Text style={styles.cardMensagem}>{item.mensagem}</Text>
-                <Text style={styles.cardQuando}>{item.quando}</Text>
+          renderItem={({ item }) => {
+            const isConvite =
+              item.tipo === 'convite_amigo' && !!item.referencia_id && !item.lida;
+            return (
+              <View
+                style={[styles.card, !item.lida && styles.cardNaoLida]}
+              >
+                {!item.lida ? <View style={styles.ponto} /> : null}
+                <TouchableOpacity
+                  style={styles.cardBody}
+                  onPress={() => {
+                    if (!isConvite) void marcarLida(item.id);
+                  }}
+                  activeOpacity={0.85}
+                >
+                  <Text style={styles.icone}>{item.icone}</Text>
+                  <View style={styles.textoColuna}>
+                    <Text style={styles.cardTitulo}>{item.titulo}</Text>
+                    <Text style={styles.cardMensagem}>{item.mensagem}</Text>
+                    <Text style={styles.cardQuando}>{item.quando}</Text>
+                  </View>
+                </TouchableOpacity>
+                {isConvite ? (
+                  <View style={styles.acoes}>
+                    <TouchableOpacity
+                      style={styles.botaoRecusar}
+                      onPress={() => {
+                        void (async () => {
+                          try {
+                            await recusarAmigo(item.referencia_id!);
+                            setItens((atual) =>
+                              atual.map((n) =>
+                                n.id === item.id ? { ...n, lida: true } : n,
+                              ),
+                            );
+                          } catch {
+                            // mantém
+                          }
+                        })();
+                      }}
+                    >
+                      <Text style={styles.textoRecusar}>Recusar</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.botaoAceitar}
+                      onPress={() => {
+                        void (async () => {
+                          try {
+                            await aceitarAmigo(item.referencia_id!);
+                            setItens((atual) =>
+                              atual.map((n) =>
+                                n.id === item.id ? { ...n, lida: true } : n,
+                              ),
+                            );
+                          } catch {
+                            // mantém
+                          }
+                        })();
+                      }}
+                    >
+                      <Text style={styles.textoAceitar}>Aceitar</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : null}
               </View>
-            </TouchableOpacity>
-          )}
+            );
+          }}
         />
       )}
     </SafeAreaView>
@@ -194,18 +248,21 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   card: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 14,
-    padding: 16,
     borderRadius: 16,
     backgroundColor: 'rgba(255,255,255,0.04)',
     borderWidth: 1.5,
     borderColor: 'transparent',
+    padding: 16,
+    gap: 12,
   },
   cardNaoLida: {
     backgroundColor: '#241C14',
     borderColor: 'rgba(232, 120, 48, 0.55)',
+  },
+  cardBody: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 14,
   },
   ponto: {
     position: 'absolute',
@@ -215,6 +272,7 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     backgroundColor: cores.roxoPrimario,
+    zIndex: 1,
   },
   icone: {
     fontSize: 28,
@@ -240,6 +298,34 @@ const styles = StyleSheet.create({
     marginTop: 2,
     color: 'rgba(255,255,255,0.35)',
     fontSize: 12,
+  },
+  acoes: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  botaoRecusar: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    alignItems: 'center',
+  },
+  textoRecusar: {
+    color: 'rgba(255,255,255,0.8)',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  botaoAceitar: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: cores.roxoPrimario,
+    alignItems: 'center',
+  },
+  textoAceitar: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 14,
   },
   erroBox: {
     padding: 24,
