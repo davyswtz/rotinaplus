@@ -364,19 +364,30 @@ export function IniciarTreinoModal({
 
   const toggle = async (item: AcademiaTreinoExercicio) => {
     if (!treinoId || !item.id) return;
+    const novo = !item.concluido;
     try {
-      await toggleTreinoExercicio(treinoId, item.id);
       setTreino((t) =>
         t
           ? {
               ...t,
               itens: (t.itens ?? []).map((i) =>
-                i.id === item.id ? { ...i, concluido: !i.concluido } : i,
+                i.id === item.id ? { ...i, concluido: novo } : i,
               ),
             }
           : t,
       );
+      await toggleTreinoExercicio(treinoId, item.id, novo);
     } catch (e) {
+      setTreino((t) =>
+        t
+          ? {
+              ...t,
+              itens: (t.itens ?? []).map((i) =>
+                i.id === item.id ? { ...i, concluido: !novo } : i,
+              ),
+            }
+          : t,
+      );
       setErro(e instanceof Error ? e.message : 'Erro');
     }
   };

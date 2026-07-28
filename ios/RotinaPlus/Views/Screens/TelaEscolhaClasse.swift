@@ -1,7 +1,7 @@
 import SwiftUI
 
 // MARK: - Catálogo de classes (GET /api/v1/classes)
-struct ClasseHeroi: Identifiable, Hashable {
+struct ClasseHeroi: Identifiable, Hashable, Codable {
     let key: String
     let nome: String
     let emoji: String
@@ -209,7 +209,15 @@ struct TelaEscolhaClasse: View {
 
     @MainActor
     private func carregarClasses() async {
-        carregando = true
+        if let cached = OfflineStore.shared.load([ClasseHeroi].self, key: OfflineCacheKey.classes.rawValue) {
+            classes = cached
+            if selecionada == nil {
+                selecionada = cached.first
+            }
+            carregando = false
+        } else {
+            carregando = true
+        }
         erro = nil
         do {
             let lista = try await RotinaPlusAPI.classes()
@@ -218,7 +226,9 @@ struct TelaEscolhaClasse: View {
                 selecionada = lista.first
             }
         } catch {
-            self.erro = error.localizedDescription
+            if classes.isEmpty {
+                self.erro = error.localizedDescription
+            }
         }
         carregando = false
     }

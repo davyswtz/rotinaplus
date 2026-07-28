@@ -231,13 +231,20 @@ struct TelaNotificacoes: View {
 
     @MainActor
     private func carregar() async {
-        carregando = true
+        if let cached = OfflineStore.shared.load([NotificacaoAPI].self, key: .notificacoes) {
+            itens = cached.map { $0.asItem() }
+            carregando = false
+        } else {
+            carregando = true
+        }
         erro = nil
         do {
             let lista = try await RotinaPlusAPI.notificacoes()
             itens = lista.map { $0.asItem() }
         } catch {
-            erro = error.localizedDescription
+            if itens.isEmpty {
+                erro = error.localizedDescription
+            }
         }
         carregando = false
     }

@@ -198,7 +198,16 @@ struct TelaDiarioHabitos: View {
 
     @MainActor
     private func carregar(data: String? = nil) async {
-        if journal == nil { carregando = true }
+        let chave = OfflineCacheKey.habitos(data: data ?? dataSelecionada)
+        if let cached = OfflineStore.shared.load(HabitoJournalAPI.self, key: chave) {
+            journal = cached
+            if dataSelecionada == nil {
+                dataSelecionada = cached.data
+            }
+            carregando = false
+        } else if journal == nil {
+            carregando = true
+        }
         erro = nil
         do {
             let j = try await RotinaPlusAPI.habitos(data: data ?? dataSelecionada)
@@ -206,8 +215,11 @@ struct TelaDiarioHabitos: View {
             if dataSelecionada == nil {
                 dataSelecionada = j.data
             }
+            await OfflineSyncEngine.shared.flush()
         } catch {
-            erro = error.localizedDescription
+            if journal == nil {
+                erro = error.localizedDescription
+            }
         }
         carregando = false
     }

@@ -319,12 +319,13 @@ struct CriarTransacaoPayload: Codable {
     var tipo: String
     var categoria: String
     var titulo: String
+    var icone: String?
     var valorCentavos: Int
     var data: String?
     var clientUUID: String
 
     enum CodingKeys: String, CodingKey {
-        case tipo, categoria, titulo, data
+        case tipo, categoria, titulo, icone, data
         case valorCentavos = "valor_centavos"
         case clientUUID = "client_uuid"
     }
@@ -332,11 +333,12 @@ struct CriarTransacaoPayload: Codable {
 
 struct CriarMetaPayload: Codable {
     var titulo: String
+    var icone: String?
     var valorAlvoCentavos: Int
     var clientUUID: String
 
     enum CodingKeys: String, CodingKey {
-        case titulo
+        case titulo, icone
         case valorAlvoCentavos = "valor_alvo_centavos"
         case clientUUID = "client_uuid"
     }

@@ -743,6 +743,17 @@ struct TelaPerfil: View {
         }
 
         do {
+            if let cachedStats = OfflineStore.shared.load(
+                PerfilStatsAPI.self,
+                key: OfflineCacheKey.perfilStats(periodo: periodo)
+            ) {
+                stats = cachedStats
+                carregando = false
+            }
+            if let cachedAmigos = OfflineStore.shared.load(AmigosListaAPI.self, key: .amigos) {
+                amigos = cachedAmigos.amigos
+            }
+
             async let statsTask = RotinaPlusAPI.perfilStats(periodo: periodo)
             async let amigosTask = RotinaPlusAPI.listarAmigos()
             stats = try await statsTask
@@ -752,6 +763,7 @@ struct TelaPerfil: View {
             if let p = stats?.perfil {
                 onPerfilAtualizado(p)
             }
+            await OfflineSyncEngine.shared.flush()
         } catch let apiError as APIError where apiError.isUnauthorized {
             precisaLogin = true
             erro = "Sessão expirada ou não autenticado."
@@ -760,7 +772,9 @@ struct TelaPerfil: View {
             if msg.contains("unauthenticated") || msg.contains("não autentic") || msg.contains("nao autentic") {
                 precisaLogin = true
             }
-            erro = error.localizedDescription
+            if stats == nil {
+                erro = error.localizedDescription
+            }
         }
         carregando = false
     }

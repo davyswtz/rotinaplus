@@ -28,6 +28,7 @@ import type {
   FinancasSerie,
   FinancasTransacao,
 } from '../types';
+import { CacheKeys, loadCache } from '../offline/store';
 
 const C = {
   roxo: '#E87830',
@@ -80,12 +81,20 @@ export function FinancasScreen() {
 
   const carregar = useCallback(async (anoMes?: string) => {
     setErro(null);
+    const cached = await loadCache<FinancasData>(CacheKeys.financasMes(anoMes));
+    if (cached) {
+      setDados(cached);
+      setMes(cached.ano_mes);
+      setCarregando(false);
+    }
     try {
       const data = await fetchFinancas(anoMes);
       setDados(data);
       setMes(data.ano_mes);
     } catch (e) {
-      setErro(e instanceof Error ? e.message : 'Erro ao carregar finanças.');
+      if (!cached) {
+        setErro(e instanceof Error ? e.message : 'Erro ao carregar finanças.');
+      }
     } finally {
       setCarregando(false);
     }

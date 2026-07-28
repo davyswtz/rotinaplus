@@ -24,6 +24,7 @@ import type {
   HabitoSugestao,
 } from '../types';
 import type { AbaFooter } from '../components/FooterNavegacao';
+import { CacheKeys, loadCache } from '../offline/store';
 
 const C = {
   primario: '#E87830',
@@ -74,12 +75,22 @@ export function DiarioHabitosScreen({ onAbrirArea }: Props) {
 
   const carregar = useCallback(async (data?: string) => {
     setErro(null);
+    const cached = await loadCache<import('../types').HabitoJournal>(
+      CacheKeys.habitos(data),
+    );
+    if (cached) {
+      setJournal(cached);
+      setDataSel((atual) => atual ?? cached.data);
+      setCarregando(false);
+    }
     try {
       const j = await fetchHabitos(data);
       setJournal(j);
       setDataSel((atual) => atual ?? j.data);
     } catch (e) {
-      setErro(e instanceof Error ? e.message : 'Erro ao carregar diário.');
+      if (!cached) {
+        setErro(e instanceof Error ? e.message : 'Erro ao carregar diário.');
+      }
     } finally {
       setCarregando(false);
     }

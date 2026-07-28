@@ -7,6 +7,7 @@ enum OfflineCacheKey: String {
     case amigos
     case notificacoes
     case historicoTreinos
+    case classes
 
     static func habitos(data: String?) -> String {
         if let data, !data.isEmpty { return "habitos_\(data)" }
@@ -15,6 +16,23 @@ enum OfflineCacheKey: String {
 
     static func perfilStats(periodo: String) -> String {
         "perfil_stats_\(periodo)"
+    }
+
+    static func amigoStats(id: Int, periodo: String) -> String {
+        "amigo_stats_\(id)_\(periodo)"
+    }
+
+    static func treino(id: Int) -> String {
+        "treino_\(id)"
+    }
+
+    static func catalogo(grupo: String?) -> String {
+        "catalogo_\(grupo ?? "all")"
+    }
+
+    static func financas(mes: String?) -> String {
+        if let mes, !mes.isEmpty { return "financas_\(mes)" }
+        return OfflineCacheKey.financas.rawValue
     }
 }
 

@@ -19,12 +19,14 @@ import {
   toggleAcademiaDia,
 } from '../services/rotinaApi';
 import type {
+  AcademiaData,
   AcademiaTreino,
   AcademiaVolume,
   EsporteCatalogo,
   EsporteResumo,
   EsporteSessao,
 } from '../types';
+import { CacheKeys, loadCache } from '../offline/store';
 import {
   HistoricoTreinosModal,
   IniciarTreinoModal,
@@ -490,8 +492,8 @@ export function AcademiaScreen({
 
   const carregar = useCallback(async () => {
     setErro(null);
-    try {
-      const data = await fetchAcademia();
+    const cached = await loadCache<AcademiaData>(CacheKeys.academia);
+    const aplicar = (data: AcademiaData) => {
       setMetaSemana(data.meta_semana);
       setSequencia(data.sequencia_treinos);
       setDias(
@@ -520,8 +522,18 @@ export function AcademiaScreen({
           xp_semana: 0,
         },
       );
+    };
+    if (cached) {
+      aplicar(cached);
+      setCarregando(false);
+    }
+    try {
+      const data = await fetchAcademia();
+      aplicar(data);
     } catch (e) {
-      setErro(e instanceof Error ? e.message : 'Erro ao carregar academia.');
+      if (!cached) {
+        setErro(e instanceof Error ? e.message : 'Erro ao carregar academia.');
+      }
     } finally {
       setCarregando(false);
     }

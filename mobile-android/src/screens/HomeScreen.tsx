@@ -34,9 +34,10 @@ import {
   toggleMissao,
   criarMissao,
 } from '../services/rotinaApi';
-import type { HabitosResumo, Perfil } from '../types';
+import type { DashboardData, HabitosResumo, Perfil } from '../types';
 import { avatarAssetKey } from '../types';
 import { AdicionarMissaoModal } from '../components/AdicionarMissaoModal';
+import { CacheKeys, loadCache } from '../offline/store';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -97,6 +98,14 @@ export function HomeScreen() {
 
   const carregar = useCallback(async () => {
     setErro(null);
+    const cached = await loadCache<DashboardData>(CacheKeys.dashboard);
+    if (cached) {
+      setPerfil(cached.perfil);
+      setMissoes(cached.missoes.map(missaoFromApi));
+      setNotificacoesNaoLidas(cached.notificacoes_nao_lidas);
+      setHabitosResumo(cached.habitos_resumo ?? null);
+      setCarregando(false);
+    }
     try {
       const data = await fetchDashboard();
       setPerfil(data.perfil);
@@ -112,7 +121,9 @@ export function HomeScreen() {
         avatarAssetKey(data.perfil.avatar_key),
       );
     } catch (e) {
-      setErro(e instanceof Error ? e.message : 'Erro ao carregar.');
+      if (!cached) {
+        setErro(e instanceof Error ? e.message : 'Erro ao carregar.');
+      }
     } finally {
       setCarregando(false);
       setRefreshing(false);

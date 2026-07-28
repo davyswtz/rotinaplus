@@ -35,8 +35,15 @@ export const CacheKeys = {
   financas: 'financas',
   amigos: 'amigos',
   notificacoes: 'notificacoes',
+  historicoTreinos: 'historico_treinos',
+  classes: 'classes',
   habitos: (data?: string | null) =>
     data ? `habitos_${data}` : 'habitos_hoje',
+  financasMes: (mes?: string | null) =>
+    mes ? `financas_${mes}` : 'financas',
+  catalogo: (grupo?: string | null) => `catalogo_${grupo ?? 'all'}`,
+  treino: (id: number) => `treino_${id}`,
+  perfilStats: (periodo: string) => `perfil_stats_${periodo}`,
 };
 
 let isOnline = true;

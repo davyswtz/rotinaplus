@@ -440,11 +440,15 @@ struct TelaIniciarTreino: View {
     @MainActor
     private func toggle(_ item: AcademiaTreinoExercicioAPI) async {
         guard let id = item.id else { return }
+        let novoEstado = !(item.concluido ?? false)
         do {
-            try await RotinaPlusAPI.toggleTreinoExercicio(treinoId: treinoId, exercicioId: id)
+            try await RotinaPlusAPI.toggleTreinoExercicio(
+                treinoId: treinoId,
+                exercicioId: id,
+                concluido: novoEstado
+            )
             if let i = treino?.itens?.firstIndex(where: { $0.id == id }) {
-                let atual = treino!.itens![i].concluido ?? false
-                treino!.itens![i].concluido = !atual
+                treino!.itens![i].concluido = novoEstado
             }
         } catch {
             erro = error.localizedDescription
@@ -532,10 +536,18 @@ struct TelaHistoricoTreinos: View {
         }
         .preferredColorScheme(.dark)
         .task {
+            if let cached = OfflineStore.shared.load(
+                [AcademiaTreinoAPI].self,
+                key: OfflineCacheKey.historicoTreinos.rawValue
+            ) {
+                treinos = cached
+            }
             do {
                 treinos = try await RotinaPlusAPI.historicoTreinos()
             } catch {
-                erro = error.localizedDescription
+                if treinos.isEmpty {
+                    erro = error.localizedDescription
+                }
             }
         }
     }

@@ -16,8 +16,12 @@ import type {
 import {
   CacheKeys,
   cachedFetch,
+  isNetworkError,
+  loadCache,
   mutateOfflineFirst,
   newClientUUID,
+  saveCache,
+  setOnline,
 } from '../offline/store';
 
 export async function fetchDashboard(): Promise<DashboardData> {
@@ -84,18 +88,44 @@ export async function criarMissao(payload: {
 }
 
 export async function fetchNotificacoes(): Promise<Notificacao[]> {
-  const { data } = await api.get<ApiResponse<Notificacao[]>>(
-    '/api/v1/notificacoes',
-  );
-  return data.data ?? [];
+  return cachedFetch(CacheKeys.notificacoes, async () => {
+    const { data } = await api.get<ApiResponse<Notificacao[]>>(
+      '/api/v1/notificacoes',
+    );
+    return data.data ?? [];
+  });
 }
 
 export async function marcarNotificacaoLida(id: number): Promise<void> {
-  await api.patch(`/api/v1/notificacoes/${id}/lida`);
+  const cached = await loadCache<Notificacao[]>(CacheKeys.notificacoes);
+  if (cached) {
+    await saveCache(
+      CacheKeys.notificacoes,
+      cached.map((n) => (n.id === id ? { ...n, lida: true } : n)),
+    );
+  }
+  try {
+    await api.patch(`/api/v1/notificacoes/${id}/lida`);
+  } catch (e) {
+    if (!isNetworkError(e)) throw e;
+    setOnline(false);
+  }
 }
 
 export async function lerTodasNotificacoes(): Promise<void> {
-  await api.post('/api/v1/notificacoes/ler-todas');
+  const cached = await loadCache<Notificacao[]>(CacheKeys.notificacoes);
+  if (cached) {
+    await saveCache(
+      CacheKeys.notificacoes,
+      cached.map((n) => ({ ...n, lida: true })),
+    );
+  }
+  try {
+    await api.post('/api/v1/notificacoes/ler-todas');
+  } catch (e) {
+    if (!isNetworkError(e)) throw e;
+    setOnline(false);
+  }
 }
 
 export async function fetchAcademia(): Promise<AcademiaData> {
@@ -126,27 +156,54 @@ export async function registrarEsporte(payload: {
   distancia_metros?: number | null;
   nota?: string | null;
 }): Promise<EsporteSessao> {
-  const { data } = await api.post<ApiResponse<EsporteSessao>>(
-    '/api/v1/academia/esportes/sessoes',
-    payload,
-  );
-  if (!data.data) throw new Error('Falha ao registrar esporte.');
-  return data.data;
+  const client_uuid = newClientUUID();
+  const offline = {
+    id: -Date.now(),
+    esporte_chave: payload.esporte_chave,
+    icone: '🏅',
+    nome: payload.esporte_chave,
+    minutos: payload.minutos,
+    distancia_metros: payload.distancia_metros ?? null,
+    xp: 0,
+    nota: payload.nota ?? null,
+  } as EsporteSessao;
+  return mutateOfflineFirst({
+    kind: 'registrarEsporte',
+    payload: { ...payload, client_uuid },
+    offlineValue: offline,
+    remote: async () => {
+      const { data } = await api.post<ApiResponse<EsporteSessao>>(
+        '/api/v1/academia/esportes/sessoes',
+        { ...payload, client_uuid },
+      );
+      if (!data.data) throw new Error('Falha ao registrar esporte.');
+      return data.data;
+    },
+  });
 }
 
 export async function excluirEsporteSessao(id: number): Promise<void> {
-  await api.delete(`/api/v1/academia/esportes/sessoes/${id}`);
+  await mutateOfflineFirst({
+    kind: 'excluirEsporteSessao',
+    payload: { id },
+    offlineValue: undefined as void,
+    remote: async () => {
+      await api.delete(`/api/v1/academia/esportes/sessoes/${id}`);
+    },
+  });
 }
 
 export async function fetchCatalogoExercicios(
   grupo?: string,
 ): Promise<ExercicioCatalogoData> {
-  const { data } = await api.get<ApiResponse<ExercicioCatalogoData>>(
-    '/api/v1/academia/exercicios',
-    { params: grupo ? { grupo } : undefined },
-  );
-  if (!data.data) throw new Error('Catálogo vazio.');
-  return data.data;
+  return cachedFetch(CacheKeys.catalogo(grupo), async () => {
+    const { data } = await api.get<ApiResponse<ExercicioCatalogoData>>(
+      '/api/v1/academia/exercicios',
+      { params: grupo ? { grupo } : undefined },
+    );
+    if (!data.data) throw new Error('Catálogo vazio.');
+    return data.data;
+  });
 }
 
 export async function criarTreino(payload: {
@@ -160,44 +217,80 @@ export async function criarTreino(payload: {
     carga_kg?: number;
   }>;
 }): Promise<AcademiaTreino> {
-  const { data } = await api.post<ApiResponse<AcademiaTreino>>(
-    '/api/v1/academia/treinos',
-    payload,
-  );
-  if (!data.data) throw new Error('Falha ao criar treino.');
-  return data.data;
+  const client_uuid = newClientUUID();
+  return mutateOfflineFirst({
+    kind: 'criarTreino',
+    payload: { ...payload, client_uuid },
+    offlineValue: {
+      id: -Date.now(),
+      foco: payload.foco,
+      titulo: payload.titulo ?? null,
+      minutos: payload.minutos ?? 45,
+      ativo: true,
+      xp: 0,
+      itens: [],
+    } as unknown as AcademiaTreino,
+    remote: async () => {
+      const { data } = await api.post<ApiResponse<AcademiaTreino>>(
+        '/api/v1/academia/treinos',
+        { ...payload, client_uuid },
+      );
+      if (!data.data) throw new Error('Falha ao criar treino.');
+      return data.data;
+    },
+  });
 }
 
 export async function fetchHistoricoTreinos(): Promise<AcademiaTreino[]> {
-  const { data } = await api.get<ApiResponse<AcademiaTreino[]>>(
-    '/api/v1/academia/treinos/historico',
-  );
-  return data.data ?? [];
+  return cachedFetch(CacheKeys.historicoTreinos, async () => {
+    const { data } = await api.get<ApiResponse<AcademiaTreino[]>>(
+      '/api/v1/academia/treinos/historico',
+    );
+    return data.data ?? [];
+  });
 }
 
 export async function fetchTreino(id: number): Promise<AcademiaTreino> {
-  const { data } = await api.get<ApiResponse<AcademiaTreino>>(
-    `/api/v1/academia/treinos/${id}`,
-  );
-  if (!data.data) throw new Error('Treino não encontrado.');
-  return data.data;
+  return cachedFetch(CacheKeys.treino(id), async () => {
+    const { data } = await api.get<ApiResponse<AcademiaTreino>>(
+      `/api/v1/academia/treinos/${id}`,
+    );
+    if (!data.data) throw new Error('Treino não encontrado.');
+    return data.data;
+  });
 }
 
 export async function toggleTreinoExercicio(
   treinoId: number,
   exercicioId: number,
+  concluido: boolean,
 ): Promise<void> {
-  await api.patch(
-    `/api/v1/academia/treinos/${treinoId}/exercicios/${exercicioId}/toggle`,
-  );
+  await mutateOfflineFirst({
+    kind: 'toggleTreinoExercicio',
+    payload: { treinoId, exercicioId, concluido },
+    offlineValue: undefined as void,
+    remote: async () => {
+      await api.patch(
+        `/api/v1/academia/treinos/${treinoId}/exercicios/${exercicioId}/toggle`,
+        { concluido },
+      );
+    },
+  });
 }
 
 export async function concluirTreino(id: number): Promise<AcademiaTreino> {
-  const { data } = await api.post<ApiResponse<AcademiaTreino>>(
-    `/api/v1/academia/treinos/${id}/concluir`,
-  );
-  if (!data.data) throw new Error('Falha ao concluir treino.');
-  return data.data;
+  return mutateOfflineFirst({
+    kind: 'concluirTreino',
+    payload: { id },
+    offlineValue: { id, ativo: false } as AcademiaTreino,
+    remote: async () => {
+      const { data } = await api.post<ApiResponse<AcademiaTreino>>(
+        `/api/v1/academia/treinos/${id}/concluir`,
+      );
+      if (!data.data) throw new Error('Falha ao concluir treino.');
+      return data.data;
+    },
+  });
 }
 
 export async function fetchHabitos(data?: string): Promise<
@@ -302,8 +395,7 @@ export async function excluirHabito(id: number): Promise<void> {
 }
 
 export async function fetchFinancas(mes?: string): Promise<FinancasData> {
-  const key = mes ? `financas_${mes}` : CacheKeys.financas;
-  return cachedFetch(key, async () => {
+  return cachedFetch(CacheKeys.financasMes(mes), async () => {
     const { data } = await api.get<ApiResponse<FinancasData>>('/api/v1/financas', {
       params: mes ? { mes } : undefined,
     });
@@ -320,16 +412,37 @@ export async function criarTransacao(payload: {
   valor_centavos: number;
   data: string;
 }): Promise<FinancasTransacao> {
-  const { data } = await api.post<ApiResponse<FinancasTransacao>>(
-    '/api/v1/financas/transacoes',
-    payload,
-  );
-  if (!data.data) throw new Error('Falha ao criar transação.');
-  return data.data;
+  const client_uuid = newClientUUID();
+  return mutateOfflineFirst({
+    kind: 'criarTransacao',
+    payload: { ...payload, client_uuid },
+    offlineValue: {
+      id: -Date.now(),
+      ...payload,
+      categoria_nome: payload.categoria,
+      categoria_cor: '#E87830',
+      icone: payload.icone ?? '💰',
+    } as FinancasTransacao,
+    remote: async () => {
+      const { data } = await api.post<ApiResponse<FinancasTransacao>>(
+        '/api/v1/financas/transacoes',
+        { ...payload, client_uuid },
+      );
+      if (!data.data) throw new Error('Falha ao criar transação.');
+      return data.data;
+    },
+  });
 }
 
 export async function excluirTransacao(id: number): Promise<void> {
-  await api.delete(`/api/v1/financas/transacoes/${id}`);
+  await mutateOfflineFirst({
+    kind: 'excluirTransacao',
+    payload: { id },
+    offlineValue: undefined as void,
+    remote: async () => {
+      await api.delete(`/api/v1/financas/transacoes/${id}`);
+    },
+  });
 }
 
 export async function criarMeta(payload: {
@@ -337,24 +450,45 @@ export async function criarMeta(payload: {
   icone?: string;
   valor_alvo_centavos: number;
 }): Promise<FinancasMeta> {
-  const { data } = await api.post<ApiResponse<FinancasMeta>>(
-    '/api/v1/financas/metas',
-    payload,
-  );
-  if (!data.data) throw new Error('Falha ao criar meta.');
-  return data.data;
+  const client_uuid = newClientUUID();
+  return mutateOfflineFirst({
+    kind: 'criarMeta',
+    payload: { ...payload, client_uuid },
+    offlineValue: {
+      id: -Date.now(),
+      titulo: payload.titulo,
+      icone: payload.icone ?? '🎯',
+      valor_alvo_centavos: payload.valor_alvo_centavos,
+      valor_atual_centavos: 0,
+    } as FinancasMeta,
+    remote: async () => {
+      const { data } = await api.post<ApiResponse<FinancasMeta>>(
+        '/api/v1/financas/metas',
+        { ...payload, client_uuid },
+      );
+      if (!data.data) throw new Error('Falha ao criar meta.');
+      return data.data;
+    },
+  });
 }
 
 export async function atualizarMeta(
   id: number,
   payload: { valor_atual_centavos?: number; titulo?: string },
 ): Promise<FinancasMeta> {
-  const { data } = await api.patch<ApiResponse<FinancasMeta>>(
-    `/api/v1/financas/metas/${id}`,
-    payload,
-  );
-  if (!data.data) throw new Error('Falha ao atualizar meta.');
-  return data.data;
+  return mutateOfflineFirst({
+    kind: 'atualizarMeta',
+    payload: { id, ...payload },
+    offlineValue: { id, ...payload } as FinancasMeta,
+    remote: async () => {
+      const { data } = await api.patch<ApiResponse<FinancasMeta>>(
+        `/api/v1/financas/metas/${id}`,
+        payload,
+      );
+      if (!data.data) throw new Error('Falha ao atualizar meta.');
+      return data.data;
+    },
+  });
 }
 
 export async function pluggyConnectToken(): Promise<
@@ -459,12 +593,14 @@ export async function removerAmigo(id: number): Promise<void> {
 export async function fetchPerfilStats(
   periodo: 'semana' | 'mes' = 'semana',
 ): Promise<import('../types').PerfilStats> {
-  const { data } = await api.get<ApiResponse<import('../types').PerfilStats>>(
-    '/api/v1/perfil/stats',
-    { params: { periodo } },
-  );
-  if (!data.data) throw new Error('Stats vazias.');
-  return data.data;
+  return cachedFetch(CacheKeys.perfilStats(periodo), async () => {
+    const { data } = await api.get<ApiResponse<import('../types').PerfilStats>>(
+      '/api/v1/perfil/stats',
+      { params: { periodo } },
+    );
+    if (!data.data) throw new Error('Stats vazias.');
+    return data.data;
+  });
 }
 
 export type ClasseCatalogItem = {
@@ -477,6 +613,8 @@ export type ClasseCatalogItem = {
 };
 
 export async function fetchClasses(): Promise<ClasseCatalogItem[]> {
-  const { data } = await api.get<ApiResponse<ClasseCatalogItem[]>>('/api/v1/classes');
-  return data.data ?? [];
+  return cachedFetch(CacheKeys.classes, async () => {
+    const { data } = await api.get<ApiResponse<ClasseCatalogItem[]>>('/api/v1/classes');
+    return data.data ?? [];
+  });
 }

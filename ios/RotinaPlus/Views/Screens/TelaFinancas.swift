@@ -204,14 +204,24 @@ struct TelaFinancas: View {
 
     @MainActor
     private func carregar(mes: String? = nil) async {
-        if dados == nil { carregando = true }
+        let chave = OfflineCacheKey.financas(mes: mes)
+        if let cached = OfflineStore.shared.load(FinancasAPI.self, key: chave) {
+            dados = cached
+            mesSelecionado = cached.anoMes
+            carregando = false
+        } else if dados == nil {
+            carregando = true
+        }
         erro = nil
         do {
             let data = try await RotinaPlusAPI.financas(mes: mes)
             dados = data
             mesSelecionado = data.anoMes
+            await OfflineSyncEngine.shared.flush()
         } catch {
-            erro = error.localizedDescription
+            if dados == nil {
+                erro = error.localizedDescription
+            }
         }
         carregando = false
     }

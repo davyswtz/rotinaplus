@@ -11,7 +11,7 @@ struct RotinaPlusApp: App {
                 .onAppear {
                     OfflineSyncEngine.shared.start()
                 }
-                .onChange(of: scenePhase) { _, phase in
+                .onChange(of: scenePhase) { phase in
                     if phase == .active {
                         Task { await OfflineSyncEngine.shared.flush() }
                     }

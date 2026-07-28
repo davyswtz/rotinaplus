@@ -16,31 +16,15 @@ enum RotinaPlusAPI {
     }
 
     static func classes() async throws -> [ClasseHeroi] {
-        struct Item: Decodable {
-            let key: String
-            let nome: String
-            let emoji: String
-            let descricao: String
-            let bonus: [String]
-            let tema: String
-        }
-
-        let response: APIResponse<[Item]> = try await APIClient.shared.request(
-            endpoint: .classes,
-            requiresAuth: false
-        )
-        guard let data = response.data else {
-            throw APIError.invalidResponse
-        }
-        return data.map {
-            ClasseHeroi(
-                key: $0.key,
-                nome: $0.nome,
-                emoji: $0.emoji,
-                descricao: $0.descricao,
-                bonus: $0.bonus,
-                tema: $0.tema
+        try await OfflineGateway.cachedFetch(key: .classes) {
+            let response: APIResponse<[ClasseHeroi]> = try await APIClient.shared.request(
+                endpoint: .classes,
+                requiresAuth: false
             )
+            guard let data = response.data else {
+                throw APIError.invalidResponse
+            }
+            return data
         }
     }
 
@@ -136,15 +120,17 @@ enum RotinaPlusAPI {
     }
 
     static func statsAmigo(id: Int, periodo: String = "semana") async throws -> AmigoStatsAPI {
-        let response: APIResponse<AmigoStatsAPI> = try await APIClient.shared.request(
-            endpoint: .statsAmigo(id: id, periodo: periodo),
-            method: .get,
-            requiresAuth: true
-        )
-        guard let data = response.data else {
-            throw APIError.invalidResponse
+        try await OfflineGateway.cachedFetch(key: OfflineCacheKey.amigoStats(id: id, periodo: periodo)) {
+            let response: APIResponse<AmigoStatsAPI> = try await APIClient.shared.request(
+                endpoint: .statsAmigo(id: id, periodo: periodo),
+                method: .get,
+                requiresAuth: true
+            )
+            guard let data = response.data else {
+                throw APIError.invalidResponse
+            }
+            return data
         }
-        return data
     }
 
     static func aceitarAmigo(amizadeId: Int) async throws -> AmigoAPI {
@@ -178,15 +164,17 @@ enum RotinaPlusAPI {
     }
 
     static func perfilStats(periodo: String = "semana") async throws -> PerfilStatsAPI {
-        let response: APIResponse<PerfilStatsAPI> = try await APIClient.shared.request(
-            endpoint: .perfilStats(periodo: periodo),
-            method: .get,
-            requiresAuth: true
-        )
-        guard let data = response.data else {
-            throw APIError.invalidResponse
+        try await OfflineGateway.cachedFetch(key: OfflineCacheKey.perfilStats(periodo: periodo)) {
+            let response: APIResponse<PerfilStatsAPI> = try await APIClient.shared.request(
+                endpoint: .perfilStats(periodo: periodo),
+                method: .get,
+                requiresAuth: true
+            )
+            guard let data = response.data else {
+                throw APIError.invalidResponse
+            }
+            return data
         }
-        return data
     }
 
     static func toggleMissao(id: Int, concluida: Bool) async throws -> MissaoAPI {
@@ -272,22 +260,49 @@ enum RotinaPlusAPI {
     }
 
     static func marcarNotificacaoLida(id: Int) async throws {
-        let _: APIResponse<NotificacaoAPI> = try await APIClient.shared.request(
-            endpoint: .marcarNotificacaoLida(id: id),
-            method: .patch,
-            requiresAuth: true
-        )
+        if var list = OfflineStore.shared.load([NotificacaoAPI].self, key: .notificacoes),
+           let idx = list.firstIndex(where: { $0.id == id }) {
+            list[idx].lida = true
+            OfflineStore.shared.save(list, key: .notificacoes)
+        }
+
+        guard await MainActor.run(body: { NetworkMonitor.shared.isOnline }) else { return }
+
+        do {
+            let _: APIResponse<NotificacaoAPI> = try await APIClient.shared.request(
+                endpoint: .marcarNotificacaoLida(id: id),
+                method: .patch,
+                requiresAuth: true
+            )
+        } catch {
+            if Self.isLikelyNetworkFailure(error) { return }
+            throw error
+        }
     }
 
     static func lerTodasNotificacoes() async throws {
-        struct Payload: Decodable {
-            let atualizadas: Int?
+        if var list = OfflineStore.shared.load([NotificacaoAPI].self, key: .notificacoes) {
+            for i in list.indices {
+                list[i].lida = true
+            }
+            OfflineStore.shared.save(list, key: .notificacoes)
         }
-        let _: APIResponse<Payload> = try await APIClient.shared.request(
-            endpoint: .lerTodasNotificacoes,
-            method: .post,
-            requiresAuth: true
-        )
+
+        guard await MainActor.run(body: { NetworkMonitor.shared.isOnline }) else { return }
+
+        do {
+            struct Payload: Decodable {
+                let atualizadas: Int?
+            }
+            let _: APIResponse<Payload> = try await APIClient.shared.request(
+                endpoint: .lerTodasNotificacoes,
+                method: .post,
+                requiresAuth: true
+            )
+        } catch {
+            if Self.isLikelyNetworkFailure(error) { return }
+            throw error
+        }
     }
 
     static func academia() async throws -> AcademiaAPI {
@@ -321,52 +336,77 @@ enum RotinaPlusAPI {
         distanciaMetros: Int?,
         nota: String?
     ) async throws -> EsporteSessaoAPI {
-        struct Body: Encodable {
-            let esporteChave: String
-            let minutos: Int
-            let distanciaMetros: Int?
-            let nota: String?
-
-            enum CodingKeys: String, CodingKey {
-                case minutos, nota
-                case esporteChave = "esporte_chave"
-                case distanciaMetros = "distancia_metros"
-            }
+        let clientUUID = UUID().uuidString
+        let payload = RegistrarEsportePayload(
+            chave: chave,
+            minutos: minutos,
+            distanciaMetros: distanciaMetros,
+            nota: nota,
+            clientUUID: clientUUID
+        )
+        let tempId = -Int(Date().timeIntervalSince1970)
+        var icone = "🏃"
+        var nome = chave
+        if let academia = OfflineStore.shared.load(AcademiaAPI.self, key: .academia),
+           let esporte = academia.esportes?.first(where: { $0.chave == chave }) {
+            icone = esporte.icone
+            nome = esporte.nome
         }
-        let response: APIResponse<EsporteSessaoAPI> = try await APIClient.shared.request(
-            endpoint: .registrarEsporte,
-            method: .post,
-            body: Body(
-                esporteChave: chave,
+        let offline = EsporteSessaoAPI(
+            id: tempId,
+            esporteChave: chave,
+            icone: icone,
+            nome: nome,
+            minutos: minutos,
+            distanciaMetros: distanciaMetros,
+            xp: 0,
+            data: Self.hojeChave(),
+            nota: nota
+        )
+
+        if var academia = OfflineStore.shared.load(AcademiaAPI.self, key: .academia) {
+            var sessoes = academia.esporteSessoes ?? []
+            sessoes.insert(offline, at: 0)
+            academia.esporteSessoes = sessoes
+            OfflineStore.shared.save(academia, key: .academia)
+        }
+
+        return try await OfflineGateway.mutate(
+            kind: .registrarEsporte,
+            payload: payload,
+            offlineValue: offline
+        ) {
+            try await remoteRegistrarEsporte(
+                chave: chave,
                 minutos: minutos,
                 distanciaMetros: distanciaMetros,
-                nota: nota
-            ),
-            requiresAuth: true
-        )
-        guard let data = response.data else {
-            throw APIError.invalidResponse
+                nota: nota,
+                clientUUID: clientUUID
+            )
         }
-        return data
     }
 
     static func excluirEsporteSessao(id: Int) async throws {
-        struct Empty: Decodable {}
-        let _: APIResponse<Empty> = try await APIClient.shared.request(
-            endpoint: .excluirEsporteSessao(id: id),
-            method: .delete,
-            requiresAuth: true
-        )
+        let payload = IdPayload(id: id)
+        if var academia = OfflineStore.shared.load(AcademiaAPI.self, key: .academia) {
+            academia.esporteSessoes?.removeAll { $0.id == id }
+            OfflineStore.shared.save(academia, key: .academia)
+        }
+        try await OfflineGateway.mutate(kind: .excluirEsporteSessao, payload: payload) {
+            try await remoteExcluirEsporteSessao(id: id)
+        }
     }
 
     static func catalogoExercicios(grupo: String?) async throws -> ExercicioCatalogoDataAPI {
-        let response: APIResponse<ExercicioCatalogoDataAPI> = try await APIClient.shared.request(
-            endpoint: .academiaExercicios(grupo: grupo),
-            method: .get,
-            requiresAuth: true
-        )
-        guard let data = response.data else { throw APIError.invalidResponse }
-        return data
+        try await OfflineGateway.cachedFetch(key: OfflineCacheKey.catalogo(grupo: grupo)) {
+            let response: APIResponse<ExercicioCatalogoDataAPI> = try await APIClient.shared.request(
+                endpoint: .academiaExercicios(grupo: grupo),
+                method: .get,
+                requiresAuth: true
+            )
+            guard let data = response.data else { throw APIError.invalidResponse }
+            return data
+        }
     }
 
     static func criarTreino(
@@ -375,62 +415,152 @@ enum RotinaPlusAPI {
         minutos: Int,
         exercicios: [TreinoExercicioPayload]
     ) async throws -> AcademiaTreinoAPI {
-        struct Body: Encodable {
-            let foco: String
-            let titulo: String?
-            let minutos: Int
-            let exercicios: [TreinoExercicioPayload]
-        }
-
-        let response: APIResponse<AcademiaTreinoAPI> = try await APIClient.shared.request(
-            endpoint: .criarTreino,
-            method: .post,
-            body: Body(foco: foco, titulo: titulo, minutos: minutos, exercicios: exercicios),
-            requiresAuth: true
+        let clientUUID = UUID().uuidString
+        let payload = CriarTreinoPayload(
+            foco: foco,
+            titulo: titulo,
+            minutos: minutos,
+            exercicios: exercicios,
+            clientUUID: clientUUID
         )
-        guard let data = response.data else { throw APIError.invalidResponse }
-        return data
+        let tempId = -Int(Date().timeIntervalSince1970)
+        let itens = exercicios.enumerated().map { index, ex in
+            AcademiaTreinoExercicioAPI(
+                id: -(index + 1),
+                exercicioChave: ex.exercicioChave,
+                nome: ex.exercicioChave,
+                icone: "💪",
+                grupo: foco,
+                series: ex.series,
+                reps: ex.reps,
+                cargaKg: ex.cargaKg,
+                ordem: index + 1,
+                concluido: false
+            )
+        }
+        let offline = AcademiaTreinoAPI(
+            id: tempId,
+            foco: foco,
+            titulo: titulo ?? foco,
+            exercicios: exercicios.count,
+            minutos: minutos,
+            xp: 0,
+            diaChave: Self.hojeChave(),
+            ativo: true,
+            concluidoEm: nil,
+            volumeKg: nil,
+            itens: itens
+        )
+
+        if var historico = OfflineStore.shared.load([AcademiaTreinoAPI].self, key: .historicoTreinos) {
+            historico.insert(offline, at: 0)
+            OfflineStore.shared.save(historico, key: .historicoTreinos)
+        }
+        OfflineStore.shared.save(offline, key: OfflineCacheKey.treino(id: tempId))
+
+        return try await OfflineGateway.mutate(
+            kind: .criarTreino,
+            payload: payload,
+            offlineValue: offline
+        ) {
+            try await remoteCriarTreino(
+                foco: foco,
+                titulo: titulo,
+                minutos: minutos,
+                exercicios: exercicios,
+                clientUUID: clientUUID
+            )
+        }
     }
 
     static func historicoTreinos() async throws -> [AcademiaTreinoAPI] {
-        let response: APIResponse<[AcademiaTreinoAPI]> = try await APIClient.shared.request(
-            endpoint: .academiaHistorico,
-            method: .get,
-            requiresAuth: true
-        )
-        return response.data ?? []
+        try await OfflineGateway.cachedFetch(key: .historicoTreinos) {
+            let response: APIResponse<[AcademiaTreinoAPI]> = try await APIClient.shared.request(
+                endpoint: .academiaHistorico,
+                method: .get,
+                requiresAuth: true
+            )
+            return response.data ?? []
+        }
     }
 
     static func detalheTreino(id: Int) async throws -> AcademiaTreinoAPI {
-        let response: APIResponse<AcademiaTreinoAPI> = try await APIClient.shared.request(
-            endpoint: .treino(id: id),
-            method: .get,
-            requiresAuth: true
-        )
-        guard let data = response.data else { throw APIError.invalidResponse }
-        return data
+        try await OfflineGateway.cachedFetch(key: OfflineCacheKey.treino(id: id)) {
+            let response: APIResponse<AcademiaTreinoAPI> = try await APIClient.shared.request(
+                endpoint: .treino(id: id),
+                method: .get,
+                requiresAuth: true
+            )
+            guard let data = response.data else { throw APIError.invalidResponse }
+            return data
+        }
     }
 
-    static func toggleTreinoExercicio(treinoId: Int, exercicioId: Int) async throws {
-        struct Payload: Decodable {
-            let id: Int
-            let concluido: Bool
-        }
-        let _: APIResponse<Payload> = try await APIClient.shared.request(
-            endpoint: .toggleTreinoExercicio(treinoId: treinoId, exercicioId: exercicioId),
-            method: .patch,
-            requiresAuth: true
+    static func toggleTreinoExercicio(treinoId: Int, exercicioId: Int, concluido: Bool) async throws {
+        let payload = ToggleTreinoExercicioPayload(
+            treinoId: treinoId,
+            exercicioId: exercicioId,
+            concluido: concluido
         )
+
+        let treinoKey = OfflineCacheKey.treino(id: treinoId)
+        if var treino = OfflineStore.shared.load(AcademiaTreinoAPI.self, key: treinoKey),
+           let idx = treino.itens?.firstIndex(where: { $0.id == exercicioId }) {
+            treino.itens?[idx].concluido = concluido
+            OfflineStore.shared.save(treino, key: treinoKey)
+        }
+        if var historico = OfflineStore.shared.load([AcademiaTreinoAPI].self, key: .historicoTreinos),
+           let idx = historico.firstIndex(where: { $0.id == treinoId }),
+           let itemIdx = historico[idx].itens?.firstIndex(where: { $0.id == exercicioId }) {
+            historico[idx].itens?[itemIdx].concluido = concluido
+            OfflineStore.shared.save(historico, key: .historicoTreinos)
+        }
+
+        try await OfflineGateway.mutate(kind: .toggleTreinoExercicio, payload: payload) {
+            try await remoteToggleTreinoExercicio(
+                treinoId: treinoId,
+                exercicioId: exercicioId,
+                concluido: concluido
+            )
+        }
     }
 
     static func concluirTreino(id: Int) async throws -> AcademiaTreinoAPI {
-        let response: APIResponse<AcademiaTreinoAPI> = try await APIClient.shared.request(
-            endpoint: .concluirTreino(id: id),
-            method: .post,
-            requiresAuth: true
-        )
-        guard let data = response.data else { throw APIError.invalidResponse }
-        return data
+        let payload = IdPayload(id: id)
+        let offline: AcademiaTreinoAPI = {
+            if var treino = OfflineStore.shared.load(AcademiaTreinoAPI.self, key: OfflineCacheKey.treino(id: id)) {
+                treino.concluidoEm = Self.hojeChave()
+                treino.ativo = false
+                OfflineStore.shared.save(treino, key: OfflineCacheKey.treino(id: id))
+                if var historico = OfflineStore.shared.load([AcademiaTreinoAPI].self, key: .historicoTreinos),
+                   let idx = historico.firstIndex(where: { $0.id == id }) {
+                    historico[idx] = treino
+                    OfflineStore.shared.save(historico, key: .historicoTreinos)
+                }
+                return treino
+            }
+            return AcademiaTreinoAPI(
+                id: id,
+                foco: "",
+                titulo: "",
+                exercicios: 0,
+                minutos: 0,
+                xp: 0,
+                diaChave: Self.hojeChave(),
+                ativo: false,
+                concluidoEm: Self.hojeChave(),
+                volumeKg: nil,
+                itens: nil
+            )
+        }()
+
+        return try await OfflineGateway.mutate(
+            kind: .concluirTreino,
+            payload: payload,
+            offlineValue: offline
+        ) {
+            try await remoteConcluirTreino(id: id)
+        }
     }
 
     static func habitos(data: String? = nil) async throws -> HabitoJournalAPI {
@@ -472,6 +602,15 @@ enum RotinaPlusAPI {
             ativo: true,
             ordem: nil
         )
+
+        if var journal = OfflineStore.shared.load(HabitoJournalAPI.self, key: OfflineCacheKey.habitos(data: nil)) {
+            journal.itens.append(
+                HabitoItemJournalAPI(habito: offline, checkin: nil, concluida: false, streak: 0)
+            )
+            journal.resumo.total += 1
+            OfflineStore.shared.save(journal, key: OfflineCacheKey.habitos(data: nil))
+        }
+
         return try await OfflineGateway.mutate(
             kind: .criarHabito,
             payload: payload,
@@ -529,6 +668,22 @@ enum RotinaPlusAPI {
             streak: 0,
             bonusDia: nil
         )
+
+        if var journal = OfflineStore.shared.load(HabitoJournalAPI.self, key: OfflineCacheKey.habitos(data: data)),
+           let idx = journal.itens.firstIndex(where: { $0.habito.id == id }) {
+            journal.itens[idx].concluida = concluida
+            journal.itens[idx].checkin = offlineCheckin
+            if concluida {
+                journal.resumo.concluidos = min(journal.resumo.concluidos + 1, journal.resumo.total)
+            } else {
+                journal.resumo.concluidos = max(journal.resumo.concluidos - 1, 0)
+            }
+            if journal.resumo.total > 0 {
+                journal.resumo.percentual = journal.resumo.concluidos * 100 / journal.resumo.total
+            }
+            OfflineStore.shared.save(journal, key: OfflineCacheKey.habitos(data: data))
+        }
+
         return try await OfflineGateway.mutate(
             kind: .toggleHabitoCheckin,
             payload: payload,
@@ -579,8 +734,7 @@ enum RotinaPlusAPI {
     }
 
     static func financas(mes: String? = nil) async throws -> FinancasAPI {
-        let key = mes.map { "financas_\($0)" } ?? OfflineCacheKey.financas.rawValue
-        return try await OfflineGateway.cachedFetch(key: key) {
+        try await OfflineGateway.cachedFetch(key: OfflineCacheKey.financas(mes: mes)) {
             let response: APIResponse<FinancasAPI> = try await APIClient.shared.request(
                 endpoint: .financas(mes: mes),
                 requiresAuth: true
@@ -600,46 +754,79 @@ enum RotinaPlusAPI {
         valorCentavos: Int,
         data: String
     ) async throws -> FinancasTransacaoAPI {
-        struct Body: Encodable {
-            let tipo: String
-            let categoria: String
-            let titulo: String
-            let icone: String?
-            let valorCentavos: Int
-            let data: String
-
-            enum CodingKeys: String, CodingKey {
-                case tipo, categoria, titulo, icone, data
-                case valorCentavos = "valor_centavos"
+        let clientUUID = UUID().uuidString
+        let payload = CriarTransacaoPayload(
+            tipo: tipo,
+            categoria: categoria,
+            titulo: titulo,
+            icone: icone,
+            valorCentavos: valorCentavos,
+            data: data,
+            clientUUID: clientUUID
+        )
+        let tempId = -Int(Date().timeIntervalSince1970)
+        var categoriaNome = categoria
+        var categoriaCor = "#888888"
+        let mes = String(data.prefix(7))
+        if let financas = OfflineStore.shared.load(FinancasAPI.self, key: OfflineCacheKey.financas(mes: mes)) {
+            if tipo == "receita" {
+                categoriaNome = financas.categorias.receita.nome
+                categoriaCor = financas.categorias.receita.cor
+            } else if let cat = financas.categorias.despesas.first(where: { $0.chave == categoria }) {
+                categoriaNome = cat.nome
+                categoriaCor = cat.cor
             }
         }
-
-        let response: APIResponse<FinancasTransacaoAPI> = try await APIClient.shared.request(
-            endpoint: .financasTransacoes,
-            method: .post,
-            body: Body(
-                tipo: tipo,
-                categoria: categoria,
-                titulo: titulo,
-                icone: icone,
-                valorCentavos: valorCentavos,
-                data: data
-            ),
-            requiresAuth: true
+        let offline = FinancasTransacaoAPI(
+            id: tempId,
+            tipo: tipo,
+            categoria: categoria,
+            categoriaNome: categoriaNome,
+            categoriaCor: categoriaCor,
+            titulo: titulo,
+            icone: icone ?? "💰",
+            valorCentavos: valorCentavos,
+            data: data,
+            origem: "manual"
         )
-        guard let data = response.data else {
-            throw APIError.invalidResponse
+
+        Self.patchFinancasCache(mes: mes) { financas in
+            financas.transacoes.insert(offline, at: 0)
+            financas.recentes.insert(offline, at: 0)
+            if tipo == "receita" {
+                financas.receitaCentavos += valorCentavos
+            } else {
+                financas.gastosCentavos += valorCentavos
+            }
+            financas.saldoCentavos = financas.receitaCentavos - financas.gastosCentavos
         }
-        return data
+
+        return try await OfflineGateway.mutate(
+            kind: .criarTransacao,
+            payload: payload,
+            offlineValue: offline
+        ) {
+            try await remoteCriarTransacao(payload)
+        }
     }
 
     static func excluirTransacao(id: Int) async throws {
-        struct Empty: Decodable {}
-        let _: APIResponse<Empty> = try await APIClient.shared.request(
-            endpoint: .financasTransacao(id: id),
-            method: .delete,
-            requiresAuth: true
-        )
+        let payload = IdPayload(id: id)
+        Self.patchFinancasCache(mes: nil) { financas in
+            if let tx = financas.transacoes.first(where: { $0.id == id }) {
+                if tx.isReceita {
+                    financas.receitaCentavos -= tx.valorCentavos
+                } else {
+                    financas.gastosCentavos -= tx.valorCentavos
+                }
+                financas.saldoCentavos = financas.receitaCentavos - financas.gastosCentavos
+            }
+            financas.transacoes.removeAll { $0.id == id }
+            financas.recentes.removeAll { $0.id == id }
+        }
+        try await OfflineGateway.mutate(kind: .excluirTransacao, payload: payload) {
+            try await remoteExcluirTransacao(id: id)
+        }
     }
 
     static func criarMeta(
@@ -647,48 +834,71 @@ enum RotinaPlusAPI {
         icone: String?,
         valorAlvoCentavos: Int
     ) async throws -> FinancasMetaAPI {
-        struct Body: Encodable {
-            let titulo: String
-            let icone: String?
-            let valorAlvoCentavos: Int
-
-            enum CodingKeys: String, CodingKey {
-                case titulo, icone
-                case valorAlvoCentavos = "valor_alvo_centavos"
-            }
-        }
-
-        let response: APIResponse<FinancasMetaAPI> = try await APIClient.shared.request(
-            endpoint: .financasMetas,
-            method: .post,
-            body: Body(titulo: titulo, icone: icone, valorAlvoCentavos: valorAlvoCentavos),
-            requiresAuth: true
+        let clientUUID = UUID().uuidString
+        let payload = CriarMetaPayload(
+            titulo: titulo,
+            icone: icone,
+            valorAlvoCentavos: valorAlvoCentavos,
+            clientUUID: clientUUID
         )
-        guard let data = response.data else {
-            throw APIError.invalidResponse
+        let offline = FinancasMetaAPI(
+            id: -Int(Date().timeIntervalSince1970),
+            titulo: titulo,
+            icone: icone ?? "🎯",
+            categoria: nil,
+            valorAlvoCentavos: valorAlvoCentavos,
+            valorAtualCentavos: 0,
+            percentual: 0
+        )
+
+        Self.patchFinancasCache(mes: nil) { financas in
+            financas.metas.append(offline)
         }
-        return data
+
+        return try await OfflineGateway.mutate(
+            kind: .criarMeta,
+            payload: payload,
+            offlineValue: offline
+        ) {
+            try await remoteCriarMeta(payload)
+        }
     }
 
     static func atualizarMeta(id: Int, valorAtualCentavos: Int) async throws -> FinancasMetaAPI {
-        struct Body: Encodable {
-            let valorAtualCentavos: Int
-
-            enum CodingKeys: String, CodingKey {
-                case valorAtualCentavos = "valor_atual_centavos"
-            }
-        }
-
-        let response: APIResponse<FinancasMetaAPI> = try await APIClient.shared.request(
-            endpoint: .financasMeta(id: id),
-            method: .patch,
-            body: Body(valorAtualCentavos: valorAtualCentavos),
-            requiresAuth: true
+        let payload = AtualizarMetaPayload(
+            id: id,
+            titulo: nil,
+            valorAlvoCentavos: nil,
+            valorAtualCentavos: valorAtualCentavos
         )
-        guard let data = response.data else {
-            throw APIError.invalidResponse
+        let offline: FinancasMetaAPI = {
+            var result = FinancasMetaAPI(
+                id: id,
+                titulo: "",
+                icone: "🎯",
+                categoria: nil,
+                valorAlvoCentavos: 1,
+                valorAtualCentavos: valorAtualCentavos,
+                percentual: 0
+            )
+            Self.patchFinancasCache(mes: nil) { financas in
+                if let idx = financas.metas.firstIndex(where: { $0.id == id }) {
+                    financas.metas[idx].valorAtualCentavos = valorAtualCentavos
+                    let alvo = max(financas.metas[idx].valorAlvoCentavos, 1)
+                    financas.metas[idx].percentual = Double(valorAtualCentavos) / Double(alvo) * 100
+                    result = financas.metas[idx]
+                }
+            }
+            return result
+        }()
+
+        return try await OfflineGateway.mutate(
+            kind: .atualizarMeta,
+            payload: payload,
+            offlineValue: offline
+        ) {
+            try await remoteAtualizarMeta(payload)
         }
-        return data
     }
 
     static func pluggyConnectToken() async throws -> PluggyConnectTokenAPI {
@@ -730,5 +940,47 @@ enum RotinaPlusAPI {
             throw APIError.invalidResponse
         }
         return data
+    }
+}
+
+// MARK: - Offline helpers
+
+private extension RotinaPlusAPI {
+    static func hojeChave() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = TimeZone(identifier: "America/Sao_Paulo")
+        return formatter.string(from: Date())
+    }
+
+    static func isLikelyNetworkFailure(_ error: Error) -> Bool {
+        if let url = error as? URLError {
+            switch url.code {
+            case .notConnectedToInternet, .timedOut, .networkConnectionLost,
+                 .cannotConnectToHost, .cannotFindHost, .dnsLookupFailed,
+                 .internationalRoamingOff, .dataNotAllowed:
+                return true
+            default:
+                return false
+            }
+        }
+        let ns = error as NSError
+        if ns.domain == NSURLErrorDomain { return true }
+        return false
+    }
+
+    static func patchFinancasCache(mes: String?, _ update: (inout FinancasAPI) -> Void) {
+        let keys: [String]
+        if let mes, !mes.isEmpty {
+            keys = [OfflineCacheKey.financas(mes: mes), OfflineCacheKey.financas(mes: nil)]
+        } else {
+            keys = [OfflineCacheKey.financas(mes: nil)]
+        }
+        for key in keys {
+            if var financas = OfflineStore.shared.load(FinancasAPI.self, key: key) {
+                update(&financas)
+                OfflineStore.shared.save(financas, key: key)
+            }
+        }
     }
 }

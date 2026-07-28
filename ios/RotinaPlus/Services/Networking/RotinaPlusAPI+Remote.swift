@@ -299,7 +299,7 @@ extension RotinaPlusAPI {
                 tipo: payload.tipo,
                 categoria: payload.categoria,
                 titulo: payload.titulo,
-                icone: nil,
+                icone: payload.icone,
                 valorCentavos: payload.valorCentavos,
                 data: payload.data ?? Self.hojeChave(),
                 clientUUID: payload.clientUUID
@@ -324,11 +324,12 @@ extension RotinaPlusAPI {
     static func remoteCriarMeta(_ payload: CriarMetaPayload) async throws -> FinancasMetaAPI {
         struct Body: Encodable {
             let titulo: String
+            let icone: String?
             let valorAlvoCentavos: Int
             let clientUUID: String
 
             enum CodingKeys: String, CodingKey {
-                case titulo
+                case titulo, icone
                 case valorAlvoCentavos = "valor_alvo_centavos"
                 case clientUUID = "client_uuid"
             }
@@ -339,6 +340,7 @@ extension RotinaPlusAPI {
             method: .post,
             body: Body(
                 titulo: payload.titulo,
+                icone: payload.icone,
                 valorAlvoCentavos: payload.valorAlvoCentavos,
                 clientUUID: payload.clientUUID
             ),

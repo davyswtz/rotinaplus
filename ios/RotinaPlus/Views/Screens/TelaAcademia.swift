@@ -584,22 +584,34 @@ struct TelaAcademia: View {
 
     @MainActor
     private func carregar() async {
-        carregando = true
+        if let cached = OfflineStore.shared.load(AcademiaAPI.self, key: .academia) {
+            aplicarAcademia(cached)
+            carregando = false
+        } else {
+            carregando = true
+        }
         erro = nil
         do {
             let data = try await RotinaPlusAPI.academia()
-            metaSemana = data.metaSemana
-            sequencia = data.sequenciaTreinos
-            dias = data.dias.map { $0.asDiaSemana() }
-            volumes = data.volumes.map { $0.asVolume() }
-            treinoHoje = data.treinoHoje
-            esportes = data.esportes ?? []
-            esporteSessoes = data.esporteSessoes ?? []
-            esporteResumo = data.esporteResumo ?? EsporteResumoAPI(totalSemana: 0, minutosSemana: 0, xpSemana: 0)
+            aplicarAcademia(data)
+            await OfflineSyncEngine.shared.flush()
         } catch {
-            erro = error.localizedDescription
+            if dias.isEmpty {
+                erro = error.localizedDescription
+            }
         }
         carregando = false
+    }
+
+    private func aplicarAcademia(_ data: AcademiaAPI) {
+        metaSemana = data.metaSemana
+        sequencia = data.sequenciaTreinos
+        dias = data.dias.map { $0.asDiaSemana() }
+        volumes = data.volumes.map { $0.asVolume() }
+        treinoHoje = data.treinoHoje
+        esportes = data.esportes ?? []
+        esporteSessoes = data.esporteSessoes ?? []
+        esporteResumo = data.esporteResumo ?? EsporteResumoAPI(totalSemana: 0, minutosSemana: 0, xpSemana: 0)
     }
 
     @MainActor
