@@ -59,6 +59,7 @@ class HabitoController extends Controller
             'frequencia' => ['nullable', 'in:diario,semanal'],
             'dias_semana' => ['nullable', 'array'],
             'dias_semana.*' => ['integer', 'min:1', 'max:7'],
+            'client_uuid' => ['nullable', 'uuid'],
         ]);
 
         $habito = $this->habitoService->criar($request->user(), $validated);
@@ -108,6 +109,7 @@ class HabitoController extends Controller
             'data' => ['nullable', 'date'],
             'humor' => ['nullable', 'integer', 'min:1', 'max:5'],
             'nota' => ['nullable', 'string', 'max:1000'],
+            'concluida' => ['sometimes', 'boolean'],
         ]);
 
         $result = $this->habitoService->toggleCheckin($request->user(), $id, $validated);

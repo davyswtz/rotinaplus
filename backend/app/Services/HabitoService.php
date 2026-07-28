@@ -106,6 +106,17 @@ class HabitoService
             false,
         );
 
+        $clientUuid = $dados['client_uuid'] ?? null;
+        if (is_string($clientUuid) && $clientUuid !== '') {
+            $existente = Habito::query()
+                ->where('user_id', $user->id)
+                ->where('client_uuid', $clientUuid)
+                ->first();
+            if ($existente) {
+                return $existente;
+            }
+        }
+
         return Habito::query()->create([
             'user_id' => $user->id,
             'icone' => $dados['icone'] ?? '✨',
@@ -117,6 +128,7 @@ class HabitoService
             'xp' => $xp,
             'ativo' => true,
             'ordem' => $ordem + 1,
+            'client_uuid' => $clientUuid,
         ]);
     }
 
@@ -172,7 +184,30 @@ class HabitoService
         ]);
 
         $eraConcluida = (bool) $checkin->concluida;
-        $nova = ! $eraConcluida;
+        $nova = array_key_exists('concluida', $dados) && $dados['concluida'] !== null
+            ? (bool) $dados['concluida']
+            : ! $eraConcluida;
+
+        // Idempotente para sync offline.
+        if ($eraConcluida === $nova && $checkin->exists) {
+            if (array_key_exists('humor', $dados) && $dados['humor'] !== null) {
+                $checkin->humor = max(1, min(5, (int) $dados['humor']));
+            }
+            if (array_key_exists('nota', $dados)) {
+                $checkin->nota = $dados['nota'];
+            }
+            if ($checkin->isDirty()) {
+                $checkin->save();
+            }
+
+            return [
+                'habito' => $habito->fresh(),
+                'checkin' => $checkin->fresh(),
+                'concluida' => $nova,
+                'streak' => $this->streakHabito($habito->fresh()),
+                'bonus_dia' => 0,
+            ];
+        }
 
         $checkin->concluida = $nova;
         $checkin->concluida_em = $nova ? now() : null;

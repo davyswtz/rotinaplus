@@ -538,20 +538,19 @@ export function AcademiaScreen({
 
   const toggleDia = async (id: number) => {
     const anterior = dias.find((d) => d.id === id);
+    const novo = !(anterior?.concluido ?? false);
     setDias((atual) =>
-      atual.map((d) =>
-        d.id === id ? { ...d, concluido: !d.concluido } : d,
-      ),
+      atual.map((d) => (d.id === id ? { ...d, concluido: novo } : d)),
     );
     if (anterior) {
       setSequencia((s) => Math.max(0, s + (anterior.concluido ? -1 : 1)));
     }
     try {
-      await toggleAcademiaDia(id);
+      await toggleAcademiaDia(id, novo);
     } catch {
       setDias((atual) =>
         atual.map((d) =>
-          d.id === id ? { ...d, concluido: !d.concluido } : d,
+          d.id === id ? { ...d, concluido: !novo } : d,
         ),
       );
       if (anterior) {

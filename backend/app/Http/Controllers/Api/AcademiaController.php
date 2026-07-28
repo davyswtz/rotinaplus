@@ -105,7 +105,16 @@ class AcademiaController extends Controller
 
     public function toggleExercicio(Request $request, int $id, int $exercicioId): JsonResponse
     {
-        $item = $this->academiaService->toggleExercicio($request->user(), $id, $exercicioId);
+        $validated = $request->validate([
+            'concluido' => ['sometimes', 'boolean'],
+        ]);
+
+        $item = $this->academiaService->toggleExercicio(
+            $request->user(),
+            $id,
+            $exercicioId,
+            array_key_exists('concluido', $validated) ? (bool) $validated['concluido'] : null,
+        );
 
         return response()->json([
             'success' => true,
@@ -139,7 +148,15 @@ class AcademiaController extends Controller
 
     public function toggleDia(Request $request, int $id): JsonResponse
     {
-        $dia = $this->academiaService->toggleDia($request->user(), $id);
+        $validated = $request->validate([
+            'concluido' => ['sometimes', 'boolean'],
+        ]);
+
+        $dia = $this->academiaService->toggleDia(
+            $request->user(),
+            $id,
+            array_key_exists('concluido', $validated) ? (bool) $validated['concluido'] : null,
+        );
 
         return response()->json([
             'success' => true,

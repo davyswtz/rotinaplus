@@ -30,6 +30,7 @@ class MissaoController extends Controller
             'titulo' => ['required', 'string', 'min:2', 'max:80'],
             'detalhe' => ['nullable', 'string', 'max:160'],
             'icone' => ['nullable', 'string', 'max:16'],
+            'client_uuid' => ['nullable', 'uuid'],
         ]);
 
         $missao = $this->missaoService->criarHoje($request->user(), $validated);
@@ -43,7 +44,15 @@ class MissaoController extends Controller
 
     public function toggle(Request $request, int $id): JsonResponse
     {
-        $missao = $this->missaoService->toggle($request->user(), $id);
+        $validated = $request->validate([
+            'concluida' => ['sometimes', 'boolean'],
+        ]);
+
+        $missao = $this->missaoService->toggle(
+            $request->user(),
+            $id,
+            array_key_exists('concluida', $validated) ? (bool) $validated['concluida'] : null,
+        );
 
         return response()->json([
             'success' => true,

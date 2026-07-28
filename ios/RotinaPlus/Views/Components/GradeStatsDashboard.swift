@@ -16,59 +16,64 @@ struct DadosGradeStats: Equatable {
     )
 }
 
-/// Grade 4 stats abaixo do card de perfil.
+/// Grade 4 stats abaixo do card de perfil (2×2, altura intrínseca).
 struct GradeStatsDashboard: View {
     let dados: DadosGradeStats
 
-    var body: some View {
-        GeometryReader { geo in
-            let compacto = LayoutDashboard.isCompacto(geo.size.width)
-            let gap: CGFloat = compacto ? 8 : 10
-
-            if compacto {
-                VStack(spacing: gap) {
-                    HStack(spacing: gap) {
-                        card(icone: "flame", cor: CoresGradeStats.streak, valor: "\(dados.streakDias)d", label: "STREAK", compacto: true)
-                        card(icone: "checkmark.circle.fill", cor: CoresGradeStats.hoje, valor: "\(dados.habitosHojeConcluidos)/\(dados.habitosHojeTotal)", label: "HOJE", compacto: true)
-                    }
-                    HStack(spacing: gap) {
-                        card(icone: "star", cor: CoresGradeStats.xp, valor: "+\(dados.xpHoje)", label: "XP HOJE", compacto: true)
-                        card(icone: "crown", cor: CoresGradeStats.moedas, valor: "\(dados.moedas)", label: "MOEDAS", compacto: true)
-                    }
-                }
-            } else {
-                HStack(spacing: gap) {
-                    card(icone: "flame", cor: CoresGradeStats.streak, valor: "\(dados.streakDias)d", label: "STREAK", compacto: false)
-                    card(icone: "checkmark.circle.fill", cor: CoresGradeStats.hoje, valor: "\(dados.habitosHojeConcluidos)/\(dados.habitosHojeTotal)", label: "HOJE", compacto: false)
-                    card(icone: "star", cor: CoresGradeStats.xp, valor: "+\(dados.xpHoje)", label: "XP HOJE", compacto: false)
-                    card(icone: "crown", cor: CoresGradeStats.moedas, valor: "\(dados.moedas)", label: "MOEDAS", compacto: false)
-                }
-            }
-        }
-        .frame(height: LayoutDashboard.isCompacto(UIScreen.main.bounds.width) ? 168 : 96)
+    private var itens: [(icone: String, cor: Color, valor: String, label: String)] {
+        [
+            ("flame", CoresGradeStats.streak, "\(dados.streakDias)d", "STREAK"),
+            (
+                "checkmark.circle.fill",
+                CoresGradeStats.hoje,
+                "\(dados.habitosHojeConcluidos)/\(dados.habitosHojeTotal)",
+                "HOJE"
+            ),
+            ("star", CoresGradeStats.xp, "+\(dados.xpHoje)", "XP HOJE"),
+            ("crown", CoresGradeStats.moedas, "\(dados.moedas)", "MOEDAS"),
+        ]
     }
 
-    private func card(icone: String, cor: Color, valor: String, label: String, compacto: Bool) -> some View {
-        VStack(spacing: compacto ? 6 : 8) {
+    var body: some View {
+        LazyVGrid(
+            columns: [
+                GridItem(.flexible(), spacing: 8),
+                GridItem(.flexible(), spacing: 8),
+            ],
+            spacing: 8
+        ) {
+            ForEach(Array(itens.enumerated()), id: \.offset) { _, item in
+                card(
+                    icone: item.icone,
+                    cor: item.cor,
+                    valor: item.valor,
+                    label: item.label
+                )
+            }
+        }
+    }
+
+    private func card(icone: String, cor: Color, valor: String, label: String) -> some View {
+        VStack(spacing: 6) {
             Image(systemName: icone)
-                .font(.system(size: compacto ? 16 : 18, weight: .semibold))
+                .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(cor)
 
             Text(valor)
-                .font(.system(size: compacto ? 15 : 16, weight: .bold))
+                .font(.system(size: 15, weight: .bold))
                 .foregroundStyle(.white)
                 .lineLimit(1)
                 .minimumScaleFactor(0.65)
 
             Text(label)
-                .font(.system(size: compacto ? 9 : 10, weight: .semibold))
+                .font(.system(size: 9, weight: .semibold))
                 .tracking(0.4)
                 .foregroundStyle(CoresGradeStats.label)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, compacto ? 12 : 14)
+        .padding(.vertical, 12)
         .padding(.horizontal, 4)
         .background(RoundedRectangle(cornerRadius: 16).fill(CoresGradeStats.card))
     }

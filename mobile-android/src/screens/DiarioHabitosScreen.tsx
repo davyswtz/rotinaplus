@@ -97,6 +97,7 @@ export function DiarioHabitosScreen({ onAbrirArea }: Props) {
         data: dataAtual,
         humor: item.checkin?.humor ?? undefined,
         nota: item.checkin?.nota ?? undefined,
+        concluida: !item.concluida,
       });
       if (result.bonus_dia?.completo) {
         setBonusMsg(

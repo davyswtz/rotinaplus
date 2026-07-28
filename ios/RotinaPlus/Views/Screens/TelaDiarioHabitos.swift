@@ -219,7 +219,8 @@ struct TelaDiarioHabitos: View {
                 id: item.habito.id,
                 data: dataAtual,
                 humor: item.checkin?.humor,
-                nota: item.checkin?.nota
+                nota: item.checkin?.nota,
+                concluida: !item.concluida
             )
             if let bonus = result.bonusDia, bonus.completo {
                 mensagemBonus = "Dia completo! +\(bonus.moedas) moedas · streak \(bonus.streakDias)🔥"

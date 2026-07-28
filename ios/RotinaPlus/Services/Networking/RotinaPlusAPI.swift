@@ -3,14 +3,16 @@ import Foundation
 /// Camada de API do app (dashboard, missões, academia, notificações).
 enum RotinaPlusAPI {
     static func dashboard() async throws -> DashboardAPI {
-        let response: APIResponse<DashboardAPI> = try await APIClient.shared.request(
-            endpoint: .dashboard,
-            requiresAuth: true
-        )
-        guard let data = response.data else {
-            throw APIError.invalidResponse
+        try await OfflineGateway.cachedFetch(key: .dashboard) {
+            let response: APIResponse<DashboardAPI> = try await APIClient.shared.request(
+                endpoint: .dashboard,
+                requiresAuth: true
+            )
+            guard let data = response.data else {
+                throw APIError.invalidResponse
+            }
+            return data
         }
-        return data
     }
 
     static func classes() async throws -> [ClasseHeroi] {
@@ -62,55 +64,61 @@ enum RotinaPlusAPI {
         classe: String? = nil,
         emojiClasse: String? = nil
     ) async throws -> PerfilAPI {
-        struct Body: Encodable {
-            var nomeHeroi: String?
-            var avatarKey: String?
-            var classe: String?
-            var emojiClasse: String?
-
-            enum CodingKeys: String, CodingKey {
-                case nomeHeroi = "nome_heroi"
-                case avatarKey = "avatar_key"
-                case classe
-                case emojiClasse = "emoji_classe"
+        let payload = AtualizarPerfilPayload(
+            nomeHeroi: nomeHeroi,
+            avatarKey: avatarKey,
+            classe: classe,
+            emojiClasse: emojiClasse
+        )
+        let offline: PerfilAPI = {
+            if var dash = OfflineStore.shared.load(DashboardAPI.self, key: .dashboard) {
+                if let nomeHeroi { dash.perfil.nomeHeroi = nomeHeroi }
+                if let avatarKey { dash.perfil.avatarKey = avatarKey }
+                if let classe { dash.perfil.classe = classe }
+                if let emojiClasse { dash.perfil.emojiClasse = emojiClasse }
+                OfflineStore.shared.save(dash, key: .dashboard)
+                return dash.perfil
             }
+            return PerfilAPI(
+                nomeHeroi: nomeHeroi,
+                codigoAmigo: nil,
+                avatarKey: avatarKey ?? "guara_serio",
+                classe: classe ?? "",
+                emojiClasse: emojiClasse ?? "",
+                nivel: 1,
+                xpAtual: 0,
+                xpProximoNivel: 500,
+                moedas: 0,
+                streakDias: 0
+            )
+        }()
 
-            func encode(to encoder: Encoder) throws {
-                var c = encoder.container(keyedBy: CodingKeys.self)
-                if let nomeHeroi { try c.encode(nomeHeroi, forKey: .nomeHeroi) }
-                if let avatarKey { try c.encode(avatarKey, forKey: .avatarKey) }
-                if let classe { try c.encode(classe, forKey: .classe) }
-                if let emojiClasse { try c.encode(emojiClasse, forKey: .emojiClasse) }
-            }
-        }
-
-        let response: APIResponse<PerfilAPI> = try await APIClient.shared.request(
-            endpoint: .perfil,
-            method: .put,
-            body: Body(
+        return try await OfflineGateway.mutate(
+            kind: .atualizarPerfil,
+            payload: payload,
+            offlineValue: offline
+        ) {
+            try await remoteAtualizarPerfilCampos(
                 nomeHeroi: nomeHeroi,
                 avatarKey: avatarKey,
                 classe: classe,
                 emojiClasse: emojiClasse
-            ),
-            requiresAuth: true
-        )
-        guard let data = response.data else {
-            throw APIError.invalidResponse
+            )
         }
-        return data
     }
 
     static func listarAmigos() async throws -> AmigosListaAPI {
-        let response: APIResponse<AmigosListaAPI> = try await APIClient.shared.request(
-            endpoint: .amigos,
-            method: .get,
-            requiresAuth: true
-        )
-        guard let data = response.data else {
-            throw APIError.invalidResponse
+        try await OfflineGateway.cachedFetch(key: .amigos) {
+            let response: APIResponse<AmigosListaAPI> = try await APIClient.shared.request(
+                endpoint: .amigos,
+                method: .get,
+                requiresAuth: true
+            )
+            guard let data = response.data else {
+                throw APIError.invalidResponse
+            }
+            return data
         }
-        return data
     }
 
     static func convidarAmigo(codigo: String) async throws -> ConviteAmigoRespostaAPI {
@@ -181,16 +189,33 @@ enum RotinaPlusAPI {
         return data
     }
 
-    static func toggleMissao(id: Int) async throws -> MissaoAPI {
-        let response: APIResponse<MissaoAPI> = try await APIClient.shared.request(
-            endpoint: .toggleMissao(id: id),
-            method: .patch,
-            requiresAuth: true
+    static func toggleMissao(id: Int, concluida: Bool) async throws -> MissaoAPI {
+        let payload = ToggleMissaoPayload(id: id, concluida: concluida)
+        let offline = MissaoAPI(
+            id: id,
+            icone: "🎯",
+            titulo: "",
+            detalhe: nil,
+            xp: 0,
+            concluida: concluida,
+            data: nil,
+            ordem: nil
         )
-        guard let data = response.data else {
-            throw APIError.invalidResponse
+
+        // Atualiza snapshot do dashboard localmente.
+        if var dash = OfflineStore.shared.load(DashboardAPI.self, key: .dashboard),
+           let idx = dash.missoes.firstIndex(where: { $0.id == id }) {
+            dash.missoes[idx].concluida = concluida
+            OfflineStore.shared.save(dash, key: .dashboard)
         }
-        return data
+
+        return try await OfflineGateway.mutate(
+            kind: .toggleMissao,
+            payload: payload,
+            offlineValue: offline
+        ) {
+            try await remoteToggleMissao(id: id, concluida: concluida)
+        }
     }
 
     static func criarMissao(
@@ -198,30 +223,52 @@ enum RotinaPlusAPI {
         detalhe: String?,
         icone: String
     ) async throws -> MissaoAPI {
-        struct Body: Encodable {
-            let titulo: String
-            let detalhe: String?
-            let icone: String
+        let clientUUID = UUID().uuidString
+        let payload = CriarMissaoPayload(
+            titulo: titulo,
+            detalhe: detalhe,
+            icone: icone,
+            clientUUID: clientUUID
+        )
+        let tempId = -Int(Date().timeIntervalSince1970)
+        let offline = MissaoAPI(
+            id: tempId,
+            icone: icone,
+            titulo: titulo,
+            detalhe: detalhe,
+            xp: 35,
+            concluida: false,
+            data: nil,
+            ordem: nil
+        )
+
+        if var dash = OfflineStore.shared.load(DashboardAPI.self, key: .dashboard) {
+            dash.missoes.append(offline)
+            OfflineStore.shared.save(dash, key: .dashboard)
         }
 
-        let response: APIResponse<MissaoAPI> = try await APIClient.shared.request(
-            endpoint: .missoes,
-            method: .post,
-            body: Body(titulo: titulo, detalhe: detalhe, icone: icone),
-            requiresAuth: true
-        )
-        guard let data = response.data else {
-            throw APIError.invalidResponse
+        return try await OfflineGateway.mutate(
+            kind: .criarMissao,
+            payload: payload,
+            offlineValue: offline
+        ) {
+            try await remoteCriarMissao(
+                titulo: titulo,
+                detalhe: detalhe,
+                icone: icone,
+                clientUUID: clientUUID
+            )
         }
-        return data
     }
 
     static func notificacoes() async throws -> [NotificacaoAPI] {
-        let response: APIResponse<[NotificacaoAPI]> = try await APIClient.shared.request(
-            endpoint: .notificacoes,
-            requiresAuth: true
-        )
-        return response.data ?? []
+        try await OfflineGateway.cachedFetch(key: .notificacoes) {
+            let response: APIResponse<[NotificacaoAPI]> = try await APIClient.shared.request(
+                endpoint: .notificacoes,
+                requiresAuth: true
+            )
+            return response.data ?? []
+        }
     }
 
     static func marcarNotificacaoLida(id: Int) async throws {
@@ -244,26 +291,28 @@ enum RotinaPlusAPI {
     }
 
     static func academia() async throws -> AcademiaAPI {
-        let response: APIResponse<AcademiaAPI> = try await APIClient.shared.request(
-            endpoint: .academia,
-            requiresAuth: true
-        )
-        guard let data = response.data else {
-            throw APIError.invalidResponse
+        try await OfflineGateway.cachedFetch(key: .academia) {
+            let response: APIResponse<AcademiaAPI> = try await APIClient.shared.request(
+                endpoint: .academia,
+                requiresAuth: true
+            )
+            guard let data = response.data else {
+                throw APIError.invalidResponse
+            }
+            return data
         }
-        return data
     }
 
-    static func toggleAcademiaDia(id: Int) async throws {
-        struct DiaToggle: Decodable {
-            let id: Int
-            let concluido: Bool
+    static func toggleAcademiaDia(id: Int, concluido: Bool) async throws {
+        let payload = ToggleAcademiaDiaPayload(id: id, concluido: concluido)
+        if var academia = OfflineStore.shared.load(AcademiaAPI.self, key: .academia),
+           let idx = academia.dias.firstIndex(where: { $0.id == id }) {
+            academia.dias[idx].concluido = concluido
+            OfflineStore.shared.save(academia, key: .academia)
         }
-        let _: APIResponse<DiaToggle> = try await APIClient.shared.request(
-            endpoint: .toggleAcademiaDia(id: id),
-            method: .patch,
-            requiresAuth: true
-        )
+        try await OfflineGateway.mutate(kind: .toggleAcademiaDia, payload: payload) {
+            try await remoteToggleAcademiaDia(id: id, concluido: concluido)
+        }
     }
 
     static func registrarEsporte(
@@ -385,14 +434,16 @@ enum RotinaPlusAPI {
     }
 
     static func habitos(data: String? = nil) async throws -> HabitoJournalAPI {
-        let response: APIResponse<HabitoJournalAPI> = try await APIClient.shared.request(
-            endpoint: .habitos(data: data),
-            requiresAuth: true
-        )
-        guard let data = response.data else {
-            throw APIError.invalidResponse
+        try await OfflineGateway.cachedFetch(key: OfflineCacheKey.habitos(data: data)) {
+            let response: APIResponse<HabitoJournalAPI> = try await APIClient.shared.request(
+                endpoint: .habitos(data: data),
+                requiresAuth: true
+            )
+            guard let data = response.data else {
+                throw APIError.invalidResponse
+            }
+            return data
         }
-        return data
     }
 
     static func criarHabito(
@@ -401,45 +452,96 @@ enum RotinaPlusAPI {
         icone: String,
         area: String
     ) async throws -> HabitoAPI {
-        struct Body: Encodable {
-            let titulo: String
-            let detalhe: String?
-            let icone: String
-            let area: String
-        }
-        let response: APIResponse<HabitoAPI> = try await APIClient.shared.request(
-            endpoint: .criarHabito,
-            method: .post,
-            body: Body(titulo: titulo, detalhe: detalhe, icone: icone, area: area),
-            requiresAuth: true
+        let clientUUID = UUID().uuidString
+        let payload = CriarHabitoPayload(
+            titulo: titulo,
+            detalhe: detalhe,
+            icone: icone,
+            area: area,
+            clientUUID: clientUUID
         )
-        guard let data = response.data else {
-            throw APIError.invalidResponse
+        let offline = HabitoAPI(
+            id: -Int(Date().timeIntervalSince1970),
+            icone: icone,
+            titulo: titulo,
+            detalhe: detalhe,
+            area: area,
+            frequencia: "diario",
+            diasSemana: nil,
+            xp: 20,
+            ativo: true,
+            ordem: nil
+        )
+        return try await OfflineGateway.mutate(
+            kind: .criarHabito,
+            payload: payload,
+            offlineValue: offline
+        ) {
+            try await remoteCriarHabito(
+                titulo: titulo,
+                detalhe: detalhe,
+                icone: icone,
+                area: area,
+                clientUUID: clientUUID
+            )
         }
-        return data
     }
 
     static func toggleHabitoCheckin(
         id: Int,
         data: String?,
         humor: Int?,
-        nota: String?
+        nota: String?,
+        concluida: Bool
     ) async throws -> HabitoToggleResultAPI {
-        struct Body: Encodable {
-            let data: String?
-            let humor: Int?
-            let nota: String?
-        }
-        let response: APIResponse<HabitoToggleResultAPI> = try await APIClient.shared.request(
-            endpoint: .toggleHabitoCheckin(id: id),
-            method: .patch,
-            body: Body(data: data, humor: humor, nota: nota),
-            requiresAuth: true
+        let payload = ToggleHabitoPayload(
+            id: id,
+            data: data,
+            humor: humor,
+            nota: nota,
+            concluida: concluida
         )
-        guard let data = response.data else {
-            throw APIError.invalidResponse
+        let offlineHabito = HabitoAPI(
+            id: id,
+            icone: "✨",
+            titulo: "",
+            detalhe: nil,
+            area: "geral",
+            frequencia: "diario",
+            diasSemana: nil,
+            xp: 0,
+            ativo: true,
+            ordem: nil
+        )
+        let offlineCheckin = HabitoCheckinAPI(
+            id: 0,
+            habitoId: id,
+            data: data,
+            concluida: concluida,
+            concluidaEm: nil,
+            humor: humor,
+            nota: nota
+        )
+        let offline = HabitoToggleResultAPI(
+            habito: offlineHabito,
+            checkin: offlineCheckin,
+            concluida: concluida,
+            streak: 0,
+            bonusDia: nil
+        )
+        return try await OfflineGateway.mutate(
+            kind: .toggleHabitoCheckin,
+            payload: payload,
+            offlineValue: offline
+        ) {
+            try await remoteToggleHabitoCheckin(
+                id: id,
+                data: data,
+                humor: humor,
+                nota: nota,
+                concluida: concluida
+            )
         }
-        return data
     }
 
     static func atualizarHabitoNota(
@@ -448,21 +550,23 @@ enum RotinaPlusAPI {
         nota: String?,
         humor: Int?
     ) async throws -> HabitoCheckinAPI {
-        struct Body: Encodable {
-            let data: String?
-            let nota: String?
-            let humor: Int?
-        }
-        let response: APIResponse<HabitoCheckinAPI> = try await APIClient.shared.request(
-            endpoint: .atualizarHabitoNota(id: id),
-            method: .patch,
-            body: Body(data: data, nota: nota, humor: humor),
-            requiresAuth: true
+        let payload = HabitoNotaPayload(id: id, data: data, nota: nota, humor: humor)
+        let offline = HabitoCheckinAPI(
+            id: 0,
+            habitoId: id,
+            data: data,
+            concluida: false,
+            concluidaEm: nil,
+            humor: humor,
+            nota: nota
         )
-        guard let data = response.data else {
-            throw APIError.invalidResponse
+        return try await OfflineGateway.mutate(
+            kind: .atualizarHabitoNota,
+            payload: payload,
+            offlineValue: offline
+        ) {
+            try await remoteAtualizarHabitoNota(id: id, data: data, nota: nota, humor: humor)
         }
-        return data
     }
 
     static func excluirHabito(id: Int) async throws {
@@ -475,14 +579,17 @@ enum RotinaPlusAPI {
     }
 
     static func financas(mes: String? = nil) async throws -> FinancasAPI {
-        let response: APIResponse<FinancasAPI> = try await APIClient.shared.request(
-            endpoint: .financas(mes: mes),
-            requiresAuth: true
-        )
-        guard let data = response.data else {
-            throw APIError.invalidResponse
+        let key = mes.map { "financas_\($0)" } ?? OfflineCacheKey.financas.rawValue
+        return try await OfflineGateway.cachedFetch(key: key) {
+            let response: APIResponse<FinancasAPI> = try await APIClient.shared.request(
+                endpoint: .financas(mes: mes),
+                requiresAuth: true
+            )
+            guard let data = response.data else {
+                throw APIError.invalidResponse
+            }
+            return data
         }
-        return data
     }
 
     static func criarTransacao(

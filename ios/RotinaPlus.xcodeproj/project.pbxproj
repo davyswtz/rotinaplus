@@ -15,6 +15,10 @@
 		1C379C0B1D009404FD32089F /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BDECFF96D9D7EA16D00DA42 /* User.swift */; };
 		A11D45B0A8D00000000002 /* DashboardModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11D45B0A8D00000000001 /* DashboardModels.swift */; };
 		A011A7115A910000000002 /* RotinaPlusAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A011A7115A910000000001 /* RotinaPlusAPI.swift */; };
+		A011A7125A910000000002 /* RotinaPlusAPI+Remote.swift in Sources */ = {isa = PBXBuildFile; fileRef = A011A7125A910000000001 /* RotinaPlusAPI+Remote.swift */; };
+		B0FFL1N3SYNC0000000002 /* OfflineSyncEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0FFL1N3SYNC0000000001 /* OfflineSyncEngine.swift */; };
+		B0FFL1N3STORE0000000002 /* OfflineStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0FFL1N3STORE0000000001 /* OfflineStore.swift */; };
+		B0FFL1N3NET000000000002 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0FFL1N3NET000000000001 /* NetworkMonitor.swift */; };
 		B0CADA50A8D00000000002 /* CadastroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0CADA50A8D00000000001 /* CadastroView.swift */; };
 		B0CADA50A8D00000000004 /* CadastroViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0CADA50A8D00000000003 /* CadastroViewModel.swift */; };
 		C1A55E50A8D00000000002 /* TelaEscolhaClasse.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A55E50A8D00000000001 /* TelaEscolhaClasse.swift */; };
@@ -86,6 +90,10 @@
 		7BDECFF96D9D7EA16D00DA42 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		A11D45B0A8D00000000001 /* DashboardModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardModels.swift; sourceTree = "<group>"; };
 		A011A7115A910000000001 /* RotinaPlusAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotinaPlusAPI.swift; sourceTree = "<group>"; };
+		A011A7125A910000000001 /* RotinaPlusAPI+Remote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RotinaPlusAPI+Remote.swift"; sourceTree = "<group>"; };
+		B0FFL1N3SYNC0000000001 /* OfflineSyncEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineSyncEngine.swift; sourceTree = "<group>"; };
+		B0FFL1N3STORE0000000001 /* OfflineStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineStore.swift; sourceTree = "<group>"; };
+		B0FFL1N3NET000000000001 /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
 		7FF3BF138F2FE9DEAC6CD397 /* _content_mask.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = _content_mask.png; sourceTree = "<group>"; };
 		80BBB4E7A5C758E62CE4DC19 /* TelaCriePersonagem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelaCriePersonagem.swift; sourceTree = "<group>"; };
 		85161E62B62BE74F95E1AFFC /* RotinaPlusApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotinaPlusApp.swift; sourceTree = "<group>"; };
@@ -120,6 +128,7 @@
 				C7B31E3FE121617ABF759DC2 /* APIClient.swift */,
 				3EC6EA046F94F6FA0EC3D5AE /* Endpoints.swift */,
 				A011A7115A910000000001 /* RotinaPlusAPI.swift */,
+				A011A7125A910000000001 /* RotinaPlusAPI+Remote.swift */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -262,9 +271,20 @@
 			isa = PBXGroup;
 			children = (
 				F95FE33776B8425D262DA6BD /* Auth */,
+				B0FFL1N3OFFLINE00000001 /* Offline */,
 				1CC98E5E331EF94978338A00 /* Networking */,
 			);
 			path = Services;
+			sourceTree = "<group>";
+		};
+		B0FFL1N3OFFLINE00000001 /* Offline */ = {
+			isa = PBXGroup;
+			children = (
+				B0FFL1N3NET000000000001 /* NetworkMonitor.swift */,
+				B0FFL1N3STORE0000000001 /* OfflineStore.swift */,
+				B0FFL1N3SYNC0000000001 /* OfflineSyncEngine.swift */,
+			);
+			path = Offline;
 			sourceTree = "<group>";
 		};
 		F496B7B980222B5C29E0E47B /* ViewModels */ = {
@@ -397,6 +417,10 @@
 				1C379C0B1D009404FD32089F /* User.swift in Sources */,
 				A11D45B0A8D00000000002 /* DashboardModels.swift in Sources */,
 				A011A7115A910000000002 /* RotinaPlusAPI.swift in Sources */,
+				A011A7125A910000000002 /* RotinaPlusAPI+Remote.swift in Sources */,
+				B0FFL1N3SYNC0000000002 /* OfflineSyncEngine.swift in Sources */,
+				B0FFL1N3STORE0000000002 /* OfflineStore.swift in Sources */,
+				B0FFL1N3NET000000000002 /* NetworkMonitor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

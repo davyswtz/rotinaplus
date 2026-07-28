@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api, setAuthToken } from './api';
 import type { User } from '../types';
 import * as tokenStorage from './tokenStorage';
+import { clearOfflineData } from '../offline/store';
 
 interface LoginPayload {
   email: string;
@@ -83,6 +84,7 @@ export async function register(
 export async function logout(): Promise<void> {
   await tokenStorage.clearToken();
   setAuthToken(null);
+  await clearOfflineData();
 }
 
 export function getToken(): string | null {

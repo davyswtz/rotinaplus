@@ -156,18 +156,18 @@ export function HomeScreen() {
   );
 
   const onToggleMissao = async (id: number) => {
-    setMissoes((atual) =>
-      atual.map((m) =>
-        m.id === id ? { ...m, concluida: !m.concluida } : m,
-      ),
+    const atual = missoes.find((m) => m.id === id);
+    const nova = !(atual?.concluida ?? false);
+    setMissoes((lista) =>
+      lista.map((m) => (m.id === id ? { ...m, concluida: nova } : m)),
     );
     try {
-      await toggleMissao(id);
+      await toggleMissao(id, nova);
       await carregar();
     } catch {
-      setMissoes((atual) =>
-        atual.map((m) =>
-          m.id === id ? { ...m, concluida: !m.concluida } : m,
+      setMissoes((lista) =>
+        lista.map((m) =>
+          m.id === id ? { ...m, concluida: !nova } : m,
         ),
       );
     }

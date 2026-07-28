@@ -605,7 +605,7 @@ struct TelaAcademia: View {
     @MainActor
     private func toggleDia(_ dia: DiaSemanaTreino) async {
         do {
-            try await RotinaPlusAPI.toggleAcademiaDia(id: dia.id)
+            try await RotinaPlusAPI.toggleAcademiaDia(id: dia.id, concluido: dia.concluido)
             sequencia = max(0, sequencia + (dia.concluido ? 1 : -1))
         } catch {
             if let i = dias.firstIndex(where: { $0.id == dia.id }) {

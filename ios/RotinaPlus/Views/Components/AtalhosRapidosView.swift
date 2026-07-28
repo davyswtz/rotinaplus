@@ -57,66 +57,62 @@ struct AtalhosRapidosView: View {
     var mensagemFox: String = "Bora começar as missões, herói! 🦊"
     var onAtalho: (AtalhoRapido) -> Void = { _ in }
 
+    private let gap: CGFloat = 10
+    private let colunas = Array(repeating: GridItem(.flexible(), spacing: 10), count: 3)
+
     var body: some View {
-        GeometryReader { geo in
-            let compacto = LayoutDashboard.isCompacto(geo.size.width)
-            let gap: CGFloat = compacto ? 8 : 10
-            let colunas = Array(repeating: GridItem(.flexible(), spacing: gap), count: 3)
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Atalhos rápidos")
+                .font(.system(size: 17, weight: .bold))
+                .foregroundStyle(CoresAtalhos.titulo)
 
-            VStack(alignment: .leading, spacing: compacto ? 10 : 12) {
-                Text("Atalhos rápidos")
-                    .font(.system(size: compacto ? 16 : 17, weight: .bold))
-                    .foregroundStyle(CoresAtalhos.titulo)
-
-                LazyVGrid(columns: colunas, spacing: gap) {
-                    ForEach(AtalhoRapido.allCases) { atalho in
-                        Button {
-                            onAtalho(atalho)
-                        } label: {
-                            VStack(spacing: compacto ? 6 : 8) {
-                                Text(atalho.icone)
-                                    .font(.system(size: compacto ? 22 : 26))
-                                Text(atalho.titulo)
-                                    .font(.system(size: compacto ? 11 : 12, weight: .medium, design: .monospaced))
-                                    .foregroundStyle(CoresAtalhos.label)
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.7)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, compacto ? 12 : 16)
-                            .background(RoundedRectangle(cornerRadius: 16).fill(CoresAtalhos.card))
-                            .overlay(RoundedRectangle(cornerRadius: 16).stroke(CoresAtalhos.borda, lineWidth: 1))
+            LazyVGrid(columns: colunas, spacing: gap) {
+                ForEach(AtalhoRapido.allCases) { atalho in
+                    Button {
+                        onAtalho(atalho)
+                    } label: {
+                        VStack(spacing: 8) {
+                            Text(atalho.icone)
+                                .font(.system(size: 24))
+                            Text(atalho.titulo)
+                                .font(.system(size: 12, weight: .medium, design: .monospaced))
+                                .foregroundStyle(CoresAtalhos.label)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
                         }
-                        .buttonStyle(.plain)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(RoundedRectangle(cornerRadius: 16).fill(CoresAtalhos.card))
+                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(CoresAtalhos.borda, lineWidth: 1))
                     }
+                    .buttonStyle(.plain)
                 }
-
-                HStack(spacing: 12) {
-                    Image("splash_guara")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: compacto ? 40 : 44, height: compacto ? 40 : 44)
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Fox diz:")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundStyle(.white)
-                        Text(mensagemFox)
-                            .font(.system(size: compacto ? 12 : 13))
-                            .foregroundStyle(CoresAtalhos.mensagem)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-
-                    Spacer(minLength: 0)
-                }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 12)
-                .background(RoundedRectangle(cornerRadius: 20).fill(CoresAtalhos.card))
-                .overlay(RoundedRectangle(cornerRadius: 20).stroke(CoresAtalhos.borda, lineWidth: 1))
             }
-            .frame(width: geo.size.width, alignment: .topLeading)
+
+            HStack(spacing: 12) {
+                Image("splash_guara")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 42, height: 42)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Fox diz:")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(.white)
+                    Text(mensagemFox)
+                        .font(.system(size: 13))
+                        .foregroundStyle(CoresAtalhos.mensagem)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .background(RoundedRectangle(cornerRadius: 20).fill(CoresAtalhos.card))
+            .overlay(RoundedRectangle(cornerRadius: 20).stroke(CoresAtalhos.borda, lineWidth: 1))
         }
-        .frame(minHeight: LayoutDashboard.isCompacto(UIScreen.main.bounds.width) ? 300 : 320)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

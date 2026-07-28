@@ -102,6 +102,7 @@ final class AuthManager: ObservableObject {
         UserDefaults.standard.removeObject(forKey: Self.tokenKey)
         forceOnboarding = false
         isAuthenticated = false
+        OfflineStore.shared.clearAll()
     }
 
     func markOnboardingComplete() {

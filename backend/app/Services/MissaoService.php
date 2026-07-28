@@ -22,7 +22,7 @@ class MissaoService
             ->get();
     }
 
-    public function toggle(User $user, int $id): Missao
+    public function toggle(User $user, int $id, ?bool $concluida = null): Missao
     {
         $missao = Missao::query()
             ->where('user_id', $user->id)
@@ -32,7 +32,12 @@ class MissaoService
             throw new NotFoundHttpException('Missão não encontrada.');
         }
 
-        $nova = ! $missao->concluida;
+        $nova = $concluida ?? ! $missao->concluida;
+
+        // Idempotente: replay offline não altera XP duas vezes.
+        if ((bool) $missao->concluida === $nova) {
+            return $missao;
+        }
 
         $missao->update([
             'concluida' => $nova,
@@ -67,6 +72,17 @@ class MissaoService
             $dados['detalhe'] ?? null,
         );
 
+        $clientUuid = $dados['client_uuid'] ?? null;
+        if (is_string($clientUuid) && $clientUuid !== '') {
+            $existente = Missao::query()
+                ->where('user_id', $user->id)
+                ->where('client_uuid', $clientUuid)
+                ->first();
+            if ($existente) {
+                return $existente;
+            }
+        }
+
         return Missao::query()->create([
             'user_id' => $user->id,
             'data' => $hoje,
@@ -81,6 +97,7 @@ class MissaoService
             'concluida' => false,
             'concluida_em' => null,
             'ordem' => $ordem + 1,
+            'client_uuid' => $clientUuid,
         ]);
     }
 

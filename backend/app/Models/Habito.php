@@ -21,6 +21,7 @@ class Habito extends Model
         'xp',
         'ativo',
         'ordem',
+        'client_uuid',
     ];
 
     protected function casts(): array

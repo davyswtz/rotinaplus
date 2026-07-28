@@ -19,6 +19,7 @@ class Missao extends Model
         'concluida',
         'concluida_em',
         'ordem',
+        'client_uuid',
     ];
 
     protected function casts(): array

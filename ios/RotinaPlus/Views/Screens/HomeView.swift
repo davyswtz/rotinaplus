@@ -224,7 +224,17 @@ struct HomeView: View {
 
     @MainActor
     private func carregarDashboard() async {
-        carregando = true
+        // Abre com cache local imediatamente (modo offline).
+        if let cached = OfflineStore.shared.load(DashboardAPI.self, key: .dashboard) {
+            perfil = cached.perfil
+            missoes = cached.missoes.map { $0.asMissaoDoDia() }
+            notificacoesNaoLidas = cached.notificacoesNaoLidas
+            xpHojeAPI = cached.xpHoje
+            habitosResumo = cached.habitosResumo
+            carregando = false
+        } else {
+            carregando = true
+        }
         erro = nil
         do {
             let data = try await RotinaPlusAPI.dashboard()
@@ -238,8 +248,11 @@ struct HomeView: View {
                 UserDefaults.standard.set(nome, forKey: "nome_heroi")
             }
             UserDefaults.standard.set(data.perfil.avatarAsset, forKey: "avatar_selecionado")
+            await OfflineSyncEngine.shared.flush()
         } catch {
-            erro = error.localizedDescription
+            if perfil == nil {
+                erro = error.localizedDescription
+            }
         }
         carregando = false
     }
@@ -248,7 +261,7 @@ struct HomeView: View {
     private func toggleMissao(_ missao: MissaoDoDia) async {
         // UI já alternou localmente em MissoesDoDiaView
         do {
-            _ = try await RotinaPlusAPI.toggleMissao(id: missao.id)
+            _ = try await RotinaPlusAPI.toggleMissao(id: missao.id, concluida: missao.concluida)
             // Atualiza XP/nível do perfil
             let data = try await RotinaPlusAPI.dashboard()
             perfil = data.perfil

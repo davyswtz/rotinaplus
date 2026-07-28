@@ -52,93 +52,88 @@ struct CardPerfilHeroi: View {
     }
 
     var body: some View {
-        GeometryReader { geo in
-            let compacto = LayoutDashboard.isCompacto(geo.size.width)
-            let avatar: CGFloat = compacto ? 60 : 72
-            let glow: CGFloat = compacto ? 76 : 88
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .top, spacing: 12) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(saudacao)
+                        .font(.system(size: 11, weight: .semibold))
+                        .tracking(1.0)
+                        .foregroundStyle(CoresCardPerfil.saudacao)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
 
-            VStack(alignment: .leading, spacing: compacto ? 14 : 18) {
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(saudacao)
-                            .font(.system(size: compacto ? 10 : 11, weight: .semibold))
-                            .tracking(compacto ? 0.6 : 1.1)
-                            .foregroundStyle(CoresCardPerfil.saudacao)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
-
-                        Text(dados.nomeUsuario.lowercased())
-                            .font(.system(size: compacto ? 24 : 28, weight: .bold))
-                            .foregroundStyle(.white)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
-
-                        HStack(spacing: 6) {
-                            Text(dados.emojiClasse)
-                                .font(.system(size: 12))
-                            Text(dados.classe)
-                                .font(.system(size: 13, weight: .semibold))
-                                .foregroundStyle(CoresCardPerfil.classeTexto)
-                        }
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(Capsule().fill(CoresCardPerfil.classeFundo))
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                    ZStack {
-                        Circle()
-                            .fill(CoresCardPerfil.glow)
-                            .frame(width: glow, height: glow)
-
-                        Image(dados.avatarAsset)
-                            .resizable()
-                            .interpolation(.none)
-                            .scaledToFill()
-                            .frame(width: avatar, height: avatar)
-                            .clipShape(Circle())
-                            .overlay(Circle().stroke(Color.white.opacity(0.12), lineWidth: 1))
-
-                        Image("splash_guara")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: compacto ? 24 : 28, height: compacto ? 24 : 28)
-                            .offset(x: avatar * 0.36, y: avatar * 0.48)
-                    }
-                    .frame(width: glow + 8, height: glow + 12)
-                }
-
-                HStack(spacing: 10) {
-                    Text("\(dados.nivel)")
-                        .font(.system(size: 12, weight: .bold))
+                    Text(dados.nomeUsuario.lowercased())
+                        .font(.system(size: 26, weight: .bold))
                         .foregroundStyle(.white)
-                        .frame(width: 24, height: 24)
-                        .background(Circle().fill(CoresCardPerfil.nivelCircle))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
 
-                    GeometryReader { bar in
-                        ZStack(alignment: .leading) {
-                            Capsule().fill(CoresCardPerfil.xpTrack)
+                    HStack(spacing: 6) {
+                        Text(dados.emojiClasse)
+                            .font(.system(size: 12))
+                        Text(dados.classe)
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(CoresCardPerfil.classeTexto)
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Capsule().fill(CoresCardPerfil.classeFundo))
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                ZStack {
+                    Circle()
+                        .fill(CoresCardPerfil.glow)
+                        .frame(width: 80, height: 80)
+
+                    Image(dados.avatarAsset)
+                        .resizable()
+                        .interpolation(.none)
+                        .scaledToFill()
+                        .frame(width: 66, height: 66)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.white.opacity(0.12), lineWidth: 1))
+
+                    Image("splash_guara")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 26, height: 26)
+                        .offset(x: 24, y: 32)
+                }
+                .frame(width: 88, height: 92)
+            }
+
+            HStack(spacing: 10) {
+                Text("\(dados.nivel)")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 24, height: 24)
+                    .background(Circle().fill(CoresCardPerfil.nivelCircle))
+
+                Capsule()
+                    .fill(CoresCardPerfil.xpTrack)
+                    .frame(height: 8)
+                    .overlay(alignment: .leading) {
+                        GeometryReader { bar in
                             Capsule()
                                 .fill(CoresCardPerfil.xpFill)
                                 .frame(width: max(8, bar.size.width * dados.progresso))
                         }
                     }
-                    .frame(height: 8)
+                    .clipShape(Capsule())
 
-                    Text("\(dados.xpAtual)/\(dados.xpProximoNivel)")
-                        .font(.system(size: compacto ? 11 : 12, weight: .medium, design: .monospaced))
-                        .foregroundStyle(CoresCardPerfil.xpTexto)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-                        .layoutPriority(1)
-                }
+                Text("\(dados.xpAtual)/\(dados.xpProximoNivel)")
+                    .font(.system(size: 12, weight: .medium, design: .monospaced))
+                    .foregroundStyle(CoresCardPerfil.xpTexto)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .layoutPriority(1)
             }
-            .padding(compacto ? 14 : 18)
-            .background(RoundedRectangle(cornerRadius: 22).fill(CoresCardPerfil.fundo))
-            .overlay(RoundedRectangle(cornerRadius: 22).stroke(CoresCardPerfil.borda, lineWidth: 1))
-            .frame(width: geo.size.width)
         }
-        .frame(minHeight: LayoutDashboard.isCompacto(UIScreen.main.bounds.width) ? 168 : 188)
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: 22).fill(CoresCardPerfil.fundo))
+        .overlay(RoundedRectangle(cornerRadius: 22).stroke(CoresCardPerfil.borda, lineWidth: 1))
     }
 }
 

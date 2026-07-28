@@ -240,7 +240,7 @@ class AcademiaService
             ->all();
     }
 
-    public function toggleExercicio(User $user, int $treinoId, int $exercicioId): AcademiaTreinoExercicio
+    public function toggleExercicio(User $user, int $treinoId, int $exercicioId, ?bool $concluido = null): AcademiaTreinoExercicio
     {
         $treino = $this->buscarTreino($user, $treinoId);
         if ($treino->concluido_em) {
@@ -257,7 +257,12 @@ class AcademiaService
             throw new NotFoundHttpException('Exercício não encontrado.');
         }
 
-        $item->concluido = ! $item->concluido;
+        $novo = $concluido ?? ! $item->concluido;
+        if ((bool) $item->concluido === $novo) {
+            return $item;
+        }
+
+        $item->concluido = $novo;
         $item->save();
 
         return $item->fresh();
@@ -310,7 +315,7 @@ class AcademiaService
         $treino->delete();
     }
 
-    public function toggleDia(User $user, int $id): AcademiaDia
+    public function toggleDia(User $user, int $id, ?bool $concluido = null): AcademiaDia
     {
         $this->ensureSemanaAtual($user);
 
@@ -322,7 +327,12 @@ class AcademiaService
             throw new NotFoundHttpException('Dia de treino não encontrado.');
         }
 
-        $novo = ! $dia->concluido;
+        $novo = $concluido ?? ! $dia->concluido;
+
+        if ((bool) $dia->concluido === $novo) {
+            return $dia;
+        }
+
         $dia->update(['concluido' => $novo]);
 
         $config = $user->academiaConfig()->first();

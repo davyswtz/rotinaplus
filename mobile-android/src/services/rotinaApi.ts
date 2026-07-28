@@ -13,19 +13,45 @@ import type {
   Notificacao,
   Perfil,
 } from '../types';
+import {
+  CacheKeys,
+  cachedFetch,
+  mutateOfflineFirst,
+  newClientUUID,
+} from '../offline/store';
 
 export async function fetchDashboard(): Promise<DashboardData> {
-  const { data } = await api.get<ApiResponse<DashboardData>>('/api/v1/dashboard');
-  if (!data.data) throw new Error('Dashboard vazio.');
-  return data.data;
+  return cachedFetch(CacheKeys.dashboard, async () => {
+    const { data } = await api.get<ApiResponse<DashboardData>>('/api/v1/dashboard');
+    if (!data.data) throw new Error('Dashboard vazio.');
+    return data.data;
+  });
 }
 
-export async function toggleMissao(id: number): Promise<Missao> {
-  const { data } = await api.patch<ApiResponse<Missao>>(
-    `/api/v1/missoes/${id}/toggle`,
-  );
-  if (!data.data) throw new Error('Falha ao atualizar missão.');
-  return data.data;
+export async function toggleMissao(
+  id: number,
+  concluida: boolean,
+): Promise<Missao> {
+  return mutateOfflineFirst({
+    kind: 'toggleMissao',
+    payload: { id, concluida },
+    offlineValue: {
+      id,
+      icone: '🎯',
+      titulo: '',
+      detalhe: null,
+      xp: 0,
+      concluida,
+    } as Missao,
+    remote: async () => {
+      const { data } = await api.patch<ApiResponse<Missao>>(
+        `/api/v1/missoes/${id}/toggle`,
+        { concluida },
+      );
+      if (!data.data) throw new Error('Falha ao atualizar missão.');
+      return data.data;
+    },
+  });
 }
 
 export async function criarMissao(payload: {
@@ -33,9 +59,28 @@ export async function criarMissao(payload: {
   detalhe?: string;
   icone?: string;
 }): Promise<Missao> {
-  const { data } = await api.post<ApiResponse<Missao>>('/api/v1/missoes', payload);
-  if (!data.data) throw new Error('Falha ao criar missão.');
-  return data.data;
+  const client_uuid = newClientUUID();
+  const offline = {
+    id: -Date.now(),
+    icone: payload.icone ?? '🎯',
+    titulo: payload.titulo,
+    detalhe: payload.detalhe ?? null,
+    xp: 35,
+    concluida: false,
+  } as Missao;
+  return mutateOfflineFirst({
+    kind: 'criarMissao',
+    payload: { ...payload, client_uuid },
+    offlineValue: offline,
+    remote: async () => {
+      const { data } = await api.post<ApiResponse<Missao>>('/api/v1/missoes', {
+        ...payload,
+        client_uuid,
+      });
+      if (!data.data) throw new Error('Falha ao criar missão.');
+      return data.data;
+    },
+  });
 }
 
 export async function fetchNotificacoes(): Promise<Notificacao[]> {
@@ -54,13 +99,25 @@ export async function lerTodasNotificacoes(): Promise<void> {
 }
 
 export async function fetchAcademia(): Promise<AcademiaData> {
-  const { data } = await api.get<ApiResponse<AcademiaData>>('/api/v1/academia');
-  if (!data.data) throw new Error('Academia vazia.');
-  return data.data;
+  return cachedFetch(CacheKeys.academia, async () => {
+    const { data } = await api.get<ApiResponse<AcademiaData>>('/api/v1/academia');
+    if (!data.data) throw new Error('Academia vazia.');
+    return data.data;
+  });
 }
 
-export async function toggleAcademiaDia(id: number): Promise<void> {
-  await api.patch(`/api/v1/academia/dias/${id}/toggle`);
+export async function toggleAcademiaDia(
+  id: number,
+  concluido: boolean,
+): Promise<void> {
+  await mutateOfflineFirst({
+    kind: 'toggleAcademiaDia',
+    payload: { id, concluido },
+    offlineValue: undefined as void,
+    remote: async () => {
+      await api.patch(`/api/v1/academia/dias/${id}/toggle`, { concluido });
+    },
+  });
 }
 
 export async function registrarEsporte(payload: {
@@ -146,11 +203,13 @@ export async function concluirTreino(id: number): Promise<AcademiaTreino> {
 export async function fetchHabitos(data?: string): Promise<
   import('../types').HabitoJournal
 > {
-  const { data: res } = await api.get<
-    ApiResponse<import('../types').HabitoJournal>
-  >('/api/v1/habitos', { params: data ? { data } : undefined });
-  if (!res.data) throw new Error('Diário vazio.');
-  return res.data;
+  return cachedFetch(CacheKeys.habitos(data), async () => {
+    const { data: res } = await api.get<
+      ApiResponse<import('../types').HabitoJournal>
+    >('/api/v1/habitos', { params: data ? { data } : undefined });
+    if (!res.data) throw new Error('Diário vazio.');
+    return res.data;
+  });
 }
 
 export async function criarHabito(payload: {
@@ -159,23 +218,71 @@ export async function criarHabito(payload: {
   icone?: string;
   area?: string;
 }): Promise<import('../types').Habito> {
-  const { data } = await api.post<ApiResponse<import('../types').Habito>>(
-    '/api/v1/habitos',
-    payload,
-  );
-  if (!data.data) throw new Error('Falha ao criar hábito.');
-  return data.data;
+  const client_uuid = newClientUUID();
+  return mutateOfflineFirst({
+    kind: 'criarHabito',
+    payload: { ...payload, client_uuid },
+    offlineValue: {
+      id: -Date.now(),
+      icone: payload.icone ?? '✨',
+      titulo: payload.titulo,
+      detalhe: payload.detalhe ?? null,
+      area: payload.area ?? 'geral',
+      frequencia: 'diario',
+      xp: 20,
+      ativo: true,
+    } as import('../types').Habito,
+    remote: async () => {
+      const { data } = await api.post<ApiResponse<import('../types').Habito>>(
+        '/api/v1/habitos',
+        { ...payload, client_uuid },
+      );
+      if (!data.data) throw new Error('Falha ao criar hábito.');
+      return data.data;
+    },
+  });
 }
 
 export async function toggleHabitoCheckin(
   id: number,
-  payload?: { data?: string; humor?: number; nota?: string },
+  payload?: {
+    data?: string;
+    humor?: number;
+    nota?: string;
+    concluida?: boolean;
+  },
 ): Promise<import('../types').HabitoToggleResult> {
-  const { data } = await api.patch<
-    ApiResponse<import('../types').HabitoToggleResult>
-  >(`/api/v1/habitos/${id}/checkin`, payload ?? {});
-  if (!data.data) throw new Error('Falha no check-in.');
-  return data.data;
+  const concluida = payload?.concluida ?? true;
+  return mutateOfflineFirst({
+    kind: 'toggleHabitoCheckin',
+    payload: { id, ...payload, concluida },
+    offlineValue: {
+      habito: {
+        id,
+        icone: '✨',
+        titulo: '',
+        area: 'geral',
+        frequencia: 'diario',
+        xp: 0,
+      },
+      checkin: {
+        id: 0,
+        habito_id: id,
+        concluida,
+        humor: payload?.humor ?? null,
+        nota: payload?.nota ?? null,
+      },
+      concluida,
+      streak: 0,
+    } as import('../types').HabitoToggleResult,
+    remote: async () => {
+      const { data } = await api.patch<
+        ApiResponse<import('../types').HabitoToggleResult>
+      >(`/api/v1/habitos/${id}/checkin`, { ...payload, concluida });
+      if (!data.data) throw new Error('Falha no check-in.');
+      return data.data;
+    },
+  });
 }
 
 export async function atualizarHabitoNota(
@@ -195,11 +302,14 @@ export async function excluirHabito(id: number): Promise<void> {
 }
 
 export async function fetchFinancas(mes?: string): Promise<FinancasData> {
-  const { data } = await api.get<ApiResponse<FinancasData>>('/api/v1/financas', {
-    params: mes ? { mes } : undefined,
+  const key = mes ? `financas_${mes}` : CacheKeys.financas;
+  return cachedFetch(key, async () => {
+    const { data } = await api.get<ApiResponse<FinancasData>>('/api/v1/financas', {
+      params: mes ? { mes } : undefined,
+    });
+    if (!data.data) throw new Error('Finanças vazias.');
+    return data.data;
   });
-  if (!data.data) throw new Error('Finanças vazias.');
-  return data.data;
 }
 
 export async function criarTransacao(payload: {
@@ -283,17 +393,26 @@ export async function updatePerfil(
     Pick<Perfil, 'nome_heroi' | 'avatar_key' | 'classe' | 'emoji_classe'>
   >,
 ): Promise<Perfil> {
-  const { data } = await api.put<ApiResponse<Perfil>>('/api/v1/perfil', payload);
-  if (!data.data) throw new Error('Falha ao atualizar perfil.');
-  return data.data;
+  return mutateOfflineFirst({
+    kind: 'atualizarPerfil',
+    payload: payload as Record<string, unknown>,
+    offlineValue: payload as Perfil,
+    remote: async () => {
+      const { data } = await api.put<ApiResponse<Perfil>>('/api/v1/perfil', payload);
+      if (!data.data) throw new Error('Falha ao atualizar perfil.');
+      return data.data;
+    },
+  });
 }
 
 export async function fetchAmigos(): Promise<import('../types').AmigosLista> {
-  const { data } = await api.get<ApiResponse<import('../types').AmigosLista>>(
-    '/api/v1/amigos',
-  );
-  if (!data.data) throw new Error('Falha ao carregar amigos.');
-  return data.data;
+  return cachedFetch(CacheKeys.amigos, async () => {
+    const { data } = await api.get<ApiResponse<import('../types').AmigosLista>>(
+      '/api/v1/amigos',
+    );
+    if (!data.data) throw new Error('Falha ao carregar amigos.');
+    return data.data;
+  });
 }
 
 export async function fetchAmigoStats(

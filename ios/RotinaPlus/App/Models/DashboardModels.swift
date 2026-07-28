@@ -300,7 +300,7 @@ struct AcademiaVolumeAPI: Codable, Equatable, Identifiable {
     }
 }
 
-struct TreinoExercicioPayload: Encodable, Equatable {
+struct TreinoExercicioPayload: Codable, Equatable {
     let exercicioChave: String
     let series: Int
     let reps: Int
