@@ -29,4 +29,18 @@ final class NetworkMonitor: ObservableObject {
         }
         monitor.start(queue: queue)
     }
+
+    /// Chamado quando uma request remota falha por rede/servidor.
+    func markOffline() {
+        isOnline = false
+    }
+
+    /// Chamado quando uma request remota conclui com sucesso.
+    func markOnline() {
+        let wasOffline = !isOnline
+        isOnline = true
+        if wasOffline {
+            Task { await OfflineSyncEngine.shared.flush() }
+        }
+    }
 }

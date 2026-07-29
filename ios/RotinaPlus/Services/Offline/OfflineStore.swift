@@ -42,6 +42,7 @@ enum OfflineMutationKind: String, Codable {
     case toggleHabitoCheckin
     case criarHabito
     case atualizarHabitoNota
+    case excluirHabito
     case toggleAcademiaDia
     case registrarEsporte
     case excluirEsporteSessao

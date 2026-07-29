@@ -1,6 +1,6 @@
 import Foundation
 
-/// Gateway: lê cache se a rede falhar; enfileira writes offline.
+/// Gateway: lê cache se a rede falhar; writes são local-first + fila de sync.
 enum OfflineGateway {
     static func cachedFetch<T: Codable>(
         key: String,
@@ -9,9 +9,13 @@ enum OfflineGateway {
         do {
             let value = try await remote()
             OfflineStore.shared.save(value, key: key)
+            await MainActor.run { NetworkMonitor.shared.markOnline() }
             return value
         } catch {
             if let cached = OfflineStore.shared.load(T.self, key: key) {
+                if shouldTreatAsOffline(error) {
+                    await MainActor.run { NetworkMonitor.shared.markOffline() }
+                }
                 return cached
             }
             throw error
@@ -25,7 +29,8 @@ enum OfflineGateway {
         try await cachedFetch(key: key.rawValue, remote: remote)
     }
 
-    /// Tenta remoto; se offline/falha de rede, enfileira e retorna `offlineValue`.
+    /// Local-first: se o remoto falhar (rede/servidor), enfileira e devolve o valor local.
+    /// Só propaga erro de auth (401/403) ou validação do cliente (400/422).
     static func mutate<T>(
         kind: OfflineMutationKind,
         payload: some Encodable,
@@ -33,26 +38,25 @@ enum OfflineGateway {
         remote: () async throws -> T
     ) async throws -> T {
         let online = await MainActor.run { NetworkMonitor.shared.isOnline }
+
         if online {
             do {
-                return try await remote()
-            } catch let error as URLError where isOfflineURLError(error) {
-                try enqueue(kind: kind, payload: payload)
-                return offlineValue
+                let value = try await remote()
+                await MainActor.run { NetworkMonitor.shared.markOnline() }
+                return value
             } catch let error as APIError where error.isUnauthorized {
                 throw error
-            } catch {
-                // Rede instável / servidor fora: preserva ação local.
-                if isLikelyNetworkFailure(error) {
-                    try enqueue(kind: kind, payload: payload)
-                    return offlineValue
-                }
+            } catch let error as APIError where error.isValidationError {
                 throw error
+            } catch {
+                await MainActor.run { NetworkMonitor.shared.markOffline() }
+                try enqueue(kind: kind, payload: payload)
+                return offlineValue
             }
-        } else {
-            try enqueue(kind: kind, payload: payload)
-            return offlineValue
         }
+
+        try enqueue(kind: kind, payload: payload)
+        return offlineValue
     }
 
     /// Variante sem valor de retorno (Void).
@@ -80,22 +84,14 @@ enum OfflineGateway {
         }
     }
 
-    private static func isOfflineURLError(_ error: URLError) -> Bool {
-        switch error.code {
-        case .notConnectedToInternet, .timedOut, .networkConnectionLost,
-             .cannotConnectToHost, .cannotFindHost, .dnsLookupFailed,
-             .internationalRoamingOff, .dataNotAllowed:
+    private static func shouldTreatAsOffline(_ error: Error) -> Bool {
+        if let api = error as? APIError {
+            if api.isUnauthorized || api.isValidationError { return false }
             return true
-        default:
-            return false
         }
-    }
-
-    private static func isLikelyNetworkFailure(_ error: Error) -> Bool {
-        if let url = error as? URLError { return isOfflineURLError(url) }
+        if error is URLError { return true }
         let ns = error as NSError
-        if ns.domain == NSURLErrorDomain { return true }
-        return false
+        return ns.domain == NSURLErrorDomain
     }
 }
 
@@ -178,6 +174,10 @@ final class OfflineSyncEngine {
                 nota: p.nota,
                 humor: p.humor
             )
+
+        case .excluirHabito:
+            let p = try mutation.decodePayload(IdPayload.self)
+            try await RotinaPlusAPI.remoteExcluirHabito(id: p.id)
 
         case .toggleAcademiaDia:
             let p = try mutation.decodePayload(ToggleAcademiaDiaPayload.self)

@@ -6,6 +6,7 @@ import {
   Modal,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   TouchableOpacity,
@@ -26,6 +27,14 @@ import {
 } from '../services/rotinaApi';
 import type { Amigo, AmigoStats, Perfil, PerfilSerieDia, PerfilStats } from '../types';
 import { avatarAssetKey } from '../types';
+import {
+  getHoraManha,
+  getHoraNoite,
+  getLembretesAtivos,
+  setHoraManha,
+  setHoraNoite,
+  setLembretesAtivos,
+} from '../offline/lembretes';
 
 const C = {
   primario: '#E87830',
@@ -87,6 +96,9 @@ export function PerfilScreen({ onPerfilAtualizado, onSair }: Props) {
   const [erroAmigo, setErroAmigo] = useState<string | null>(null);
   const [adicionandoAmigo, setAdicionandoAmigo] = useState(false);
   const [conviteEnviado, setConviteEnviado] = useState(false);
+  const [lembretesAtivos, setLembretesAtivosState] = useState(true);
+  const [horaManha, setHoraManhaState] = useState(9);
+  const [horaNoite, setHoraNoiteState] = useState(20);
 
   const carregar = useCallback(async () => {
     setErro(null);
@@ -117,6 +129,14 @@ export function PerfilScreen({ onPerfilAtualizado, onSair }: Props) {
     setCarregando(true);
     void carregar();
   }, [carregar]);
+
+  useEffect(() => {
+    void (async () => {
+      setLembretesAtivosState(await getLembretesAtivos());
+      setHoraManhaState(await getHoraManha());
+      setHoraNoiteState(await getHoraNoite());
+    })();
+  }, []);
 
   const perfil = stats?.perfil;
   const avatarSrc =
@@ -389,6 +409,83 @@ export function PerfilScreen({ onPerfilAtualizado, onSair }: Props) {
           valor={`${perfil.emoji_classe} ${perfil.classe}`}
           onPress={() => setMostrarClasse(true)}
         />
+      </View>
+
+      <View style={[styles.card, { marginHorizontal: pad, marginTop: gap }]}>
+        <Text style={styles.secao}>LEMBRETES</Text>
+        <Text style={styles.lembreteHint}>
+          Notificações no celular para missões e hábitos.
+        </Text>
+        <View style={styles.lembreteRow}>
+          <Text style={styles.lembreteLabel}>Ativar lembretes</Text>
+          <Switch
+            value={lembretesAtivos}
+            onValueChange={(v) => {
+              setLembretesAtivosState(v);
+              void setLembretesAtivos(v);
+            }}
+            trackColor={{ false: '#333', true: C.primario }}
+            thumbColor="#fff"
+          />
+        </View>
+        {lembretesAtivos ? (
+          <>
+            <View style={styles.lembreteRow}>
+              <Text style={styles.lembreteLabel}>Manhã</Text>
+              <View style={styles.horaRow}>
+                {[7, 8, 9, 10, 11].map((h) => (
+                  <TouchableOpacity
+                    key={`m${h}`}
+                    style={[
+                      styles.horaChip,
+                      horaManha === h && styles.horaChipAtivo,
+                    ]}
+                    onPress={() => {
+                      setHoraManhaState(h);
+                      void setHoraManha(h);
+                    }}
+                  >
+                    <Text
+                      style={[
+                        styles.horaChipTexto,
+                        horaManha === h && styles.horaChipTextoAtivo,
+                      ]}
+                    >
+                      {`${h}:00`}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+            <View style={styles.lembreteRow}>
+              <Text style={styles.lembreteLabel}>Noite</Text>
+              <View style={styles.horaRow}>
+                {[18, 19, 20, 21, 22].map((h) => (
+                  <TouchableOpacity
+                    key={`n${h}`}
+                    style={[
+                      styles.horaChip,
+                      horaNoite === h && styles.horaChipAtivo,
+                    ]}
+                    onPress={() => {
+                      setHoraNoiteState(h);
+                      void setHoraNoite(h);
+                    }}
+                  >
+                    <Text
+                      style={[
+                        styles.horaChipTexto,
+                        horaNoite === h && styles.horaChipTextoAtivo,
+                      ]}
+                    >
+                      {`${h}:00`}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </>
+        ) : null}
       </View>
 
       <TouchableOpacity
@@ -955,6 +1052,44 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: 1,
+  },
+  lembreteHint: {
+    color: 'rgba(255,255,255,0.45)',
+    fontSize: 13,
+    marginTop: 6,
+    marginBottom: 10,
+  },
+  lembreteRow: {
+    marginTop: 8,
+    gap: 8,
+  },
+  lembreteLabel: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  horaRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  horaChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+  },
+  horaChipAtivo: {
+    backgroundColor: 'rgba(232,120,48,0.35)',
+  },
+  horaChipTexto: {
+    color: 'rgba(255,255,255,0.55)',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  horaChipTextoAtivo: {
+    color: '#fff',
   },
   rowBetween: {
     flexDirection: 'row',

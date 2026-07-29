@@ -142,6 +142,15 @@ extension RotinaPlusAPI {
         return data
     }
 
+    static func remoteExcluirHabito(id: Int) async throws {
+        struct Empty: Decodable {}
+        let _: APIResponse<Empty> = try await APIClient.shared.request(
+            endpoint: .excluirHabito(id: id),
+            method: .delete,
+            requiresAuth: true
+        )
+    }
+
     static func remoteToggleAcademiaDia(id: Int, concluido: Bool) async throws {
         struct Body: Encodable {
             let concluido: Bool

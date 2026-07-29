@@ -4,6 +4,7 @@ import { LoadingScreen } from './src/screens/LoadingScreen';
 import { useAuthStore } from './src/store/authStore';
 import { installOfflineSync } from './src/offline/sync';
 import { startOfflineRuntime } from './src/offline/store';
+import { iniciarLembretes } from './src/offline/lembretes';
 
 const SPLASH_MS = 2200;
 
@@ -16,6 +17,7 @@ function App(): React.JSX.Element {
     installOfflineSync();
     const stop = startOfflineRuntime();
     void hydrate();
+    void iniciarLembretes();
     return stop;
   }, [hydrate]);
 

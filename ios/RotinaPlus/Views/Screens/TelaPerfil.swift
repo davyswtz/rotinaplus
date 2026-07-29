@@ -23,6 +23,9 @@ struct TelaPerfil: View {
     @State private var erroAmigo: String?
     @State private var adicionandoAmigo = false
     @State private var conviteEnviado = false
+    @State private var lembretesAtivos = LembretesService.shared.ativos
+    @State private var lembretesHoraManha = LembretesService.shared.horaManha
+    @State private var lembretesHoraNoite = LembretesService.shared.horaNoite
 
     private let c = CoresPerfil.self
 
@@ -141,6 +144,10 @@ struct TelaPerfil: View {
                             .padding(.top, gap)
 
                         edicaoSection(perfil)
+                            .padding(.horizontal, pad)
+                            .padding(.top, gap)
+
+                        lembretesSection
                             .padding(.horizontal, pad)
                             .padding(.top, gap)
 
@@ -523,6 +530,79 @@ struct TelaPerfil: View {
             }
             .buttonStyle(.plain)
             .padding(.top, 4)
+        }
+        .padding(16)
+        .background(cardBg)
+    }
+
+    // MARK: - Lembretes
+
+    private var lembretesSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("LEMBRETES")
+                .font(.system(size: 11, weight: .bold))
+                .tracking(1)
+                .foregroundStyle(c.label)
+
+            Text("Notificações no celular para missões e hábitos.")
+                .font(.system(size: 13))
+                .foregroundStyle(.white.opacity(0.45))
+
+            Toggle(isOn: $lembretesAtivos) {
+                Label("Ativar lembretes", systemImage: "bell.fill")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.white)
+            }
+            .tint(c.primario)
+            .padding(12)
+            .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.04)))
+            .onChange(of: lembretesAtivos) { novo in
+                LembretesService.shared.ativos = novo
+                if novo {
+                    Task {
+                        _ = await LembretesService.shared.pedirPermissaoSeNecessario()
+                        await LembretesService.shared.reagendarTudo()
+                    }
+                }
+            }
+
+            if lembretesAtivos {
+                HStack {
+                    Text("Manhã")
+                        .foregroundStyle(.white.opacity(0.7))
+                    Spacer()
+                    Picker("", selection: $lembretesHoraManha) {
+                        ForEach(5..<13, id: \.self) { h in
+                            Text(String(format: "%02d:00", h)).tag(h)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .tint(c.laranja)
+                }
+                .padding(12)
+                .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.04)))
+                .onChange(of: lembretesHoraManha) { h in
+                    LembretesService.shared.horaManha = h
+                }
+
+                HStack {
+                    Text("Noite")
+                        .foregroundStyle(.white.opacity(0.7))
+                    Spacer()
+                    Picker("", selection: $lembretesHoraNoite) {
+                        ForEach(17..<23, id: \.self) { h in
+                            Text(String(format: "%02d:00", h)).tag(h)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .tint(c.laranja)
+                }
+                .padding(12)
+                .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.04)))
+                .onChange(of: lembretesHoraNoite) { h in
+                    LembretesService.shared.horaNoite = h
+                }
+            }
         }
         .padding(16)
         .background(cardBg)

@@ -10,6 +10,7 @@ export type OfflineMutationKind =
   | 'toggleHabitoCheckin'
   | 'criarHabito'
   | 'atualizarHabitoNota'
+  | 'excluirHabito'
   | 'toggleAcademiaDia'
   | 'registrarEsporte'
   | 'excluirEsporteSessao'
@@ -137,13 +138,25 @@ export function isNetworkError(error: unknown): boolean {
   const e = error as {
     message?: string;
     code?: string;
-    response?: unknown;
+    response?: { status?: number };
   };
   if (e.code === 'ERR_NETWORK' || e.code === 'ECONNABORTED') return true;
   if (!e.response && typeof e.message === 'string') {
     return /network|timeout|internet/i.test(e.message);
   }
   return false;
+}
+
+function isAuthError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const status = (error as { response?: { status?: number } }).response?.status;
+  return status === 401 || status === 403;
+}
+
+function isValidationError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const status = (error as { response?: { status?: number } }).response?.status;
+  return status === 400 || status === 422;
 }
 
 export async function cachedFetch<T>(
@@ -158,7 +171,9 @@ export async function cachedFetch<T>(
   } catch (error) {
     const cached = await loadCache<T>(key);
     if (cached) {
-      if (isNetworkError(error)) setOnline(false);
+      if (isNetworkError(error) || (!isAuthError(error) && !isValidationError(error))) {
+        setOnline(false);
+      }
       return cached;
     }
     throw error;
@@ -180,12 +195,13 @@ export async function mutateOfflineFirst<T>(opts: {
     setOnline(true);
     return value;
   } catch (error) {
-    if (isNetworkError(error)) {
-      setOnline(false);
-      await enqueueMutation(opts.kind, opts.payload);
-      return opts.offlineValue;
+    if (isAuthError(error) || isValidationError(error)) {
+      throw error;
     }
-    throw error;
+    // Rede, timeout, 5xx, host down, etc.: fila local e segue.
+    setOnline(false);
+    await enqueueMutation(opts.kind, opts.payload);
+    return opts.offlineValue;
   }
 }
 

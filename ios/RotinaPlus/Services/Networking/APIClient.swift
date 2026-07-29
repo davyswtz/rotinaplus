@@ -33,6 +33,14 @@ enum APIError: LocalizedError {
         }
         return false
     }
+
+    /// Erros de validação do formulário — não devem ir para a fila offline.
+    var isValidationError: Bool {
+        if case .httpError(let statusCode, _) = self {
+            return statusCode == 400 || statusCode == 422
+        }
+        return false
+    }
 }
 
 struct APIResponse<T: Decodable>: Decodable {

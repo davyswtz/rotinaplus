@@ -72,6 +72,13 @@ export async function criarMissao(payload: {
     xp: 35,
     concluida: false,
   } as Missao;
+  const dash = await loadCache<DashboardData>(CacheKeys.dashboard);
+  if (dash) {
+    await saveCache(CacheKeys.dashboard, {
+      ...dash,
+      missoes: [...(dash.missoes ?? []), offline],
+    });
+  }
   return mutateOfflineFirst({
     kind: 'criarMissao',
     payload: { ...payload, client_uuid },
@@ -218,18 +225,40 @@ export async function criarTreino(payload: {
   }>;
 }): Promise<AcademiaTreino> {
   const client_uuid = newClientUUID();
+  const tempId = -Date.now();
+  const offline = {
+    id: tempId,
+    foco: payload.foco,
+    titulo: payload.titulo ?? null,
+    minutos: payload.minutos ?? 45,
+    ativo: true,
+    xp: 0,
+    itens: payload.exercicios.map((ex, index) => ({
+      id: -(index + 1),
+      exercicio_chave: ex.exercicio_chave,
+      nome: ex.exercicio_chave,
+      icone: '💪',
+      grupo: payload.foco,
+      series: ex.series ?? 3,
+      reps: ex.reps ?? 10,
+      carga_kg: ex.carga_kg ?? null,
+      ordem: index + 1,
+      concluido: false,
+    })),
+  } as unknown as AcademiaTreino;
+
+  const historico = (await loadCache<AcademiaTreino[]>(CacheKeys.historicoTreinos)) ?? [];
+  await saveCache(CacheKeys.historicoTreinos, [offline, ...historico]);
+  await saveCache(CacheKeys.treino(tempId), offline);
+  const academia = await loadCache<AcademiaData>(CacheKeys.academia);
+  if (academia) {
+    await saveCache(CacheKeys.academia, { ...academia, treino_hoje: offline });
+  }
+
   return mutateOfflineFirst({
     kind: 'criarTreino',
     payload: { ...payload, client_uuid },
-    offlineValue: {
-      id: -Date.now(),
-      foco: payload.foco,
-      titulo: payload.titulo ?? null,
-      minutos: payload.minutos ?? 45,
-      ativo: true,
-      xp: 0,
-      itens: [],
-    } as unknown as AcademiaTreino,
+    offlineValue: offline,
     remote: async () => {
       const { data } = await api.post<ApiResponse<AcademiaTreino>>(
         '/api/v1/academia/treinos',
@@ -312,19 +341,43 @@ export async function criarHabito(payload: {
   area?: string;
 }): Promise<import('../types').Habito> {
   const client_uuid = newClientUUID();
+  const offline = {
+    id: -Date.now(),
+    icone: payload.icone ?? '✨',
+    titulo: payload.titulo,
+    detalhe: payload.detalhe ?? null,
+    area: payload.area ?? 'geral',
+    frequencia: 'diario',
+    xp: 20,
+    ativo: true,
+  } as import('../types').Habito;
+
+  const journal = await loadCache<import('../types').HabitoJournal>(
+    CacheKeys.habitos(),
+  );
+  if (journal) {
+    await saveCache(CacheKeys.habitos(), {
+      ...journal,
+      itens: [
+        ...journal.itens,
+        {
+          habito: offline,
+          checkin: null,
+          concluida: false,
+          streak: 0,
+        },
+      ],
+      resumo: {
+        ...journal.resumo,
+        total: journal.resumo.total + 1,
+      },
+    });
+  }
+
   return mutateOfflineFirst({
     kind: 'criarHabito',
     payload: { ...payload, client_uuid },
-    offlineValue: {
-      id: -Date.now(),
-      icone: payload.icone ?? '✨',
-      titulo: payload.titulo,
-      detalhe: payload.detalhe ?? null,
-      area: payload.area ?? 'geral',
-      frequencia: 'diario',
-      xp: 20,
-      ativo: true,
-    } as import('../types').Habito,
+    offlineValue: offline,
     remote: async () => {
       const { data } = await api.post<ApiResponse<import('../types').Habito>>(
         '/api/v1/habitos',
@@ -382,16 +435,46 @@ export async function atualizarHabitoNota(
   id: number,
   payload: { data?: string; nota?: string | null; humor?: number },
 ): Promise<import('../types').HabitoCheckin> {
-  const { data } = await api.patch<ApiResponse<import('../types').HabitoCheckin>>(
-    `/api/v1/habitos/${id}/nota`,
-    payload,
-  );
-  if (!data.data) throw new Error('Falha ao salvar nota.');
-  return data.data;
+  const offline = {
+    id: 0,
+    habito_id: id,
+    data: payload.data ?? null,
+    concluida: false,
+    humor: payload.humor ?? null,
+    nota: payload.nota ?? null,
+  } as import('../types').HabitoCheckin;
+  return mutateOfflineFirst({
+    kind: 'atualizarHabitoNota',
+    payload: { id, ...payload },
+    offlineValue: offline,
+    remote: async () => {
+      const { data } = await api.patch<
+        ApiResponse<import('../types').HabitoCheckin>
+      >(`/api/v1/habitos/${id}/nota`, payload);
+      if (!data.data) throw new Error('Falha ao salvar nota.');
+      return data.data;
+    },
+  });
 }
 
 export async function excluirHabito(id: number): Promise<void> {
-  await api.delete(`/api/v1/habitos/${id}`);
+  const journal = await loadCache<import('../types').HabitoJournal>(
+    CacheKeys.habitos(),
+  );
+  if (journal) {
+    await saveCache(CacheKeys.habitos(), {
+      ...journal,
+      itens: journal.itens.filter((item) => item.habito.id !== id),
+    });
+  }
+  await mutateOfflineFirst({
+    kind: 'excluirHabito',
+    payload: { id },
+    offlineValue: undefined as void,
+    remote: async () => {
+      await api.delete(`/api/v1/habitos/${id}`);
+    },
+  });
 }
 
 export async function fetchFinancas(mes?: string): Promise<FinancasData> {
@@ -413,16 +496,31 @@ export async function criarTransacao(payload: {
   data: string;
 }): Promise<FinancasTransacao> {
   const client_uuid = newClientUUID();
+  const offline = {
+    id: -Date.now(),
+    ...payload,
+    categoria_nome: payload.categoria,
+    categoria_cor: '#E87830',
+    icone: payload.icone ?? '💰',
+  } as FinancasTransacao;
+
+  const mes = payload.data.slice(0, 7);
+  await patchFinancasCache(mes, (financas) => {
+    financas.transacoes = [offline, ...financas.transacoes];
+    financas.recentes = [offline, ...financas.recentes];
+    if (payload.tipo === 'receita') {
+      financas.receita_centavos += payload.valor_centavos;
+    } else {
+      financas.gastos_centavos += payload.valor_centavos;
+    }
+    financas.saldo_centavos =
+      financas.receita_centavos - financas.gastos_centavos;
+  });
+
   return mutateOfflineFirst({
     kind: 'criarTransacao',
     payload: { ...payload, client_uuid },
-    offlineValue: {
-      id: -Date.now(),
-      ...payload,
-      categoria_nome: payload.categoria,
-      categoria_cor: '#E87830',
-      icone: payload.icone ?? '💰',
-    } as FinancasTransacao,
+    offlineValue: offline,
     remote: async () => {
       const { data } = await api.post<ApiResponse<FinancasTransacao>>(
         '/api/v1/financas/transacoes',
@@ -435,6 +533,20 @@ export async function criarTransacao(payload: {
 }
 
 export async function excluirTransacao(id: number): Promise<void> {
+  await patchFinancasCache(undefined, (financas) => {
+    const tx = financas.transacoes.find((t) => t.id === id);
+    if (tx) {
+      if (tx.tipo === 'receita') {
+        financas.receita_centavos -= tx.valor_centavos;
+      } else {
+        financas.gastos_centavos -= tx.valor_centavos;
+      }
+      financas.saldo_centavos =
+        financas.receita_centavos - financas.gastos_centavos;
+    }
+    financas.transacoes = financas.transacoes.filter((t) => t.id !== id);
+    financas.recentes = financas.recentes.filter((t) => t.id !== id);
+  });
   await mutateOfflineFirst({
     kind: 'excluirTransacao',
     payload: { id },
@@ -451,16 +563,24 @@ export async function criarMeta(payload: {
   valor_alvo_centavos: number;
 }): Promise<FinancasMeta> {
   const client_uuid = newClientUUID();
+  const offline = {
+    id: -Date.now(),
+    titulo: payload.titulo,
+    icone: payload.icone ?? '🎯',
+    categoria: null,
+    valor_alvo_centavos: payload.valor_alvo_centavos,
+    valor_atual_centavos: 0,
+    percentual: 0,
+  } as FinancasMeta;
+
+  await patchFinancasCache(undefined, (financas) => {
+    financas.metas = [...financas.metas, offline];
+  });
+
   return mutateOfflineFirst({
     kind: 'criarMeta',
     payload: { ...payload, client_uuid },
-    offlineValue: {
-      id: -Date.now(),
-      titulo: payload.titulo,
-      icone: payload.icone ?? '🎯',
-      valor_alvo_centavos: payload.valor_alvo_centavos,
-      valor_atual_centavos: 0,
-    } as FinancasMeta,
+    offlineValue: offline,
     remote: async () => {
       const { data } = await api.post<ApiResponse<FinancasMeta>>(
         '/api/v1/financas/metas',
@@ -476,10 +596,35 @@ export async function atualizarMeta(
   id: number,
   payload: { valor_atual_centavos?: number; titulo?: string },
 ): Promise<FinancasMeta> {
+  let offline: FinancasMeta = {
+    id,
+    titulo: payload.titulo ?? '',
+    icone: '🎯',
+    categoria: null,
+    valor_alvo_centavos: 1,
+    valor_atual_centavos: payload.valor_atual_centavos ?? 0,
+    percentual: 0,
+  };
+  await patchFinancasCache(undefined, (financas) => {
+    const idx = financas.metas.findIndex((m) => m.id === id);
+    if (idx >= 0) {
+      if (payload.valor_atual_centavos != null) {
+        financas.metas[idx].valor_atual_centavos = payload.valor_atual_centavos;
+      }
+      if (payload.titulo != null) {
+        financas.metas[idx].titulo = payload.titulo;
+      }
+      const alvo = Math.max(financas.metas[idx].valor_alvo_centavos, 1);
+      financas.metas[idx].percentual =
+        (financas.metas[idx].valor_atual_centavos / alvo) * 100;
+      offline = financas.metas[idx];
+    }
+  });
+
   return mutateOfflineFirst({
     kind: 'atualizarMeta',
     payload: { id, ...payload },
-    offlineValue: { id, ...payload } as FinancasMeta,
+    offlineValue: offline,
     remote: async () => {
       const { data } = await api.patch<ApiResponse<FinancasMeta>>(
         `/api/v1/financas/metas/${id}`,
@@ -617,4 +762,58 @@ export async function fetchClasses(): Promise<ClasseCatalogItem[]> {
     const { data } = await api.get<ApiResponse<ClasseCatalogItem[]>>('/api/v1/classes');
     return data.data ?? [];
   });
+}
+
+async function emptyFinancasShell(mes?: string): Promise<FinancasData> {
+  const anoMes =
+    mes ||
+    new Date().toISOString().slice(0, 7);
+  return {
+    ano_mes: anoMes,
+    mes_label: anoMes,
+    meses: [],
+    saldo_centavos: 0,
+    receita_centavos: 0,
+    gastos_centavos: 0,
+    serie_mensal: [],
+    distribuicao: [],
+    recentes: [],
+    transacoes: [],
+    metas: [],
+    categorias: {
+      despesas: [
+        { chave: 'geral', nome: 'Geral', cor: '#888888', icone: '💸' },
+      ],
+      receita: {
+        chave: 'receita',
+        nome: 'Receita',
+        cor: '#2ECC71',
+        icone: '💰',
+      },
+    },
+  };
+}
+
+async function patchFinancasCache(
+  mes: string | undefined,
+  update: (financas: FinancasData) => void,
+): Promise<void> {
+  const keys = mes
+    ? [CacheKeys.financasMes(mes), CacheKeys.financasMes()]
+    : [CacheKeys.financasMes()];
+  let patched = false;
+  for (const key of keys) {
+    const current = await loadCache<FinancasData>(key);
+    if (current) {
+      update(current);
+      await saveCache(key, current);
+      patched = true;
+    }
+  }
+  if (!patched) {
+    const shell = await emptyFinancasShell(mes);
+    update(shell);
+    await saveCache(CacheKeys.financasMes(mes), shell);
+    await saveCache(CacheKeys.financasMes(), shell);
+  }
 }

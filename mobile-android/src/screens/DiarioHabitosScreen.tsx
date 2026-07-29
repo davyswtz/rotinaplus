@@ -87,6 +87,8 @@ export function DiarioHabitosScreen({ onAbrirArea }: Props) {
       const j = await fetchHabitos(data);
       setJournal(j);
       setDataSel((atual) => atual ?? j.data);
+      const { reagendarLembretes } = await import('../offline/lembretes');
+      await reagendarLembretes();
     } catch (e) {
       if (!cached) {
         setErro(e instanceof Error ? e.message : 'Erro ao carregar diário.');

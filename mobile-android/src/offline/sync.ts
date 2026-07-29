@@ -47,6 +47,9 @@ async function replay(mutation: OfflineMutation): Promise<void> {
         humor: p.humor,
       });
       break;
+    case 'excluirHabito':
+      await api.delete(`/api/v1/habitos/${p.id}`);
+      break;
     case 'toggleAcademiaDia':
       await api.patch(`/api/v1/academia/dias/${p.id}/toggle`, {
         concluido: p.concluido,

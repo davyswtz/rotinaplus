@@ -216,6 +216,7 @@ struct TelaDiarioHabitos: View {
                 dataSelecionada = j.data
             }
             await OfflineSyncEngine.shared.flush()
+            await LembretesService.shared.reagendarTudo()
         } catch {
             if journal == nil {
                 erro = error.localizedDescription

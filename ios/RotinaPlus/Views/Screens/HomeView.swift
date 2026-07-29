@@ -249,6 +249,7 @@ struct HomeView: View {
             }
             UserDefaults.standard.set(data.perfil.avatarAsset, forKey: "avatar_selecionado")
             await OfflineSyncEngine.shared.flush()
+            await LembretesService.shared.reagendarTudo()
         } catch {
             if perfil == nil {
                 erro = error.localizedDescription

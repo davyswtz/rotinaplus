@@ -455,8 +455,14 @@ enum RotinaPlusAPI {
         if var historico = OfflineStore.shared.load([AcademiaTreinoAPI].self, key: .historicoTreinos) {
             historico.insert(offline, at: 0)
             OfflineStore.shared.save(historico, key: .historicoTreinos)
+        } else {
+            OfflineStore.shared.save([offline], key: .historicoTreinos)
         }
         OfflineStore.shared.save(offline, key: OfflineCacheKey.treino(id: tempId))
+        if var academia = OfflineStore.shared.load(AcademiaAPI.self, key: .academia) {
+            academia.treinoHoje = offline
+            OfflineStore.shared.save(academia, key: .academia)
+        }
 
         return try await OfflineGateway.mutate(
             kind: .criarTreino,
@@ -725,12 +731,14 @@ enum RotinaPlusAPI {
     }
 
     static func excluirHabito(id: Int) async throws {
-        struct Empty: Decodable {}
-        let _: APIResponse<Empty> = try await APIClient.shared.request(
-            endpoint: .excluirHabito(id: id),
-            method: .delete,
-            requiresAuth: true
-        )
+        let payload = IdPayload(id: id)
+        if var journal = OfflineStore.shared.load(HabitoJournalAPI.self, key: OfflineCacheKey.habitos(data: nil)) {
+            journal.itens.removeAll { $0.habito.id == id }
+            OfflineStore.shared.save(journal, key: OfflineCacheKey.habitos(data: nil))
+        }
+        try await OfflineGateway.mutate(kind: .excluirHabito, payload: payload) {
+            try await remoteExcluirHabito(id: id)
+        }
     }
 
     static func financas(mes: String? = nil) async throws -> FinancasAPI {
@@ -976,11 +984,47 @@ private extension RotinaPlusAPI {
         } else {
             keys = [OfflineCacheKey.financas(mes: nil)]
         }
+        var patchedAny = false
         for key in keys {
             if var financas = OfflineStore.shared.load(FinancasAPI.self, key: key) {
                 update(&financas)
                 OfflineStore.shared.save(financas, key: key)
+                patchedAny = true
             }
         }
+        // Primeira criação offline sem snapshot prévio: shell mínimo para a UI.
+        if !patchedAny {
+            let mesKey = mes ?? Self.mesAtualChave()
+            var shell = FinancasAPI(
+                anoMes: mesKey,
+                mesLabel: mesKey,
+                meses: [],
+                saldoCentavos: 0,
+                receitaCentavos: 0,
+                gastosCentavos: 0,
+                serieMensal: [],
+                distribuicao: [],
+                recentes: [],
+                transacoes: [],
+                metas: [],
+                categorias: FinancasCategoriasAPI(
+                    despesas: [
+                        FinancasCategoriaAPI(chave: "geral", nome: "Geral", cor: "#888888", icone: "💸")
+                    ],
+                    receita: FinancasCategoriaAPI(chave: "receita", nome: "Receita", cor: "#2ECC71", icone: "💰")
+                ),
+                pluggy: nil
+            )
+            update(&shell)
+            OfflineStore.shared.save(shell, key: OfflineCacheKey.financas(mes: mes))
+            OfflineStore.shared.save(shell, key: OfflineCacheKey.financas(mes: nil))
+        }
+    }
+
+    static func mesAtualChave() -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM"
+        return formatter.string(from: Date())
     }
 }

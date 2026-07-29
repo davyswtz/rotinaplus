@@ -60,6 +60,7 @@
 		D1A7B001NOVOTREINO000002 /* TelaNovoTreino.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A7B001NOVOTREINO000001 /* TelaNovoTreino.swift */; };
 		D1A7B001PERFIL0000000002 /* TelaPerfil.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A7B001PERFIL0000000001 /* TelaPerfil.swift */; };
 		F1N4NC45A8D00000000002 /* TelaFinancas.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1N4NC45A8D00000000001 /* TelaFinancas.swift */; };
+		B0FFL1N3LEMBRETE00000002 /* LembretesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0FFL1N3LEMBRETE00000001 /* LembretesService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -119,6 +120,7 @@
 		F2865C182562E82CFAD74364 /* _icon0_check.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = _icon0_check.png; sourceTree = "<group>"; };
 		F6660249C15BA031E5D46016 /* RotinaPlus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RotinaPlus.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F8EF2ED900DB4DC58EEDC56B /* _icons_preview.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = _icons_preview.png; sourceTree = "<group>"; };
+		B0FFL1N3LEMBRETE00000001 /* LembretesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LembretesService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -273,6 +275,7 @@
 				F95FE33776B8425D262DA6BD /* Auth */,
 				B0FFL1N3OFFLINE00000001 /* Offline */,
 				1CC98E5E331EF94978338A00 /* Networking */,
+				B0FFL1N3LEMBRETES000001 /* Lembretes */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -302,6 +305,14 @@
 				304E05A076A85F6859B184EF /* AuthManager.swift */,
 			);
 			path = Auth;
+			sourceTree = "<group>";
+		};
+		B0FFL1N3LEMBRETES000001 /* Lembretes */ = {
+			isa = PBXGroup;
+			children = (
+				B0FFL1N3LEMBRETE00000001 /* LembretesService.swift */,
+			);
+			path = Lembretes;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -421,6 +432,7 @@
 				B0FFL1N3SYNC0000000002 /* OfflineSyncEngine.swift in Sources */,
 				B0FFL1N3STORE0000000002 /* OfflineStore.swift in Sources */,
 				B0FFL1N3NET000000000002 /* NetworkMonitor.swift in Sources */,
+				B0FFL1N3LEMBRETE00000002 /* LembretesService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
