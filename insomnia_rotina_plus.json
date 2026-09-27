@@ -1,0 +1,885 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-09-27T04:21:05.558Z",
+  "__export_source": "rotina-plus:manual-script:v1",
+  "resources": [
+    {
+      "_id": "wrk_001",
+      "_type": "workspace",
+      "parentId": null,
+      "name": "Rotina Plus - API",
+      "description": "Coleção de todas as rotas da API do Rotina Plus (Laravel + Sanctum).",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_002",
+      "_type": "environment",
+      "parentId": "wrk_001",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://127.0.0.1:8000/api",
+        "token": ""
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "base_url",
+          "token"
+        ]
+      },
+      "color": null,
+      "isPrivate": false
+    },
+    {
+      "_id": "fld_003",
+      "_type": "request_group",
+      "parentId": "wrk_001",
+      "name": "Autenticação",
+      "environment": {},
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_004",
+      "_type": "request",
+      "parentId": "fld_003",
+      "name": "Registrar usuário",
+      "method": "POST",
+      "url": "{{ _.base_url }}/registro",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Ana Teste\",\n  \"email\": \"ana@teste.com\",\n  \"senha\": \"123456\",\n  \"senha_confirmation\": \"123456\"\n}"
+      },
+      "authentication": {},
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_005",
+      "_type": "request",
+      "parentId": "fld_003",
+      "name": "Login",
+      "method": "POST",
+      "url": "{{ _.base_url }}/login",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"ana@teste.com\",\n  \"senha\": \"123456\"\n}"
+      },
+      "authentication": {},
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_006",
+      "_type": "request",
+      "parentId": "fld_003",
+      "name": "Usuário autenticado",
+      "method": "GET",
+      "url": "{{ _.base_url }}/usuario",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {},
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_007",
+      "_type": "request",
+      "parentId": "fld_003",
+      "name": "Logout",
+      "method": "POST",
+      "url": "{{ _.base_url }}/logout",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {},
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "fld_008",
+      "_type": "request_group",
+      "parentId": "wrk_001",
+      "name": "Categorias",
+      "environment": {},
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_009",
+      "_type": "request",
+      "parentId": "fld_008",
+      "name": "Listar categorias",
+      "method": "GET",
+      "url": "{{ _.base_url }}/categorias",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {},
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_010",
+      "_type": "request",
+      "parentId": "fld_008",
+      "name": "Criar categoria",
+      "method": "POST",
+      "url": "{{ _.base_url }}/categorias",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Estudo\",\n  \"cor\": \"#b9d6e8\"\n}"
+      },
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_011",
+      "_type": "request",
+      "parentId": "fld_008",
+      "name": "Atualizar categoria",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/categorias/1",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Estudo Atualizado\"\n}"
+      },
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_012",
+      "_type": "request",
+      "parentId": "fld_008",
+      "name": "Remover categoria",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/categorias/1",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {},
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "fld_013",
+      "_type": "request_group",
+      "parentId": "wrk_001",
+      "name": "Tarefas",
+      "environment": {},
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_014",
+      "_type": "request",
+      "parentId": "fld_013",
+      "name": "Listar tarefas da semana",
+      "method": "GET",
+      "url": "{{ _.base_url }}/tarefas?data_inicio=2026-09-28&data_fim=2026-10-04",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {},
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_015",
+      "_type": "request",
+      "parentId": "fld_013",
+      "name": "Criar tarefa",
+      "method": "POST",
+      "url": "{{ _.base_url }}/tarefas",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"titulo\": \"Revisar cartões anki\",\n  \"data\": \"2026-09-28\",\n  \"categoria_id\": null,\n  \"descricao\": null\n}"
+      },
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_016",
+      "_type": "request",
+      "parentId": "fld_013",
+      "name": "Atualizar tarefa",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/tarefas/1",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"titulo\": \"Revisar cartões anki (editado)\"\n}"
+      },
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_017",
+      "_type": "request",
+      "parentId": "fld_013",
+      "name": "Concluir/reabrir tarefa",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/tarefas/1/concluir",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {},
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_018",
+      "_type": "request",
+      "parentId": "fld_013",
+      "name": "Remover tarefa",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/tarefas/1",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {},
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "fld_019",
+      "_type": "request_group",
+      "parentId": "wrk_001",
+      "name": "Hábitos",
+      "environment": {},
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_020",
+      "_type": "request",
+      "parentId": "fld_019",
+      "name": "Listar hábitos da semana",
+      "method": "GET",
+      "url": "{{ _.base_url }}/habitos?data_inicio=2026-09-28&data_fim=2026-10-04",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {},
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_021",
+      "_type": "request",
+      "parentId": "fld_019",
+      "name": "Criar hábito",
+      "method": "POST",
+      "url": "{{ _.base_url }}/habitos",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"academia\"\n}"
+      },
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_022",
+      "_type": "request",
+      "parentId": "fld_019",
+      "name": "Atualizar hábito",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/habitos/1",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"academia (editado)\"\n}"
+      },
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_023",
+      "_type": "request",
+      "parentId": "fld_019",
+      "name": "Marcar/desmarcar hábito no dia",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/habitos/1/registrar-dia",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"data\": \"2026-09-28\"\n}"
+      },
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_024",
+      "_type": "request",
+      "parentId": "fld_019",
+      "name": "Remover hábito",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/habitos/1",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {},
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "fld_025",
+      "_type": "request_group",
+      "parentId": "wrk_001",
+      "name": "Metas",
+      "environment": {},
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_026",
+      "_type": "request",
+      "parentId": "fld_025",
+      "name": "Listar metas",
+      "method": "GET",
+      "url": "{{ _.base_url }}/metas",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {},
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_027",
+      "_type": "request",
+      "parentId": "fld_025",
+      "name": "Criar meta",
+      "method": "POST",
+      "url": "{{ _.base_url }}/metas",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"titulo\": \"Estudar para o bacen\"\n}"
+      },
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_028",
+      "_type": "request",
+      "parentId": "fld_025",
+      "name": "Atualizar meta",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/metas/1",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"titulo\": \"Estudar para o bacen (editado)\"\n}"
+      },
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_029",
+      "_type": "request",
+      "parentId": "fld_025",
+      "name": "Concluir/reabrir meta",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/metas/1/concluir",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {},
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_030",
+      "_type": "request",
+      "parentId": "fld_025",
+      "name": "Remover meta",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/metas/1",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {},
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "fld_031",
+      "_type": "request_group",
+      "parentId": "wrk_001",
+      "name": "Humor",
+      "environment": {},
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_032",
+      "_type": "request",
+      "parentId": "fld_031",
+      "name": "Listar humor da semana",
+      "method": "GET",
+      "url": "{{ _.base_url }}/humor?data_inicio=2026-09-28&data_fim=2026-10-04",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {},
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_033",
+      "_type": "request",
+      "parentId": "fld_031",
+      "name": "Definir humor do dia",
+      "method": "POST",
+      "url": "{{ _.base_url }}/humor",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"data\": \"2026-09-28\",\n  \"humor\": \"feliz\"\n}"
+      },
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "fld_034",
+      "_type": "request_group",
+      "parentId": "wrk_001",
+      "name": "Água",
+      "environment": {},
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_035",
+      "_type": "request",
+      "parentId": "fld_034",
+      "name": "Listar água da semana",
+      "method": "GET",
+      "url": "{{ _.base_url }}/agua?data_inicio=2026-09-28&data_fim=2026-10-04",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {},
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_036",
+      "_type": "request",
+      "parentId": "fld_034",
+      "name": "Adicionar gota de água",
+      "method": "POST",
+      "url": "{{ _.base_url }}/agua/adicionar",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"data\": \"2026-09-28\"\n}"
+      },
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_037",
+      "_type": "request",
+      "parentId": "fld_034",
+      "name": "Remover gota de água",
+      "method": "POST",
+      "url": "{{ _.base_url }}/agua/remover",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"data\": \"2026-09-28\"\n}"
+      },
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "fld_038",
+      "_type": "request_group",
+      "parentId": "wrk_001",
+      "name": "Reflexão",
+      "environment": {},
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_039",
+      "_type": "request",
+      "parentId": "fld_038",
+      "name": "Mostrar reflexão da semana",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reflexao?semana_inicio=2026-09-28",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {},
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    },
+    {
+      "_id": "req_040",
+      "_type": "request",
+      "parentId": "fld_038",
+      "name": "Salvar reflexão da semana",
+      "method": "POST",
+      "url": "{{ _.base_url }}/reflexao",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"semana_inicio\": \"2026-09-28\",\n  \"texto\": \"Semana produtiva.\"\n}"
+      },
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": -1790482865558
+    }
+  ]
+}

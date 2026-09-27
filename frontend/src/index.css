@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  font-family: 'Nunito', system-ui, sans-serif;
+  background-color: #f2ead9;
+  color: #2f2a24;
+}
+
+/*
+ * Anel de foco consistente para navegação por teclado (acessibilidade),
+ * sem poluir a interface com contorno quando o clique é por mouse/toque.
+ */
+@layer base {
+  :focus-visible {
+    outline: none;
+    @apply ring-2 ring-destaque-azul-escuro ring-offset-2 ring-offset-papel;
+  }
+}
+
+/*
+ * Classes de componente reutilizáveis: garantem que cartões, botões e campos
+ * tenham a mesma aparência em todas as telas do app (um pequeno design system).
+ * Os tamanhos crescem levemente em telas maiores (sm/md), mas o ponto de
+ * partida é sempre o layout mobile — respeitando o mobile-first do projeto.
+ */
+@layer components {
+  /* Cartão base usado nas seções de conteúdo (efeito "folha elevada"). */
+  .cartao {
+    @apply rounded-2xl border border-papel-escuro bg-papel-claro p-4 shadow-papel transition-shadow sm:p-5 sm:hover:shadow-papel-lg;
+  }
+
+  /* Botão de ação principal (ex: salvar, entrar, criar conta). Alvo de toque >= 44px. */
+  .botao-primario {
+    @apply flex min-h-[44px] items-center justify-center rounded-xl bg-tinta px-4 text-sm font-semibold text-papel-claro shadow-papel transition-all active:scale-[0.98] disabled:opacity-60 disabled:active:scale-100 sm:min-h-[46px] sm:text-base sm:hover:brightness-110;
+  }
+
+  /* Botão circular secundário (ex: setas de navegação, +/-). Alvo de toque >= 44px. */
+  .botao-circular {
+    @apply flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-papel-claro text-tinta shadow-papel transition-transform active:scale-95 sm:hover:bg-papel-escuro;
+  }
+
+  /* Campo de texto padrão (inputs e textareas fora do diário). Alvo de toque >= 44px. */
+  .campo-texto {
+    @apply min-h-[44px] rounded-xl border border-papel-escuro bg-white px-3.5 py-2 text-base text-tinta outline-none transition-colors focus:border-tinta sm:text-sm;
+  }
+
+  /* Título de seção com ícone, usado no topo de cada cartão. */
+  .titulo-secao {
+    @apply mb-2 flex items-center gap-1.5 font-titulo text-2xl text-tinta sm:text-[1.7rem];
+  }
+}
+
+/*
+ * Folha de caderno: pauta horizontal + margem vermelha, como uma folha
+ * de papel almaço de verdade. Usada na área de escrita do Diário.
+ * background-attachment: local faz as linhas rolarem junto com o texto.
+ */
+.folha-pautada {
+  background-color: #fffdf6;
+  background-image:
+    linear-gradient(to right, transparent 43px, #e3a9a9 43px, #e3a9a9 44px, transparent 44px),
+    repeating-linear-gradient(to bottom, transparent 0, transparent 30px, #d9cdae 30px, #d9cdae 31px);
+  background-position: 0 14px, 0 14px;
+  background-attachment: local;
+  line-height: 31px;
+  padding: 14px 18px 14px 58px;
+}
+
