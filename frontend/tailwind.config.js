@@ -1,29 +1,51 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
         // Paleta inspirada no planner de papel (bege/creme) do design de referência.
-        // Mantém o mesmo espectro já usado no app, só com mais variações de profundidade.
+        // Os valores reais ficam em variáveis CSS (src/index.css), trocadas pela
+        // classe .dark no <html> — assim o mesmo token (ex: bg-papel) serve os dois temas.
         papel: {
-          claro: '#faf4e6',
-          DEFAULT: '#f2ead9',
-          escuro: '#e4d6b8',
+          claro: 'rgb(var(--papel-claro) / <alpha-value>)',
+          DEFAULT: 'rgb(var(--papel) / <alpha-value>)',
+          escuro: 'rgb(var(--papel-escuro) / <alpha-value>)',
         },
         tinta: {
-          DEFAULT: '#2f2a24',
-          suave: '#6b6255',
-          fraca: '#9a9082',
+          DEFAULT: 'rgb(var(--tinta) / <alpha-value>)',
+          suave: 'rgb(var(--tinta-suave) / <alpha-value>)',
+          fraca: 'rgb(var(--tinta-fraca) / <alpha-value>)',
         },
         // Cada seção do app tem uma cor de destaque própria (mesmo espectro pastel),
         // usada para reforçar a navegação e diferenciar as áreas visualmente.
         destaque: {
-          azul: { claro: '#e3f0f7', DEFAULT: '#8fb9d6', escuro: '#5a8fb0' },
-          verde: { claro: '#e9f2e3', DEFAULT: '#9dc191', escuro: '#6b9a5c' },
-          rosa: { claro: '#f7e9ec', DEFAULT: '#dd9ba8', escuro: '#c06d80' },
-          areia: { claro: '#f3e9d6', DEFAULT: '#cba86b', escuro: '#a3803f' },
-          roxo: { claro: '#ece5f2', DEFAULT: '#a98fc2', escuro: '#7c5e9c' },
+          azul: {
+            claro: 'rgb(var(--destaque-azul-claro) / <alpha-value>)',
+            DEFAULT: 'rgb(var(--destaque-azul) / <alpha-value>)',
+            escuro: 'rgb(var(--destaque-azul-escuro) / <alpha-value>)',
+          },
+          verde: {
+            claro: 'rgb(var(--destaque-verde-claro) / <alpha-value>)',
+            DEFAULT: 'rgb(var(--destaque-verde) / <alpha-value>)',
+            escuro: 'rgb(var(--destaque-verde-escuro) / <alpha-value>)',
+          },
+          rosa: {
+            claro: 'rgb(var(--destaque-rosa-claro) / <alpha-value>)',
+            DEFAULT: 'rgb(var(--destaque-rosa) / <alpha-value>)',
+            escuro: 'rgb(var(--destaque-rosa-escuro) / <alpha-value>)',
+          },
+          areia: {
+            claro: 'rgb(var(--destaque-areia-claro) / <alpha-value>)',
+            DEFAULT: 'rgb(var(--destaque-areia) / <alpha-value>)',
+            escuro: 'rgb(var(--destaque-areia-escuro) / <alpha-value>)',
+          },
+          roxo: {
+            claro: 'rgb(var(--destaque-roxo-claro) / <alpha-value>)',
+            DEFAULT: 'rgb(var(--destaque-roxo) / <alpha-value>)',
+            escuro: 'rgb(var(--destaque-roxo-escuro) / <alpha-value>)',
+          },
         },
       },
       fontFamily: {
@@ -33,8 +55,9 @@ export default {
       },
       boxShadow: {
         // Sombra suave e quente, como uma folha de papel levemente elevada.
-        papel: '0 2px 10px -2px rgba(47, 42, 36, 0.12), 0 1px 2px rgba(47, 42, 36, 0.06)',
-        'papel-lg': '0 8px 24px -6px rgba(47, 42, 36, 0.18), 0 2px 6px rgba(47, 42, 36, 0.08)',
+        // No escuro vira um contorno bem sutil (sombra preta não aparece sobre preto).
+        papel: 'var(--shadow-papel)',
+        'papel-lg': 'var(--shadow-papel-lg)',
       },
     },
   },

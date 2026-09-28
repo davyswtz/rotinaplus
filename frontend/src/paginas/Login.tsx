@@ -1,6 +1,7 @@
 import { type FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png';
+import { AlternarTema } from '../componentes/AlternarTema';
 import { useAutenticacao } from '../contextos/AutenticacaoContexto';
 
 /** Tela de login do sistema. */
@@ -31,6 +32,7 @@ export function Login() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-papel px-4 py-8">
+      <AlternarTema />
       <div className="w-full max-w-sm rounded-3xl border border-papel-escuro bg-papel-claro p-6 shadow-papel-lg sm:max-w-md sm:p-8">
         <img src={logo} alt="Rotina Plus" className="mb-1 h-16 w-16 rounded-2xl object-cover shadow-papel" />
         <h1 className="font-titulo text-4xl text-tinta sm:text-5xl">Rotina Plus</h1>

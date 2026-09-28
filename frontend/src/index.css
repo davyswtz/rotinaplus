@@ -2,8 +2,92 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Cores do app como variáveis CSS (RGB "r g b", sem vírgula, para o Tailwind
+ * poder aplicar opacidade com rgb(var(--x) / <alpha-value>)). O tema escuro
+ * (.dark no <html>) redefine as mesmas variáveis — todo o resto do app usa
+ * sempre os mesmos tokens (bg-papel, text-tinta, etc.) e troca de cor sozinho.
+ */
 :root {
   color-scheme: light;
+
+  --papel-claro: 250 244 230;
+  --papel: 242 234 217;
+  --papel-escuro: 228 214 184;
+
+  --tinta: 47 42 36;
+  --tinta-suave: 107 98 85;
+  --tinta-fraca: 154 144 130;
+
+  --destaque-azul-claro: 227 240 247;
+  --destaque-azul: 143 185 214;
+  --destaque-azul-escuro: 90 143 176;
+
+  --destaque-verde-claro: 233 242 227;
+  --destaque-verde: 157 193 145;
+  --destaque-verde-escuro: 107 154 92;
+
+  --destaque-rosa-claro: 247 233 236;
+  --destaque-rosa: 221 155 168;
+  --destaque-rosa-escuro: 192 109 128;
+
+  --destaque-areia-claro: 243 233 214;
+  --destaque-areia: 203 168 107;
+  --destaque-areia-escuro: 163 128 63;
+
+  --destaque-roxo-claro: 236 229 242;
+  --destaque-roxo: 169 143 194;
+  --destaque-roxo-escuro: 124 94 156;
+
+  --shadow-papel: 0 2px 10px -2px rgba(47, 42, 36, 0.12), 0 1px 2px rgba(47, 42, 36, 0.06);
+  --shadow-papel-lg: 0 8px 24px -6px rgba(47, 42, 36, 0.18), 0 2px 6px rgba(47, 42, 36, 0.08);
+
+  /* Fundo por trás do caderno semanal (desktop) — um marrom café escuro, para destacar do creme das folhas. */
+  --caderno-fundo: 58 46 38;
+}
+
+/*
+ * Tema escuro: preto de verdade (0 0 0) como fundo de página, não um
+ * cinza-azulado disfarçado de preto. Os cartões usam um cinza bem escuro
+ * (18 18 18) só para terem alguma separação visível do fundo.
+ */
+:root.dark {
+  color-scheme: dark;
+
+  --papel-claro: 18 18 18;
+  --papel: 0 0 0;
+  --papel-escuro: 42 42 42;
+
+  --tinta: 242 237 225;
+  --tinta-suave: 179 171 156;
+  --tinta-fraca: 122 114 100;
+
+  --destaque-azul-claro: 15 30 38;
+  --destaque-azul: 111 162 194;
+  --destaque-azul-escuro: 159 203 232;
+
+  --destaque-verde-claro: 16 25 14;
+  --destaque-verde: 130 168 115;
+  --destaque-verde-escuro: 169 214 154;
+
+  --destaque-rosa-claro: 36 16 20;
+  --destaque-rosa: 196 127 143;
+  --destaque-rosa-escuro: 230 166 182;
+
+  --destaque-areia-claro: 34 26 12;
+  --destaque-areia: 184 148 79;
+  --destaque-areia-escuro: 224 189 126;
+
+  --destaque-roxo-claro: 26 20 36;
+  --destaque-roxo: 145 121 176;
+  --destaque-roxo-escuro: 193 168 222;
+
+  /* Sombra escura não aparece sobre preto puro: vira um contorno claro bem sutil. */
+  --shadow-papel: 0 2px 10px -2px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  --shadow-papel-lg: 0 10px 28px -6px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.07);
+
+  /* No escuro o fundo do caderno vira um cinza bem escuro (quase preto, mas separado do papel). */
+  --caderno-fundo: 10 10 10;
 }
 
 body {
@@ -11,8 +95,9 @@ body {
   min-width: 320px;
   min-height: 100vh;
   font-family: 'Nunito', system-ui, sans-serif;
-  background-color: #f2ead9;
-  color: #2f2a24;
+  background-color: rgb(var(--papel));
+  color: rgb(var(--tinta));
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /*
@@ -50,7 +135,7 @@ body {
 
   /* Campo de texto padrão (inputs e textareas fora do diário). Alvo de toque >= 44px. */
   .campo-texto {
-    @apply min-h-[44px] rounded-xl border border-papel-escuro bg-white px-3.5 py-2 text-base text-tinta outline-none transition-colors focus:border-tinta sm:text-sm;
+    @apply min-h-[44px] rounded-xl border border-papel-escuro bg-papel-claro px-3.5 py-2 text-base text-tinta outline-none transition-colors focus:border-tinta sm:text-sm;
   }
 
   /* Título de seção com ícone, usado no topo de cada cartão. */
@@ -75,3 +160,72 @@ body {
   padding: 14px 18px 14px 58px;
 }
 
+.dark .folha-pautada {
+  background-color: #0c0c0c;
+  background-image:
+    linear-gradient(to right, transparent 43px, #4a2020 43px, #4a2020 44px, transparent 44px),
+    repeating-linear-gradient(to bottom, transparent 0, transparent 30px, #262626 30px, #262626 31px);
+}
+
+/*
+ * Papel quadriculado (grid de caderno), usado no caderno semanal do desktop.
+ * Duas grades sobrepostas: uma fina (quadrados pequenos) e uma um pouco mais
+ * visível a cada 4 quadrados, como um caderno de matemática de verdade.
+ */
+.papel-quadriculado {
+  background-color: #f2ead9;
+  background-image:
+    linear-gradient(to right, rgba(47, 42, 36, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(47, 42, 36, 0.07) 1px, transparent 1px),
+    linear-gradient(to right, rgba(47, 42, 36, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(47, 42, 36, 0.04) 1px, transparent 1px);
+  background-size:
+    88px 88px,
+    88px 88px,
+    22px 22px,
+    22px 22px;
+}
+
+.dark .papel-quadriculado {
+  background-color: #000000;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size:
+    88px 88px,
+    88px 88px,
+    22px 22px,
+    22px 22px;
+}
+
+/*
+ * Versão só com os quadrados pequenos (sem a grade mais grossa a cada 4
+ * quadrados), usada na folha esquerda do caderno.
+ */
+.papel-quadriculado-fino {
+  background-color: #f2ead9;
+  background-image:
+    linear-gradient(to right, rgba(47, 42, 36, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(47, 42, 36, 0.05) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.dark .papel-quadriculado-fino {
+  background-color: #000000;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* Esconde a barra de rolagem visualmente, sem desativar a rolagem em si. */
+.sem-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Edge antigo */
+}
+
+.sem-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}

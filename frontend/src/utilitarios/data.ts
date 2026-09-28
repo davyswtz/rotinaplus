@@ -79,3 +79,25 @@ export function adicionarMeses(data: Date, quantidade: number): Date {
 export function formatarMesAno(data: Date): string {
   return `${NOMES_MESES[data.getMonth()]} ${data.getFullYear()}`;
 }
+
+/** Retorna o número da semana no ano (padrão ISO-8601), usado no cabeçalho do caderno. */
+export function obterNumeroDaSemana(data: Date): number {
+  const copia = new Date(Date.UTC(data.getFullYear(), data.getMonth(), data.getDate()));
+  const diaSemanaIso = copia.getUTCDay() || 7;
+
+  copia.setUTCDate(copia.getUTCDate() + 4 - diaSemanaIso);
+
+  const inicioDoAno = new Date(Date.UTC(copia.getUTCFullYear(), 0, 1));
+
+  return Math.ceil(((copia.getTime() - inicioDoAno.getTime()) / 86400000 + 1) / 7);
+}
+
+/** Formata o(s) mês(es) e o ano de uma semana para o cabeçalho do caderno (ex: "Set / Out 2026"). */
+export function formatarCabecalhoMesDaSemana(inicioDaSemana: Date): string {
+  const dias = obterDiasDaSemana(inicioDaSemana);
+  const mesPrimeiro = NOMES_MESES[dias[0].getMonth()].slice(0, 3);
+  const mesUltimo = NOMES_MESES[dias[6].getMonth()].slice(0, 3);
+  const ano = dias[6].getFullYear();
+
+  return mesPrimeiro === mesUltimo ? `${mesPrimeiro} ${ano}` : `${mesPrimeiro} / ${mesUltimo} ${ano}`;
+}
